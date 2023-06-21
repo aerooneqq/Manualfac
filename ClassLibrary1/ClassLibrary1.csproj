@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ClassLibrary2\ClassLibrary2.csproj" />
+      <ProjectReference Include="..\ManualfacAttributes\ManualfacAttributes.csproj" />
       <ProjectReference Include="..\Manualfac\Manualfac.csproj"
                         OutputItemType="Analyzer"
                         ReferenceOutputAssembly="false"/>
