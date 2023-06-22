@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace Manualfac.Generators;
+namespace Manualfac.Exceptions;
 
 public class ComponentShouldSpecifyOnlyOneConstructorException : ManualfacGeneratorException
 {

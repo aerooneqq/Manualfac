@@ -1,4 +1,4 @@
-namespace Manualfac.Generators;
+namespace Manualfac.Exceptions;
 
 public class ManualfacGeneratorException : Exception
 {

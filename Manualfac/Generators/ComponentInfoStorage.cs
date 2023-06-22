@@ -1,3 +1,4 @@
+using Manualfac.Exceptions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -52,6 +53,11 @@ internal class ComponentInfoStorage
   
   private ComponentInfo ToComponentInfo(INamedTypeSymbol symbol, GeneratorExecutionContext context)
   {
+    if (!CheckIfManualfacComponent(symbol))
+    {
+      throw new TypeSymbolIsNotManualfacComponentException(symbol);
+    }
+    
     var dependencies = new HashSet<ComponentInfo>();
     var compilation = context.Compilation;
 
