@@ -12,6 +12,9 @@ internal class ComponentInfo
 
 
   public string ShortName => Component.Name;
+  
+  // ReSharper disable once ReturnTypeCanBeNotNullable
+  public string? Namespace => Component.ContainingNamespace.Name;
 
   
   public ComponentInfo(INamedTypeSymbol component, HashSet<INamedTypeSymbol> dependencies)
@@ -69,6 +72,13 @@ public class ServiceInjectionGenerator : ISourceGenerator
   private void GenerateDependenciesPart(ComponentInfo componentInfo, GeneratorExecutionContext context)
   {
     var sb = new StringBuilder();
+
+    if (componentInfo.Namespace is { })
+    {
+      sb.Append("namespace").AppendSpace().Append(componentInfo.Namespace).AppendSpace()
+        .AppendNewLine().AppendOpenCurlyBracket();
+    }
+    
     sb.Append("public partial class ").Append(componentInfo.ShortName)
       .AppendNewLine().AppendOpenCurlyBracket().AppendNewLine();
 
@@ -76,6 +86,11 @@ public class ServiceInjectionGenerator : ISourceGenerator
     sb = WriteConstructor(componentInfo, sb);
     
     sb.AppendNewLine().AppendClosedCurlyBracket();
+
+    if (componentInfo.Namespace is { })
+    {
+      sb.AppendNewLine().AppendClosedCurlyBracket(); 
+    }
     
     context.AddSource($"{componentInfo.ShortName}.g", sb.ToString());
   }
@@ -98,7 +113,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
     return sb.Append("my").Append(component.Name);
   }
 
-  private StringBuilder WriteConstructor(ComponentInfo componentInfo, StringBuilder sb)
+  private static StringBuilder WriteConstructor(ComponentInfo componentInfo, StringBuilder sb)
   {
     sb = sb.Append("public ").Append(componentInfo.ShortName).AppendOpenBracket();
     
