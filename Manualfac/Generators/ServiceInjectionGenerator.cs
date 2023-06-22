@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -77,20 +76,20 @@ public class ServiceInjectionGenerator : ISourceGenerator
 
   private void GenerateDependenciesPart(ComponentInfo componentInfo, GeneratorExecutionContext context)
   {
-    var sb = new StringBuilder();
-
+    var sb = WriteUsings(componentInfo, new StringBuilder()).AppendNewLine();
+    
     if (componentInfo.Namespace is { })
     {
       sb.Append("namespace").AppendSpace().Append(componentInfo.Namespace).AppendSpace()
-        .AppendNewLine().AppendOpenCurlyBracket();
+        .AppendNewLine().AppendOpenCurlyBracket().AppendNewLine();
     }
     
     sb.Append("public partial class ").Append(componentInfo.ShortName)
       .AppendNewLine().AppendOpenCurlyBracket().AppendNewLine();
 
-    sb = WriteDependenciesFields(componentInfo, sb);
+    WriteDependenciesFields(componentInfo, sb);
     sb.AppendNewLine();
-    sb = WriteConstructor(componentInfo, sb);
+    WriteConstructor(componentInfo, sb);
     
     sb.AppendNewLine().AppendClosedCurlyBracket();
 
@@ -102,6 +101,17 @@ public class ServiceInjectionGenerator : ISourceGenerator
     context.AddSource($"{componentInfo.ShortName}.g", sb.ToString());
   }
 
+  private StringBuilder WriteUsings(ComponentInfo componentInfo, StringBuilder sb)
+  {
+    foreach (var dependency in componentInfo.Dependencies)
+    {
+      sb.Append("using ").Append(dependency.ContainingNamespace.Name).AppendSemicolon()
+        .AppendNewLine();
+    }
+
+    return sb;
+  }
+  
   private StringBuilder WriteDependenciesFields(ComponentInfo componentInfo, StringBuilder sb)
   {
     foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
