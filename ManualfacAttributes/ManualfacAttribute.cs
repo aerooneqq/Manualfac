@@ -1,4 +1,4 @@
-﻿namespace ManualfacAttributes.Attributes;
+﻿namespace ManualfacAttributes;
 
 public abstract class ManualfacAttribute : Attribute
 {
