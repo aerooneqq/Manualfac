@@ -65,7 +65,11 @@ public class ServiceInjectionGenerator : ISourceGenerator
   {
     foreach (var componentInfo in components)
     {
-      GenerateDependenciesPart(componentInfo, context);
+      var assembly = componentInfo.Component.ContainingAssembly;
+      if (SymbolEqualityComparer.Default.Equals(assembly, context.Compilation.Assembly))
+      {
+        GenerateDependenciesPart(componentInfo, context);
+      }
     }
   }
 
