@@ -4,62 +4,18 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Manualfac.Generators;
 
-internal class ComponentInfo
-{
-  private IReadOnlyList<INamedTypeSymbol>? myOrderedDependencies;
-
-  public INamedTypeSymbol Component { get; }
-  public HashSet<INamedTypeSymbol> Dependencies { get; }
-
-
-  public string ShortName => Component.Name;
-  
-  // ReSharper disable once ReturnTypeCanBeNotNullable
-  public string? Namespace => Component.ContainingNamespace.Name;
-
-  
-  public ComponentInfo(INamedTypeSymbol component, HashSet<INamedTypeSymbol> dependencies)
-  {
-    Component = component;
-    Dependencies = dependencies;
-  }
-
-
-  public IReadOnlyList<INamedTypeSymbol> GetOrCreateOrderedListOfDependencies()
-  {
-    if (myOrderedDependencies is null)
-    {
-      myOrderedDependencies = Dependencies.OrderBy(dep => dep.Name).ToList();
-    }
-
-    return myOrderedDependencies;
-  }
-}
-
 [Generator]
 public class ServiceInjectionGenerator : ISourceGenerator
 {
-  private readonly HashSet<INamedTypeSymbol> myComponents;
-  private readonly HashSet<INamedTypeSymbol> myNotComponents;
-
-  
-  public ServiceInjectionGenerator()
-  {
-    myComponents = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-    myNotComponents = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-  }
-  
-  
   public void Initialize(GeneratorInitializationContext context)
   {
-    myComponents.Clear();
-    myNotComponents.Clear();
   }
 
   public void Execute(GeneratorExecutionContext context)
   {
-    var components = GetComponents(context);
-    GenerateDependenciesPart(components, context);
+    var storage = new ComponentInfoStorage();
+    storage.FillComponents(context);
+    GenerateDependenciesPart(storage.Components, context);
   }
 
   private void GenerateDependenciesPart(IReadOnlyList<ComponentInfo> components, GeneratorExecutionContext context)
@@ -161,105 +117,6 @@ public class ServiceInjectionGenerator : ISourceGenerator
     return sb;
 
     static string GetComponentParamName(int index) => $"c{index}";
-  }
-
-  private IReadOnlyList<ComponentInfo> GetComponents(GeneratorExecutionContext context)
-  {
-    var modulesQueue = new Queue<IModuleSymbol>();
-    var visited = new HashSet<IModuleSymbol>(SymbolEqualityComparer.Default);
-    var components = new List<ComponentInfo>();
-    
-    modulesQueue.Enqueue(context.Compilation.SourceModule);
-
-    while (modulesQueue.Count != 0)
-    {
-      var module = modulesQueue.Dequeue();
-      visited.Add(module);
-      
-      components.AddRange(GetComponentTypesFrom(module).Select(type => ToComponentInfo(type, context)));
-
-      foreach (var refAsm in module.ReferencedAssemblySymbols)
-      {
-        foreach (var refAsmModule in refAsm.Modules)
-        {
-          if (!visited.Contains(refAsmModule))
-          {
-            modulesQueue.Enqueue(refAsmModule);
-          }
-        }
-      }
-    }
-
-    return components;
-  }
-
-  private static ComponentInfo ToComponentInfo(INamedTypeSymbol symbol, GeneratorExecutionContext context)
-  {
-    var dependencies = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-    var compilation = context.Compilation;
-
-    var dependenciesSymbols = symbol.GetAttributes()
-      .Where(attr => attr.AttributeClass?.Name == "DependsOnAttribute")
-      .Select(attr => attr.ApplicationSyntaxReference?.GetSyntax())
-      .OfType<AttributeSyntax>()
-      .Select(attributeSyntax => attributeSyntax.DescendantNodes().OfType<TypeArgumentListSyntax>().FirstOrDefault())
-      .Where(typeArgs => typeArgs is { })
-      .SelectMany(typeArgsSyntax => typeArgsSyntax!.Arguments)
-      .Select(genericArg => compilation.GetSemanticModel(genericArg.SyntaxTree).GetTypeInfo(genericArg).Type)
-      .OfType<INamedTypeSymbol>();
-
-    foreach (var typeSymbol in dependenciesSymbols)
-    {
-      dependencies.Add(typeSymbol);
-    }
-    
-    return new ComponentInfo(symbol, dependencies);
-  }
-
-  private bool CheckIfManualfacComponent(INamedTypeSymbol symbol)
-  {
-    if (myNotComponents.Contains(symbol)) return false;
-    if (myComponents.Contains(symbol)) return true;
-
-    if (symbol.GetAttributes().Any(IsManualfacAttribute))
-    {
-      myComponents.Add(symbol);
-      return true;
-    }
-
-    myNotComponents.Add(symbol);
-    return false;
-  }
-
-  private IEnumerable<INamedTypeSymbol> GetComponentTypesFrom(IModuleSymbol module)
-  {
-    return GetAllNamespacesFrom(module.GlobalNamespace)
-      .SelectMany(ns => ns.GetTypeMembers())
-      .Where(CheckIfManualfacComponent);
-  }
-
-  private static bool IsManualfacAttribute(AttributeData attribute)
-  {
-    var attributeClass = attribute.AttributeClass;
-    while (attributeClass is { })
-    {
-      if (attributeClass.Name == "ManualfacAttribute") return true;
-      attributeClass = attributeClass.BaseType;
-    }
-
-    return false;
-  }
-
-  private static IEnumerable<INamespaceSymbol> GetAllNamespacesFrom(INamespaceSymbol namespaceSymbol)
-  {
-    yield return namespaceSymbol;
-    foreach (var childNamespace in namespaceSymbol.GetNamespaceMembers())
-    {
-      foreach (var nextNamespace in GetAllNamespacesFrom(childNamespace))
-      {
-        yield return nextNamespace;
-      }
-    }
   }
 }
 
