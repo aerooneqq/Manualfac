@@ -1,5 +1,8 @@
-﻿namespace ClassLibrary2;
+﻿using ManualfacAttributes.Attributes;
 
-public class Class2
+namespace ClassLibrary2;
+
+[Component]
+public partial class Class2
 {
 }

@@ -5,14 +5,30 @@ namespace Manualfac.Generators;
 
 internal class ComponentInfo
 {
+  private IReadOnlyList<INamedTypeSymbol>? myOrderedDependencies;
+
   public INamedTypeSymbol Component { get; }
   public HashSet<INamedTypeSymbol> Dependencies { get; }
+
+
+  public string ShortName => Component.Name;
 
   
   public ComponentInfo(INamedTypeSymbol component, HashSet<INamedTypeSymbol> dependencies)
   {
     Component = component;
     Dependencies = dependencies;
+  }
+
+
+  public IReadOnlyList<INamedTypeSymbol> GetOrCreateOrderedListOfDependencies()
+  {
+    if (myOrderedDependencies is null)
+    {
+      myOrderedDependencies = Dependencies.OrderBy(dep => dep.Name).ToList();
+    }
+
+    return myOrderedDependencies;
   }
 }
 
@@ -39,8 +55,80 @@ public class ServiceInjectionGenerator : ISourceGenerator
   public void Execute(GeneratorExecutionContext context)
   {
     var components = GetComponents(context);
+    GenerateDependenciesPart(components, context);
+  }
+
+  private void GenerateDependenciesPart(IReadOnlyList<ComponentInfo> components, GeneratorExecutionContext context)
+  {
+    foreach (var componentInfo in components)
+    {
+      GenerateDependenciesPart(componentInfo, context);
+    }
+  }
+
+  private void GenerateDependenciesPart(ComponentInfo componentInfo, GeneratorExecutionContext context)
+  {
+    var sb = new StringBuilder();
+    sb.Append("public partial class ").Append(componentInfo.ShortName)
+      .AppendNewLine().AppendOpenCurlyBracket().AppendNewLine();
+
+    sb = WriteDependenciesFields(componentInfo, sb);
+    sb = WriteConstructor(componentInfo, sb);
     
+    sb.AppendNewLine().AppendClosedCurlyBracket();
     
+    context.AddSource($"{componentInfo.ShortName}.g", sb.ToString());
+  }
+
+  private StringBuilder WriteDependenciesFields(ComponentInfo componentInfo, StringBuilder sb)
+  {
+    foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
+    {
+      sb = sb.Append("private readonly ").Append(dependency.Name).AppendSpace();
+      sb = WriteFieldName(dependency, sb);
+      
+      sb = sb.AppendSemicolon().AppendNewLine();
+    }
+
+    return sb;
+  }
+
+  private static StringBuilder WriteFieldName(INamedTypeSymbol component, StringBuilder sb)
+  {
+    return sb.Append("my").Append(component.Name);
+  }
+
+  private StringBuilder WriteConstructor(ComponentInfo componentInfo, StringBuilder sb)
+  {
+    sb = sb.Append("public ").Append(componentInfo.ShortName).AppendOpenBracket();
+    
+    var index = 0;
+    foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
+    {
+      sb = sb.Append(dependency.Name).AppendSpace().Append(GetComponentParamName(index++)).AppendComma()
+        .AppendSpace();
+    }
+    
+    if (index > 0)
+    {
+      //remove last space and comma
+      sb = sb.Remove(sb.Length - 2, 2);
+    }
+    
+    sb.AppendClosedBracket().AppendNewLine().AppendOpenCurlyBracket().AppendNewLine();
+
+    index = 0;
+    foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
+    {
+      sb = WriteFieldName(dependency, sb);
+      sb.AppendSpace().AppendEq().Append(GetComponentParamName(index++)).AppendSemicolon().AppendNewLine();
+    }
+
+    sb.AppendClosedCurlyBracket();
+
+    return sb;
+
+    static string GetComponentParamName(int index) => $"c{index}";
   }
 
   private IReadOnlyList<ComponentInfo> GetComponents(in GeneratorExecutionContext context)
@@ -149,7 +237,17 @@ public class ServiceInjectionGenerator : ISourceGenerator
 
 public static class StringBuilderExtensions
 {
-  public static StringBuilder AppendNewLine(this StringBuilder sb) => sb.Append("\n");
+  public static StringBuilder AppendNewLine(this StringBuilder sb) => sb.Append('\n');
+  public static StringBuilder AppendSemicolon(this StringBuilder sb) => sb.Append(';');
+  public static StringBuilder AppendSpace(this StringBuilder sb) => sb.Append(' ');
+  public static StringBuilder AppendComma(this StringBuilder sb) => sb.Append(',');
+  public static StringBuilder AppendOpenBracket(this StringBuilder sb) => sb.Append('(');
+  public static StringBuilder AppendClosedBracket(this StringBuilder sb) => sb.Append(')');
+  public static StringBuilder AppendOpenCurlyBracket(this StringBuilder sb) => sb.Append('{');
+  public static StringBuilder AppendClosedCurlyBracket(this StringBuilder sb) => sb.Append('}');
+  public static StringBuilder AppendEq(this StringBuilder sb) => sb.Append('=');
+
+  public static StringBuilder AppendTab(this StringBuilder sb) => sb.AppendSpace().AppendSpace();
 }
 
 public class ManualfacGeneratorException : Exception

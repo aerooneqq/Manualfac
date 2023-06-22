@@ -3,6 +3,7 @@
 namespace ClassLibrary1;
 
 [Component]
-public class Class1
+[DependsOn<Class2>]
+public partial class Class1
 {
 }
