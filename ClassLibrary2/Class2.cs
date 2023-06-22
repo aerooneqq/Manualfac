@@ -1,4 +1,4 @@
-﻿using ManualfacAttributes.Attributes;
+﻿using ManualfacAttributes;
 
 namespace ClassLibrary2;
 
