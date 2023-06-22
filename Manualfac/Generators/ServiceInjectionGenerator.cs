@@ -1,6 +1,5 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Manualfac.Generators;
 
@@ -22,7 +21,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
   {
     foreach (var componentInfo in components)
     {
-      var assembly = componentInfo.Component.ContainingAssembly;
+      var assembly = componentInfo.ComponentSymbol.ContainingAssembly;
       if (SymbolEqualityComparer.Default.Equals(assembly, context.Compilation.Assembly))
       {
         GenerateDependenciesPart(componentInfo, context);
@@ -61,8 +60,10 @@ public class ServiceInjectionGenerator : ISourceGenerator
   {
     foreach (var dependency in componentInfo.Dependencies)
     {
-      sb.Append("using ").Append(dependency.ContainingNamespace.Name).AppendSemicolon()
-        .AppendNewLine();
+      if (dependency.Namespace is { })
+      {
+        sb.Append("using ").Append(dependency.Namespace).AppendSemicolon().AppendNewLine(); 
+      }
     }
 
     return sb;
@@ -72,7 +73,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
   {
     foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
     {
-      sb = sb.Append("private readonly ").Append(dependency.Name).AppendSpace();
+      sb = sb.Append("private readonly ").Append(dependency.ShortName).AppendSpace();
       sb = WriteFieldName(dependency, sb);
       
       sb = sb.AppendSemicolon().AppendNewLine();
@@ -81,26 +82,26 @@ public class ServiceInjectionGenerator : ISourceGenerator
     return sb;
   }
 
-  private static StringBuilder WriteFieldName(INamedTypeSymbol component, StringBuilder sb)
+  private static StringBuilder WriteFieldName(ComponentInfo component, StringBuilder sb)
   {
-    return sb.Append("my").Append(component.Name);
+    return sb.Append("my").Append(component.ShortName);
   }
 
   private static StringBuilder WriteConstructor(ComponentInfo componentInfo, StringBuilder sb)
   {
-    sb = sb.Append("public ").Append(componentInfo.ShortName).AppendOpenBracket();
+    sb.Append("public ").Append(componentInfo.ShortName).AppendOpenBracket();
     
     var index = 0;
     foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
     {
-      sb = sb.Append(dependency.Name).AppendSpace().Append(GetComponentParamName(index++)).AppendComma()
+      sb.Append(dependency.ShortName).AppendSpace().Append(GetComponentParamName(index++)).AppendComma()
         .AppendSpace();
     }
     
     if (index > 0)
     {
       //remove last space and comma
-      sb = sb.Remove(sb.Length - 2, 2);
+      sb.Remove(sb.Length - 2, 2);
     }
     
     sb.AppendClosedBracket().AppendNewLine().AppendOpenCurlyBracket().AppendNewLine();
@@ -108,7 +109,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
     index = 0;
     foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
     {
-      sb = WriteFieldName(dependency, sb);
+      WriteFieldName(dependency, sb);
       sb.AppendSpace().AppendEq().Append(GetComponentParamName(index++)).AppendSemicolon().AppendNewLine();
     }
 
@@ -117,58 +118,5 @@ public class ServiceInjectionGenerator : ISourceGenerator
     return sb;
 
     static string GetComponentParamName(int index) => $"c{index}";
-  }
-}
-
-public static class StringBuilderExtensions
-{
-  public static StringBuilder AppendNewLine(this StringBuilder sb) => sb.Append('\n');
-  public static StringBuilder AppendSemicolon(this StringBuilder sb) => sb.Append(';');
-  public static StringBuilder AppendSpace(this StringBuilder sb) => sb.Append(' ');
-  public static StringBuilder AppendComma(this StringBuilder sb) => sb.Append(',');
-  public static StringBuilder AppendOpenBracket(this StringBuilder sb) => sb.Append('(');
-  public static StringBuilder AppendClosedBracket(this StringBuilder sb) => sb.Append(')');
-  public static StringBuilder AppendOpenCurlyBracket(this StringBuilder sb) => sb.Append('{');
-  public static StringBuilder AppendClosedCurlyBracket(this StringBuilder sb) => sb.Append('}');
-  public static StringBuilder AppendEq(this StringBuilder sb) => sb.Append('=');
-
-  public static StringBuilder AppendTab(this StringBuilder sb) => sb.AppendSpace().AppendSpace();
-}
-
-public class ManualfacGeneratorException : Exception
-{
-  
-}
-
-public class ComponentShouldSpecifyOnlyOneConstructorException : ManualfacGeneratorException
-{
-  public override string Message { get; }
-
-  
-  public ComponentShouldSpecifyOnlyOneConstructorException(INamedTypeSymbol namedTypeSymbol)
-  {
-    Message = $"Type {namedTypeSymbol.Name} declared {namedTypeSymbol.Constructors.Length} constructors, when only one is expected";
-  }
-}
-
-public class ComponentParameterIsNotNamedTypeSymbolException : ManualfacGeneratorException
-{
-  public override string Message { get; }
-
-  
-  public ComponentParameterIsNotNamedTypeSymbolException(IParameterSymbol symbol)
-  {
-    Message = $"Parameter {symbol.Name} in {symbol.ContainingType.Name} was not of type {nameof(INamedTypeSymbol)}";
-  }
-}
-
-public class ParameterIsNotManualfacComponentException : ManualfacGeneratorException
-{
-  public override string Message { get; }
-  
-  
-  public ParameterIsNotManualfacComponentException(IParameterSymbol parameterSymbol)
-  {
-    Message = $"Parameter {parameterSymbol.Name} in {parameterSymbol.ContainingType.Name} is not a Manualfac component";
   }
 }

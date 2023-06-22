@@ -7,7 +7,7 @@ internal class ComponentInfoStorage
 {
   private readonly HashSet<INamedTypeSymbol> myComponentsSymbols;
   private readonly HashSet<INamedTypeSymbol> myNotComponentsSymbols;
-  private readonly Dictionary<INamespaceSymbol, ComponentInfo> myCache;
+  private readonly Dictionary<INamedTypeSymbol, ComponentInfo> myCache;
   private readonly List<ComponentInfo> myComponents;
 
 
@@ -16,7 +16,7 @@ internal class ComponentInfoStorage
 
   public ComponentInfoStorage()
   {
-    myCache = new Dictionary<INamespaceSymbol, ComponentInfo>(SymbolEqualityComparer.Default);
+    myCache = new Dictionary<INamedTypeSymbol, ComponentInfo>(SymbolEqualityComparer.Default);
     myComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
     myNotComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
     myComponents = new List<ComponentInfo>();
@@ -50,9 +50,9 @@ internal class ComponentInfoStorage
     }
   }
   
-  private static ComponentInfo ToComponentInfo(INamedTypeSymbol symbol, GeneratorExecutionContext context)
+  private ComponentInfo ToComponentInfo(INamedTypeSymbol symbol, GeneratorExecutionContext context)
   {
-    var dependencies = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+    var dependencies = new HashSet<ComponentInfo>();
     var compilation = context.Compilation;
 
     var dependenciesSymbols = symbol.GetAttributes()
@@ -67,7 +67,15 @@ internal class ComponentInfoStorage
 
     foreach (var typeSymbol in dependenciesSymbols)
     {
-      dependencies.Add(typeSymbol);
+      if (myCache.TryGetValue(typeSymbol, out var existingComponent))
+      {
+        dependencies.Add(existingComponent);
+        continue;
+      }
+
+      var dependencyComponent = ToComponentInfo(typeSymbol, context);
+      myCache[typeSymbol] = dependencyComponent;
+      dependencies.Add(dependencyComponent);
     }
     
     return new ComponentInfo(symbol, dependencies);

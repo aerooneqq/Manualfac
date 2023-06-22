@@ -4,30 +4,31 @@ namespace Manualfac.Generators;
 
 internal class ComponentInfo
 {
-  private IReadOnlyList<INamedTypeSymbol>? myOrderedDependencies;
+  private IReadOnlyList<ComponentInfo>? myOrderedDependencies;
 
-  public INamedTypeSymbol Component { get; }
-  public HashSet<INamedTypeSymbol> Dependencies { get; }
+  public INamedTypeSymbol ComponentSymbol { get; }
+  public HashSet<ComponentInfo> Dependencies { get; }
 
 
-  public string ShortName => Component.Name;
+  public string ShortName => ComponentSymbol.Name;
+  public string FullName => Namespace is { } @namespace ? @namespace + "." + ShortName : ShortName;
   
   // ReSharper disable once ReturnTypeCanBeNotNullable
-  public string? Namespace => Component.ContainingNamespace.Name;
+  public string? Namespace => ComponentSymbol.ContainingNamespace.Name;
 
   
-  public ComponentInfo(INamedTypeSymbol component, HashSet<INamedTypeSymbol> dependencies)
+  public ComponentInfo(INamedTypeSymbol componentSymbol, HashSet<ComponentInfo> dependencies)
   {
-    Component = component;
+    ComponentSymbol = componentSymbol;
     Dependencies = dependencies;
   }
 
 
-  public IReadOnlyList<INamedTypeSymbol> GetOrCreateOrderedListOfDependencies()
+  public IReadOnlyList<ComponentInfo> GetOrCreateOrderedListOfDependencies()
   {
     if (myOrderedDependencies is null)
     {
-      myOrderedDependencies = Dependencies.OrderBy(dep => dep.Name).ToList();
+      myOrderedDependencies = Dependencies.OrderBy(dep => dep.ShortName).ToList();
     }
 
     return myOrderedDependencies;
