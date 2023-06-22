@@ -1,5 +1,7 @@
+using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Manualfac.Generators;
 
@@ -87,6 +89,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
       .AppendNewLine().AppendOpenCurlyBracket().AppendNewLine();
 
     sb = WriteDependenciesFields(componentInfo, sb);
+    sb.AppendNewLine();
     sb = WriteConstructor(componentInfo, sb);
     
     sb.AppendNewLine().AppendClosedCurlyBracket();
@@ -150,7 +153,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
     static string GetComponentParamName(int index) => $"c{index}";
   }
 
-  private IReadOnlyList<ComponentInfo> GetComponents(in GeneratorExecutionContext context)
+  private IReadOnlyList<ComponentInfo> GetComponents(GeneratorExecutionContext context)
   {
     var modulesQueue = new Queue<IModuleSymbol>();
     var visited = new HashSet<IModuleSymbol>(SymbolEqualityComparer.Default);
@@ -163,7 +166,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
       var module = modulesQueue.Dequeue();
       visited.Add(module);
       
-      components.AddRange(GetComponentTypesFrom(module).Select(ToComponentInfo));
+      components.AddRange(GetComponentTypesFrom(module).Select(type => ToComponentInfo(type, context)));
 
       foreach (var refAsm in module.ReferencedAssemblySymbols)
       {
@@ -180,30 +183,26 @@ public class ServiceInjectionGenerator : ISourceGenerator
     return components;
   }
 
-  private ComponentInfo ToComponentInfo(INamedTypeSymbol symbol)
+  private static ComponentInfo ToComponentInfo(INamedTypeSymbol symbol, GeneratorExecutionContext context)
   {
-    if (symbol.Constructors.Length != 1)
-    {
-      throw new ComponentShouldSpecifyOnlyOneConstructorException(symbol);
-    }
-
     var dependencies = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-    var constructor = symbol.Constructors[0];
-    foreach (var parameter in constructor.Parameters)
+    var compilation = context.Compilation;
+
+    var dependenciesSymbols = symbol.GetAttributes()
+      .Where(attr => attr.AttributeClass?.Name == "DependsOnAttribute")
+      .Select(attr => attr.ApplicationSyntaxReference?.GetSyntax())
+      .OfType<AttributeSyntax>()
+      .Select(attributeSyntax => attributeSyntax.DescendantNodes().OfType<TypeArgumentListSyntax>().FirstOrDefault())
+      .Where(typeArgs => typeArgs is { })
+      .SelectMany(typeArgsSyntax => typeArgsSyntax!.Arguments)
+      .Select(genericArg => compilation.GetSemanticModel(genericArg.SyntaxTree).GetTypeInfo(genericArg).Type)
+      .OfType<INamedTypeSymbol>();
+
+    foreach (var typeSymbol in dependenciesSymbols)
     {
-      if (parameter.Type is not INamedTypeSymbol parameterType)
-      {
-        throw new ComponentParameterIsNotNamedTypeSymbolException(parameter);
-      }
-
-      if (CheckIfManualfacComponent(parameterType))
-      {
-        throw new ParameterIsNotManualfacComponentException(parameter);
-      }
-
-      dependencies.Add(parameterType);
+      dependencies.Add(typeSymbol);
     }
-
+    
     return new ComponentInfo(symbol, dependencies);
   }
 
