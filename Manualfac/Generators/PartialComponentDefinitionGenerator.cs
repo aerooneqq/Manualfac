@@ -3,29 +3,30 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators;
 
-internal static class PartialComponentDefinitionGenerator
+internal static unsafe class PartialComponentDefinitionGenerator
 {
   public static void GenerateDependenciesPart(ComponentInfo componentInfo, GeneratorExecutionContext context)
   {
     var sb = WriteUsings(componentInfo, new StringBuilder()).AppendNewLine();
 
     OpenCloseStringBuilderOperation? namespaceCookie = null;
+    var indent = 0;
 
     try
     {
       if (componentInfo.Namespace is { })
       {
         sb.Append("namespace").AppendSpace().Append(componentInfo.Namespace).AppendSpace().AppendNewLine();
-        namespaceCookie = StringBuilderCookies.CurlyBraces(sb);
+        namespaceCookie = StringBuilderCookies.CurlyBraces(sb, &indent);
       }
       
-      sb.Append("public partial class ").Append(componentInfo.ShortName).AppendNewLine();
+      sb.AppendIndent(indent).Append("public partial class ").Append(componentInfo.ShortName).AppendNewLine();
 
-      using (StringBuilderCookies.CurlyBraces(sb))
+      using (StringBuilderCookies.CurlyBraces(sb, &indent))
       {
-        WriteDependenciesFields(componentInfo, sb);
+        WriteDependenciesFields(componentInfo, sb, indent);
         sb.AppendNewLine();
-        WriteConstructor(componentInfo, sb);
+        WriteConstructor(componentInfo, sb, &indent);
       }
     }
     finally
@@ -49,12 +50,12 @@ internal static class PartialComponentDefinitionGenerator
     return sb;
   }
   
-  private static StringBuilder WriteDependenciesFields(ComponentInfo componentInfo, StringBuilder sb)
+  private static StringBuilder WriteDependenciesFields(ComponentInfo componentInfo, StringBuilder sb, int indent)
   {
     foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
     {
-      sb = sb.Append("private readonly ").Append(dependency.ShortName).AppendSpace();
-      sb = WriteFieldName(dependency, sb);
+      sb = sb.AppendIndent(indent).Append("private readonly ").Append(dependency.ShortName).AppendSpace();
+      sb = WriteFieldName(dependency, sb, 0);
       
       sb = sb.AppendSemicolon().AppendNewLine();
     }
@@ -62,24 +63,24 @@ internal static class PartialComponentDefinitionGenerator
     return sb;
   }
 
-  private static StringBuilder WriteFieldName(ComponentInfo component, StringBuilder sb)
+  private static StringBuilder WriteFieldName(ComponentInfo component, StringBuilder sb, int indent)
   {
-    return sb.Append("my").Append(component.ShortName);
+    return sb.AppendIndent(indent).Append("my").Append(component.ShortName);
   }
 
-  private static StringBuilder WriteConstructor(ComponentInfo componentInfo, StringBuilder sb)
+  private static StringBuilder WriteConstructor(ComponentInfo componentInfo, StringBuilder sb, int* indent)
   {
-    sb.Append("public ").Append(componentInfo.ShortName);
+    sb.AppendIndent(*indent).Append("public ").Append(componentInfo.ShortName);
 
-    using (StringBuilderCookies.DefaultBraces(sb))
+    using (StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true))
     {
       var index = 0;
       foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
       {
-        sb.Append(dependency.ShortName).AppendSpace().Append(GetComponentParamName(index++)).AppendComma()
-          .AppendSpace();
+        sb.AppendIndent(*indent).Append(dependency.ShortName).AppendSpace().Append(GetComponentParamName(index++))
+          .AppendComma().AppendNewLine();
       }
-    
+      
       if (index > 0)
       {
         //remove last space and comma
@@ -87,14 +88,18 @@ internal static class PartialComponentDefinitionGenerator
       }
     }
     
-    using (StringBuilderCookies.CurlyBraces(sb))
+    using (StringBuilderCookies.CurlyBraces(sb.AppendNewLine(), indent))
     {
       var index = 0;
       foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
       {
-        WriteFieldName(dependency, sb);
-        sb.AppendSpace().AppendEq().Append(GetComponentParamName(index++)).AppendSemicolon().AppendNewLine();
+        WriteFieldName(dependency, sb, *indent);
+        sb.AppendSpace().AppendEq().AppendSpace().Append(GetComponentParamName(index++))
+          .AppendSemicolon().AppendNewLine();
       }
+
+      //remove last new line
+      sb.Remove(sb.Length - 1, 1);
     }
     
     return sb;
@@ -103,35 +108,57 @@ internal static class PartialComponentDefinitionGenerator
   }
 }
 
-internal readonly struct OpenCloseStringBuilderOperation : IDisposable
+internal readonly unsafe struct OpenCloseStringBuilderOperation : IDisposable
 {
   private readonly StringBuilder myStringBuilder;
   private readonly Action<StringBuilder> myCloseAction;
+  private readonly int* myIndent;
 
   public OpenCloseStringBuilderOperation(
     StringBuilder sb, 
     Action<StringBuilder> openAction, 
-    Action<StringBuilder> closeAction)
+    Action<StringBuilder> closeAction,
+    int* indent)
   {
+    myIndent = indent;
     myStringBuilder = sb;
     myCloseAction = closeAction;
     openAction(sb);
     myStringBuilder.AppendNewLine();
+    *indent += 1;
   }
   
   
   public void Dispose()
   {
     myStringBuilder.AppendNewLine();
+    *myIndent -= 1;
     myCloseAction(myStringBuilder);
   }
 }
 
-internal static class StringBuilderCookies
+internal static unsafe class StringBuilderCookies
 {
-  public static OpenCloseStringBuilderOperation CurlyBraces(StringBuilder sb) =>
-    new(sb, static sb => sb.AppendOpenCurlyBrace(), static sb => sb.AppendClosedCurlyBrace());
+  public static OpenCloseStringBuilderOperation CurlyBraces(StringBuilder sb, int* indent) =>
+    new(sb, sb => sb.AppendIndent(*indent).AppendOpenCurlyBrace(), sb => sb.AppendIndent(*indent).AppendClosedCurlyBrace(), indent);
 
-  public static OpenCloseStringBuilderOperation DefaultBraces(StringBuilder sb) =>
-    new(sb, static sb => sb.AppendOpenBracket(), static sb => sb.AppendClosedBrace());
+  public static OpenCloseStringBuilderOperation DefaultBraces(
+    StringBuilder sb, int* indent, bool appendStartIndent = false, bool appendEndIndent = false)
+  {
+    void OpenAction(StringBuilder sb)
+    {
+      if (appendStartIndent) sb.AppendIndent(*indent);
+
+      sb.AppendOpenBracket();
+    }
+
+    void CloseAction(StringBuilder sb)
+    {
+      if (appendEndIndent) sb.AppendIndent(*indent);
+
+      sb.AppendClosedBrace();
+    }
+
+    return new OpenCloseStringBuilderOperation(sb, OpenAction, CloseAction, indent);
+  }
 }

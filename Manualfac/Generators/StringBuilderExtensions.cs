@@ -15,4 +15,14 @@ public static class StringBuilderExtensions
   public static StringBuilder AppendEq(this StringBuilder sb) => sb.Append('=');
 
   public static StringBuilder AppendTab(this StringBuilder sb) => sb.AppendSpace().AppendSpace();
+
+  public static StringBuilder AppendIndent(this StringBuilder sb, int indent)
+  {
+    for (var i = 0; i < indent; ++i)
+    {
+      sb.AppendTab();
+    }
+
+    return sb;
+  }
 }
