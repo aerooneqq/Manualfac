@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Manualfac.Exceptions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -80,7 +81,8 @@ internal class ComponentInfoStorage
     var visited = new HashSet<ComponentInfo>();
     foreach (var (attributeSyntax, types) in dependenciesSymbols)
     {
-      var modifier = AccessModifier.Private;
+      var modifier = ExtractAccessModifierOrDefault(attributeSyntax, compilation);
+      
       foreach (var typeSymbol in types.OfType<INamedTypeSymbol>())
       {
         if (myCache.TryGetValue(typeSymbol, out var existingComponent))
@@ -101,6 +103,33 @@ internal class ComponentInfoStorage
     }
     
     return new ComponentInfo(symbol, dependencies);
+  }
+
+  private AccessModifier ExtractAccessModifierOrDefault(AttributeSyntax attributeSyntax, Compilation compilation)
+  {
+    if (attributeSyntax.ArgumentList is not { } argumentList) return AccessModifier.Private;
+    
+    foreach (var argument in argumentList.Arguments)
+    {
+      if (argument.Expression is not MemberAccessExpressionSyntax accessSyntax) continue;
+      var foundSymbol = compilation.GetSemanticModel(accessSyntax.SyntaxTree).GetSymbolInfo(accessSyntax).Symbol;
+      
+      if (foundSymbol is IFieldSymbol { Type.Name: "AccessModifier" } fieldSymbol)
+      {
+        return foundSymbol.Name switch
+        {
+          nameof(AccessModifier.Internal) => AccessModifier.Internal,
+          nameof(AccessModifier.Protected) => AccessModifier.Protected,
+          nameof(AccessModifier.Private) => AccessModifier.Private,
+          nameof(AccessModifier.Public) => AccessModifier.Public,
+          nameof(AccessModifier.PrivateProtected) => AccessModifier.PrivateProtected,
+          nameof(AccessModifier.ProtectedInternal) => AccessModifier.ProtectedInternal,
+          _ => throw new ArgumentOutOfRangeException(fieldSymbol.Name)
+        };
+      }
+    }
+
+    return AccessModifier.Private;
   }
 
   private bool CheckIfManualfacComponent(INamedTypeSymbol symbol)
