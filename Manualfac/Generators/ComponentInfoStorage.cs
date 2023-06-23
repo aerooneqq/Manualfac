@@ -1,3 +1,4 @@
+using System.Globalization;
 using Manualfac.Exceptions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,6 +25,55 @@ internal class ComponentInfoStorage
   }
 
 
+  private enum ComponentState
+  {
+    NotVisited,
+    Black,
+    Gray
+  }
+  
+  public IReadOnlyList<ComponentInfo> GetInTopologicalOrder()
+  {
+    var visited = myComponents.ToDictionary(static c => c, static _ => ComponentState.NotVisited);
+    
+    var result = new List<ComponentInfo>();
+    foreach (var component in myComponents)
+    {
+      if (visited[component] == ComponentState.NotVisited)
+      {
+        if (Dfs(component, visited, result))
+        {
+          throw new CyclicDependencyException();
+        }
+      }
+    }
+
+    result.Reverse();
+    return result;
+  }
+
+  private static bool Dfs(
+    ComponentInfo current, Dictionary<ComponentInfo, ComponentState> visited, List<ComponentInfo> result)
+  {
+    visited[current] = ComponentState.Gray;
+    foreach (var dependency in current.Dependencies)
+    {
+      switch (visited[dependency])
+      {
+        case ComponentState.Gray:
+        case ComponentState.NotVisited when Dfs(current, visited, result):
+          return true;
+        default:
+          throw new ArgumentOutOfRangeException();
+      }
+    }
+
+    visited[current] = ComponentState.Black;
+    
+    result.Add(current);
+    return false;
+  }
+  
   public void FillComponents(GeneratorExecutionContext context)
   {
     var modulesQueue = new Queue<IModuleSymbol>();
@@ -53,6 +103,11 @@ internal class ComponentInfoStorage
   
   private ComponentInfo ToComponentInfo(INamedTypeSymbol symbol, GeneratorExecutionContext context)
   {
+    if (myCache.TryGetValue(symbol, out var existingComponent))
+    {
+      return existingComponent;
+    }
+    
     if (!CheckIfManualfacComponent(symbol))
     {
       throw new TypeSymbolIsNotManualfacComponentException(symbol);
@@ -60,7 +115,6 @@ internal class ComponentInfoStorage
     
     var compilation = context.Compilation;
     var dependencies = new List<(ComponentInfo, AccessModifier)>();
-    var visited = new HashSet<ComponentInfo>();
     
     foreach (var (attributeSyntax, types) in ExtractDependencies(symbol, compilation))
     {
@@ -68,25 +122,14 @@ internal class ComponentInfoStorage
       
       foreach (var typeSymbol in types.OfType<INamedTypeSymbol>())
       {
-        if (myCache.TryGetValue(typeSymbol, out var existingComponent))
-        {
-          if (!visited.Contains(existingComponent))
-          {
-            visited.Add(existingComponent);
-            dependencies.Add((existingComponent, modifier)); 
-          }
-          
-          continue;
-        }
-
         var dependencyComponent = ToComponentInfo(typeSymbol, context);
-        myCache[typeSymbol] = dependencyComponent;
         dependencies.Add((dependencyComponent, modifier));
-        visited.Add(dependencyComponent);
       }
     }
     
-    return new ComponentInfo(symbol, dependencies);
+    var createdComponent = new ComponentInfo(symbol, dependencies);
+    myCache[symbol] = createdComponent;
+    return createdComponent;
   }
 
   private static IEnumerable<(AttributeSyntax, IEnumerable<ITypeSymbol?>)> ExtractDependencies(
