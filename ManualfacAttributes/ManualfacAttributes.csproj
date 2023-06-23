@@ -8,4 +8,8 @@
     </PropertyGroup>
 
 
+    <ItemGroup>
+      <PackageReference Include="JetBrains.Annotations" Version="2023.2.0-eap3" />
+    </ItemGroup>
+
 </Project>

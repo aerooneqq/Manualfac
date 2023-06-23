@@ -58,30 +58,46 @@ internal class ComponentInfoStorage
       throw new TypeSymbolIsNotManualfacComponentException(symbol);
     }
     
-    var dependencies = new HashSet<ComponentInfo>();
     var compilation = context.Compilation;
-
     var dependenciesSymbols = symbol.GetAttributes()
       .Where(attr => attr.AttributeClass?.Name == "DependsOnAttribute")
       .Select(attr => attr.ApplicationSyntaxReference?.GetSyntax())
       .OfType<AttributeSyntax>()
-      .Select(attributeSyntax => attributeSyntax.DescendantNodes().OfType<TypeArgumentListSyntax>().FirstOrDefault())
-      .Where(typeArgs => typeArgs is { })
-      .SelectMany(typeArgsSyntax => typeArgsSyntax!.Arguments)
-      .Select(genericArg => compilation.GetSemanticModel(genericArg.SyntaxTree).GetTypeInfo(genericArg).Type)
-      .OfType<INamedTypeSymbol>();
-
-    foreach (var typeSymbol in dependenciesSymbols)
-    {
-      if (myCache.TryGetValue(typeSymbol, out var existingComponent))
+      .Select(attributeSyntax =>
       {
-        dependencies.Add(existingComponent);
-        continue;
-      }
+        var typeArgs = attributeSyntax.DescendantNodes().OfType<TypeArgumentListSyntax>().FirstOrDefault();
+        return (Attribute: attributeSyntax, TypeArgs: typeArgs);
+      })
+      .Where(tuple => tuple.TypeArgs is { })
+      .Select(tuple =>
+      {
+        var args = tuple.TypeArgs!.Arguments;
+        var types = args.Select(arg => compilation.GetSemanticModel(arg.SyntaxTree).GetTypeInfo(arg).Type);
+        return (tuple.Attribute, Types: types);
+      });
 
-      var dependencyComponent = ToComponentInfo(typeSymbol, context);
-      myCache[typeSymbol] = dependencyComponent;
-      dependencies.Add(dependencyComponent);
+    var dependencies = new List<(ComponentInfo, AccessModifier)>();
+    var visited = new HashSet<ComponentInfo>();
+    foreach (var (attributeSyntax, types) in dependenciesSymbols)
+    {
+      var modifier = AccessModifier.Private;
+      foreach (var typeSymbol in types.OfType<INamedTypeSymbol>())
+      {
+        if (myCache.TryGetValue(typeSymbol, out var existingComponent))
+        {
+          if (!visited.Contains(existingComponent))
+          {
+            visited.Add(existingComponent);
+            dependencies.Add((existingComponent, modifier)); 
+          }
+          continue;
+        }
+
+        var dependencyComponent = ToComponentInfo(typeSymbol, context);
+        myCache[typeSymbol] = dependencyComponent;
+        dependencies.Add((dependencyComponent, modifier));
+        visited.Add(dependencyComponent);
+      }
     }
     
     return new ComponentInfo(symbol, dependencies);

@@ -2,9 +2,33 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators;
 
+public enum AccessModifier
+{
+  Public,
+  Private,
+  Protected,
+  Internal,
+  PrivateProtected,
+  ProtectedInternal
+}
+
+public static class AccessModifierExtensions
+{
+  public static string CreateModifierString(this AccessModifier modifier) => modifier switch
+  {
+    AccessModifier.Public => "public",
+    AccessModifier.Private => "private",
+    AccessModifier.Protected => "protected",
+    AccessModifier.Internal => "internal",
+    AccessModifier.PrivateProtected => "private protected",
+    AccessModifier.ProtectedInternal => "protected internal",
+    _ => throw new ArgumentOutOfRangeException(nameof(modifier), modifier, null)
+  };
+}
+
 internal class ComponentInfo
 {
-  private IReadOnlyList<ComponentInfo>? myOrderedDependencies;
+  private readonly IReadOnlyList<(ComponentInfo Component, AccessModifier Modifier)> myOrderedDependencies;
 
   public INamedTypeSymbol ComponentSymbol { get; }
   public HashSet<ComponentInfo> Dependencies { get; }
@@ -17,20 +41,18 @@ internal class ComponentInfo
   public string? Namespace => ComponentSymbol.ContainingNamespace.Name;
 
   
-  public ComponentInfo(INamedTypeSymbol componentSymbol, HashSet<ComponentInfo> dependencies)
+  public ComponentInfo(
+    INamedTypeSymbol componentSymbol, 
+    IReadOnlyCollection<(ComponentInfo Component, AccessModifier Modifier)> dependencies)
   {
     ComponentSymbol = componentSymbol;
-    Dependencies = dependencies;
+    Dependencies = new HashSet<ComponentInfo>(dependencies.Select(dep => dep.Component));
+    myOrderedDependencies = dependencies.ToList();
   }
 
 
-  public IReadOnlyList<ComponentInfo> GetOrCreateOrderedListOfDependencies()
+  public IReadOnlyList<(ComponentInfo Component, AccessModifier Modifier)> GetOrCreateOrderedListOfDependencies()
   {
-    if (myOrderedDependencies is null)
-    {
-      myOrderedDependencies = Dependencies.OrderBy(dep => dep.ShortName).ToList();
-    }
-
     return myOrderedDependencies;
   }
 }

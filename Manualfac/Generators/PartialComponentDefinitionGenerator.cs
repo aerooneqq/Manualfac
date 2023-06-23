@@ -52,12 +52,14 @@ internal static unsafe class PartialComponentDefinitionGenerator
   
   private static StringBuilder WriteDependenciesFields(ComponentInfo componentInfo, StringBuilder sb, int indent)
   {
-    foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
+    foreach (var (dependency, modifier) in componentInfo.GetOrCreateOrderedListOfDependencies())
     {
-      sb = sb.AppendIndent(indent).Append("private readonly ").Append(dependency.ShortName).AppendSpace();
-      sb = WriteFieldName(dependency, sb, 0);
+      sb.AppendIndent(indent).Append(modifier.CreateModifierString()).AppendSpace()
+        .Append(dependency.ShortName).AppendSpace();
       
-      sb = sb.AppendSemicolon().AppendNewLine();
+      WriteFieldName(dependency, sb, 0);
+      
+      sb.AppendSemicolon().AppendNewLine();
     }
 
     return sb;
@@ -75,7 +77,7 @@ internal static unsafe class PartialComponentDefinitionGenerator
     using (StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true))
     {
       var index = 0;
-      foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
+      foreach (var (dependency, _) in componentInfo.GetOrCreateOrderedListOfDependencies())
       {
         sb.AppendIndent(*indent).Append(dependency.ShortName).AppendSpace().Append(GetComponentParamName(index++))
           .AppendComma().AppendNewLine();
@@ -91,7 +93,7 @@ internal static unsafe class PartialComponentDefinitionGenerator
     using (StringBuilderCookies.CurlyBraces(sb.AppendNewLine(), indent))
     {
       var index = 0;
-      foreach (var dependency in componentInfo.GetOrCreateOrderedListOfDependencies())
+      foreach (var (dependency, _) in componentInfo.GetOrCreateOrderedListOfDependencies())
       {
         WriteFieldName(dependency, sb, *indent);
         sb.AppendSpace().AppendEq().AppendSpace().Append(GetComponentParamName(index++))
