@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Manualfac.Exceptions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -60,7 +59,40 @@ internal class ComponentInfoStorage
     }
     
     var compilation = context.Compilation;
-    var dependenciesSymbols = symbol.GetAttributes()
+    var dependencies = new List<(ComponentInfo, AccessModifier)>();
+    var visited = new HashSet<ComponentInfo>();
+    
+    foreach (var (attributeSyntax, types) in ExtractDependencies(symbol, compilation))
+    {
+      var modifier = ExtractAccessModifierOrDefault(attributeSyntax, compilation);
+      
+      foreach (var typeSymbol in types.OfType<INamedTypeSymbol>())
+      {
+        if (myCache.TryGetValue(typeSymbol, out var existingComponent))
+        {
+          if (!visited.Contains(existingComponent))
+          {
+            visited.Add(existingComponent);
+            dependencies.Add((existingComponent, modifier)); 
+          }
+          
+          continue;
+        }
+
+        var dependencyComponent = ToComponentInfo(typeSymbol, context);
+        myCache[typeSymbol] = dependencyComponent;
+        dependencies.Add((dependencyComponent, modifier));
+        visited.Add(dependencyComponent);
+      }
+    }
+    
+    return new ComponentInfo(symbol, dependencies);
+  }
+
+  private static IEnumerable<(AttributeSyntax, IEnumerable<ITypeSymbol?>)> ExtractDependencies(
+    INamedTypeSymbol symbol, Compilation compilation)
+  {
+    return symbol.GetAttributes()
       .Where(attr => attr.AttributeClass?.Name == "DependsOnAttribute")
       .Select(attr => attr.ApplicationSyntaxReference?.GetSyntax())
       .OfType<AttributeSyntax>()
@@ -76,33 +108,6 @@ internal class ComponentInfoStorage
         var types = args.Select(arg => compilation.GetSemanticModel(arg.SyntaxTree).GetTypeInfo(arg).Type);
         return (tuple.Attribute, Types: types);
       });
-
-    var dependencies = new List<(ComponentInfo, AccessModifier)>();
-    var visited = new HashSet<ComponentInfo>();
-    foreach (var (attributeSyntax, types) in dependenciesSymbols)
-    {
-      var modifier = ExtractAccessModifierOrDefault(attributeSyntax, compilation);
-      
-      foreach (var typeSymbol in types.OfType<INamedTypeSymbol>())
-      {
-        if (myCache.TryGetValue(typeSymbol, out var existingComponent))
-        {
-          if (!visited.Contains(existingComponent))
-          {
-            visited.Add(existingComponent);
-            dependencies.Add((existingComponent, modifier)); 
-          }
-          continue;
-        }
-
-        var dependencyComponent = ToComponentInfo(typeSymbol, context);
-        myCache[typeSymbol] = dependencyComponent;
-        dependencies.Add((dependencyComponent, modifier));
-        visited.Add(dependencyComponent);
-      }
-    }
-    
-    return new ComponentInfo(symbol, dependencies);
   }
 
   private AccessModifier ExtractAccessModifierOrDefault(AttributeSyntax attributeSyntax, Compilation compilation)
