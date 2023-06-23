@@ -1,4 +1,3 @@
-using System.Globalization;
 using Manualfac.Exceptions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -35,8 +34,8 @@ internal class ComponentInfoStorage
   public IReadOnlyList<ComponentInfo> GetInTopologicalOrder()
   {
     var visited = myComponents.ToDictionary(static c => c, static _ => ComponentState.NotVisited);
-    
     var result = new List<ComponentInfo>();
+    
     foreach (var component in myComponents)
     {
       if (visited[component] == ComponentState.NotVisited)
@@ -58,13 +57,14 @@ internal class ComponentInfoStorage
     visited[current] = ComponentState.Gray;
     foreach (var dependency in current.Dependencies)
     {
-      switch (visited[dependency])
+      if (visited[dependency] == ComponentState.Gray)
       {
-        case ComponentState.Gray:
-        case ComponentState.NotVisited when Dfs(current, visited, result):
-          return true;
-        default:
-          throw new ArgumentOutOfRangeException();
+        return true;
+      }
+
+      if (visited[dependency] == ComponentState.NotVisited)
+      {
+        if (Dfs(dependency, visited, result)) return true;
       }
     }
 
