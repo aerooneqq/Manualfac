@@ -29,6 +29,11 @@ internal class ComponentInfo
 
 internal static class ComponentInfoExtensions
 {
+  public static GeneratedUsingsModel ToDependenciesUsingsModel(this ComponentInfo component) => 
+    new(component.Dependencies.Select(dep => dep.Namespace).Where(ns => ns is { }).Distinct().ToList()!);
+  
+  public static GeneratedComponentFileModel ToGeneratedFileModel(this ComponentInfo component) => new(component);
+
   public static GeneratedClassModel ToGeneratedClassModel(this ComponentInfo component)
   {
     return new GeneratedClassModel(component.TypeShortName, component.ExtractGeneratedFields());
