@@ -85,8 +85,10 @@ internal class ComponentInfoStorage
     {
       var module = modulesQueue.Dequeue();
       visited.Add(module);
-      
-      myComponents.AddRange(GetComponentTypesFrom(module).Select(type => ToComponentInfo(type, context)));
+
+      var componentTypes = GetComponentTypesFrom(module);
+      var componentInfos = componentTypes.Select(type => ToComponentInfo(type, new HashSet<INamedTypeSymbol>(), context));
+      myComponents.AddRange(componentInfos);
 
       foreach (var refAsm in module.ReferencedAssemblySymbols)
       {
@@ -101,18 +103,14 @@ internal class ComponentInfoStorage
     }
   }
   
-  private ComponentInfo ToComponentInfo(INamedTypeSymbol symbol, GeneratorExecutionContext context)
+  private ComponentInfo ToComponentInfo(
+    INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
   {
-    if (myCache.TryGetValue(symbol, out var existingComponent))
-    {
-      return existingComponent;
-    }
-    
-    if (!CheckIfManualfacComponent(symbol))
-    {
-      throw new TypeSymbolIsNotManualfacComponentException(symbol);
-    }
-    
+    if (myCache.TryGetValue(symbol, out var existingComponent)) return existingComponent;
+    if (visited.Contains(symbol)) throw new CyclicDependencyException();
+    if (!CheckIfManualfacComponent(symbol)) throw new TypeSymbolIsNotManualfacComponentException(symbol);
+
+    visited.Add(symbol);
     var compilation = context.Compilation;
     var dependencies = new List<(ComponentInfo, AccessModifier)>();
     
@@ -122,7 +120,7 @@ internal class ComponentInfoStorage
       
       foreach (var typeSymbol in types.OfType<INamedTypeSymbol>())
       {
-        var dependencyComponent = ToComponentInfo(typeSymbol, context);
+        var dependencyComponent = ToComponentInfo(typeSymbol, visited, context);
         dependencies.Add((dependencyComponent, modifier));
       }
     }
