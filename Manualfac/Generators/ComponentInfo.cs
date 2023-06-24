@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Manualfac.Generators.Models;
 using Microsoft.CodeAnalysis;
 
@@ -29,6 +30,8 @@ internal class ComponentInfo
 
 internal static class ComponentInfoExtensions
 {
+  public static string CreateContainerName(this ComponentInfo component) => $"{component.TypeShortName}Container";
+  
   public static GeneratedUsingsModel ToDependenciesUsingsModel(this ComponentInfo component) => 
     new(component.Dependencies.Select(dep => dep.Namespace).Where(ns => ns is { }).Distinct().ToList()!);
   
@@ -36,7 +39,10 @@ internal static class ComponentInfoExtensions
 
   public static GeneratedClassModel ToGeneratedClassModel(this ComponentInfo component)
   {
-    return new GeneratedClassModel(component.TypeShortName, component.ExtractGeneratedFields());
+    return new GeneratedClassModel(
+      component.TypeShortName, 
+      component.ExtractGeneratedFields(),
+      ImmutableList<GeneratedMethodModel>.Empty);
   }
 
   public static IReadOnlyList<GeneratedFieldModel> ExtractGeneratedFields(this ComponentInfo component)

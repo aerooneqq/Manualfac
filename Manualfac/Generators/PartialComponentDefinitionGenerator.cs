@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators;
 
-internal static unsafe class PartialComponentDefinitionGenerator
+internal static class PartialComponentDefinitionGenerator
 {
   public static void GenerateDependenciesPart(ComponentInfo componentInfo, GeneratorExecutionContext context)
   {

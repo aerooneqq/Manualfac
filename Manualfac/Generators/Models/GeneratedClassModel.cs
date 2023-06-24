@@ -24,6 +24,7 @@ internal class GeneratedClassModel
 {
   private readonly string myName;
   private readonly IReadOnlyList<GeneratedFieldModel> myFields;
+  private readonly IReadOnlyList<GeneratedMethodModel> myMethods;
   private readonly GeneratedClassAccessModifier myModifier;
   private readonly GeneratedConstructorModel myConstructorModel;
 
@@ -31,10 +32,12 @@ internal class GeneratedClassModel
   public GeneratedClassModel(
     string name,
     IReadOnlyList<GeneratedFieldModel> fields,
+    IReadOnlyList<GeneratedMethodModel> methods,
     GeneratedClassAccessModifier modifier = GeneratedClassAccessModifier.Public)
   {
     myName = name;
     myFields = fields;
+    myMethods = methods;
     myModifier = modifier;
     myConstructorModel = new GeneratedConstructorModel(name, fields);
   }
@@ -54,6 +57,54 @@ internal class GeneratedClassModel
       
       sb.AppendNewLine();
       myConstructorModel.GenerateInto(sb, indent);
+      sb.AppendNewLine();
+      
+      foreach (var method in myMethods)
+      {
+        method.GenerateInto(sb, indent);
+      }
+    }
+  }
+}
+
+internal class GeneratedMethodModel
+{
+  private readonly string myName;
+  private readonly string myReturnTypeName;
+  private readonly Action<StringBuilder, int> myBodyGenerator;
+  private readonly AccessModifier myModifier;
+  private readonly bool myIsStatic;
+  private readonly bool myIsPartial;
+
+  
+  public GeneratedMethodModel(
+    string name,
+    string returnTypeName,
+    Action<StringBuilder, int> bodyGenerator,
+    AccessModifier modifier = AccessModifier.Public,
+    bool isStatic = false,
+    bool isPartial = false)
+  {
+    myName = name;
+    myReturnTypeName = returnTypeName;
+    myBodyGenerator = bodyGenerator;
+    myModifier = modifier;
+    myIsStatic = isStatic;
+    myIsPartial = isPartial;
+  }
+
+
+  public unsafe void GenerateInto(StringBuilder sb, int indent)
+  {
+    sb.AppendIndent(indent).Append(myModifier.CreateModifierString()).AppendSpace();
+    
+    if (myIsStatic) sb.Append("static").AppendSpace();
+    if (myIsPartial) sb.Append("partial").AppendSpace();
+
+    sb.Append(myReturnTypeName).AppendSpace().Append(myName).Append("()").AppendNewLine();
+    using (StringBuilderCookies.CurlyBraces(sb, &indent))
+    {
+      myBodyGenerator(sb, indent);
     }
   }
 }
