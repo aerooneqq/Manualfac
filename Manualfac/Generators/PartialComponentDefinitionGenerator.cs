@@ -52,7 +52,7 @@ internal static unsafe class PartialComponentDefinitionGenerator
   
   private static StringBuilder WriteDependenciesFields(ComponentInfo componentInfo, StringBuilder sb, int indent)
   {
-    foreach (var (dependency, modifier) in componentInfo.GetOrCreateOrderedListOfDependencies())
+    foreach (var (dependency, modifier) in componentInfo.OrderedDependencies)
     {
       sb.AppendIndent(indent).Append(modifier.CreateModifierString()).AppendSpace()
         .Append(dependency.ShortName).AppendSpace();
@@ -77,7 +77,7 @@ internal static unsafe class PartialComponentDefinitionGenerator
     using (StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true))
     {
       var index = 0;
-      foreach (var (dependency, _) in componentInfo.GetOrCreateOrderedListOfDependencies())
+      foreach (var (dependency, _) in componentInfo.OrderedDependencies)
       {
         sb.AppendIndent(*indent).Append(dependency.ShortName).AppendSpace().Append(GetComponentParamName(index++))
           .AppendComma().AppendNewLine();
@@ -93,7 +93,7 @@ internal static unsafe class PartialComponentDefinitionGenerator
     using (StringBuilderCookies.CurlyBraces(sb.AppendNewLine(), indent))
     {
       var index = 0;
-      foreach (var (dependency, _) in componentInfo.GetOrCreateOrderedListOfDependencies())
+      foreach (var (dependency, _) in componentInfo.OrderedDependencies)
       {
         WriteFieldName(dependency, sb, *indent);
         sb.AppendSpace().AppendEq().AppendSpace().Append(GetComponentParamName(index++))
