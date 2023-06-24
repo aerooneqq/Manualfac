@@ -61,4 +61,10 @@ internal static unsafe class StringBuilderCookies
 
     return new OpenCloseStringBuilderOperation(sb, OpenAction, CloseAction, indent);
   }
+
+  public static OpenCloseStringBuilderOperation Lock(StringBuilder sb, string objectName, int* indent)
+  {
+    sb.AppendIndent(*indent).Append("lock (").Append(objectName).Append(")").AppendNewLine();
+    return CurlyBraces(sb, indent);
+  }
 }
