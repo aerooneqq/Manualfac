@@ -16,9 +16,10 @@ internal class GeneratedComponentBuilderModel
     myDependenciesAccessors = component.Dependencies.Select(dep => $"{dep.CreateContainerName()}.Resolve()").ToList();
     myComponentShortTypeName = component.TypeShortName;
     myDependenciesUsingsModel = component.ToDependenciesUsingsModel();
-    
+
     var generatedClassModel = new GeneratedClassModel(
-      component.CreateContainerName(), 
+      component.CreateContainerName(),
+      ImmutableArray<GeneratedConstructorModel>.Empty,
       ImmutableArray<GeneratedFieldModel>.Empty,
       new[] { new GeneratedMethodModel("Resolve", component.TypeShortName, GenerateFactoryMethod, isStatic: true) });
     

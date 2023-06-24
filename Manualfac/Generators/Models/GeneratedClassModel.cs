@@ -23,23 +23,24 @@ internal static class GeneratedClassAccessModifierExtensions
 internal class GeneratedClassModel
 {
   private readonly string myName;
+  private readonly IReadOnlyList<GeneratedConstructorModel> myConstructors;
   private readonly IReadOnlyList<GeneratedFieldModel> myFields;
   private readonly IReadOnlyList<GeneratedMethodModel> myMethods;
   private readonly GeneratedClassAccessModifier myModifier;
-  private readonly GeneratedConstructorModel myConstructorModel;
 
 
   public GeneratedClassModel(
     string name,
+    IReadOnlyList<GeneratedConstructorModel> constructors,
     IReadOnlyList<GeneratedFieldModel> fields,
     IReadOnlyList<GeneratedMethodModel> methods,
     GeneratedClassAccessModifier modifier = GeneratedClassAccessModifier.Public)
   {
     myName = name;
+    myConstructors = constructors;
     myFields = fields;
     myMethods = methods;
     myModifier = modifier;
-    myConstructorModel = new GeneratedConstructorModel(name, fields);
   }
 
 
@@ -55,9 +56,14 @@ internal class GeneratedClassModel
         field.GenerateInto(sb, indent);
       }
       
-      sb.AppendNewLine();
-      myConstructorModel.GenerateInto(sb, indent);
-      sb.AppendNewLine();
+      if (myFields.Count > 0) sb.AppendNewLine();
+      
+      foreach (var constructor in myConstructors)
+      {
+        constructor.GenerateInto(sb, indent);
+      }
+      
+      if (myConstructors.Count > 0) sb.AppendNewLine();
       
       foreach (var method in myMethods)
       {

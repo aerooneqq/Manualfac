@@ -39,16 +39,18 @@ internal static class ComponentInfoExtensions
 
   public static GeneratedClassModel ToGeneratedClassModel(this ComponentInfo component)
   {
+    var fields = component.ExtractGeneratedFieldsModels();
+    var className = component.TypeShortName;
+
     return new GeneratedClassModel(
-      component.TypeShortName, 
-      component.ExtractGeneratedFields(),
+      className,
+      new[] { new GeneratedConstructorModel(className, fields) },
+      fields,
       ImmutableList<GeneratedMethodModel>.Empty);
   }
 
-  public static IReadOnlyList<GeneratedFieldModel> ExtractGeneratedFields(this ComponentInfo component)
-  {
-    return component.OrderedDependencies
+  public static IReadOnlyList<GeneratedFieldModel> ExtractGeneratedFieldsModels(this ComponentInfo component) => 
+    component.OrderedDependencies
       .Select(dep => new GeneratedFieldModel(dep.Component.TypeShortName, $"my{dep.Component.TypeShortName}", dep.Modifier))
       .ToList();
-  }
 }
