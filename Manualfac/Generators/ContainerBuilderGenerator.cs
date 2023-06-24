@@ -9,6 +9,12 @@ internal static class ContainerBuilderGenerator
   {
     foreach (var componentInfo in componentsStorage.GetInTopologicalOrder())
     {
+      GenerateComponentBuilderClass(componentInfo, context);
     }
+  }
+
+  private static void GenerateComponentBuilderClass(ComponentInfo componentInfo, GeneratorExecutionContext context)
+  {
+    var builderClassName = $"{componentInfo.TypeShortName}Builder";
   }
 }
