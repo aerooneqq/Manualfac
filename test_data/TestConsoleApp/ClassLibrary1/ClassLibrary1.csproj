@@ -1,9 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../../../src/Manualfac/Manualfac.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\ClassLibrary2\ClassLibrary2.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="ManualfacAttributes">
+        <HintPath>..\..\..\src\ManualfacAttributes\bin\Release\netstandard2.0\ManualfacAttributes.dll</HintPath>
+      </Reference>
+    </ItemGroup>
 
 </Project>

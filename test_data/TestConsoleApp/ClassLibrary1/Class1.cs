@@ -1,5 +1,9 @@
-﻿namespace ClassLibrary1;
+﻿using ManualfacAttributes;
 
-public class Class1
+namespace ClassLibrary1;
+
+[Component]
+[DependsOn<Class2, Class3>(AccessModifier.Private)]
+public partial class Class1
 {
 }
