@@ -87,7 +87,9 @@ internal class ComponentInfoStorage
       visited.Add(module);
 
       var componentTypes = GetComponentTypesFrom(module);
-      var componentInfos = componentTypes.Select(type => ToComponentInfo(type, new HashSet<INamedTypeSymbol>(), context));
+      var componentInfos = componentTypes
+        .Select(type => ToComponentInfo(type, new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default), context));
+      
       myComponents.AddRange(componentInfos);
 
       foreach (var refAsm in module.ReferencedAssemblySymbols)
