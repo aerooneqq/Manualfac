@@ -6,9 +6,19 @@ using TestCore;
 
 namespace UnitTests;
 
+internal readonly record struct GeneratedFile(string Name, string Text);
+
+internal static class SyntaxTreeExtensions
+{
+  public static GeneratedFile ToGeneratedFile(this SyntaxTree tree) =>
+    new(
+      tree.FilePath[(tree.FilePath.LastIndexOf(Path.DirectorySeparatorChar) + 1)..],
+      tree.GetText().ToString().Replace("\r\n", "\n")
+    );
+}
+
 internal class SourceGeneratorsTestExecutor
 {
-  private readonly record struct GeneratedFile(string Name, string Text);
 
   
   private readonly string myTestName;
@@ -45,7 +55,7 @@ internal class SourceGeneratorsTestExecutor
     var generatedTrees = myActualTest(CreateCompilation(files));
     
     myGeneratedFiles = generatedTrees
-      .Select(tree => new GeneratedFile(tree.FilePath[(tree.FilePath.LastIndexOf(Path.DirectorySeparatorChar) + 1)..], tree.GetText().ToString().Replace("\r\n", "\n")))
+      .Select(tree => tree.ToGeneratedFile())
       .ToDictionary(static file => file.Name, static file => file.Text);
     
     myGoldFileNames = Directory.EnumerateFiles(myPathToGoldDirFor)
