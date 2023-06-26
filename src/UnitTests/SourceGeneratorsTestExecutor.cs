@@ -17,12 +17,9 @@ internal static class SyntaxTreeExtensions
     );
 }
 
-internal class SourceGeneratorsTestExecutor
+internal class SourceGeneratorsTestExecutor<TGenerator> where TGenerator : ISourceGenerator, new()
 {
-
-  
   private readonly string myTestName;
-  private readonly Func<Compilation, IReadOnlyList<SyntaxTree>> myActualTest;
   private readonly HashSet<string> myDifferences;
   private readonly string myPathToGoldDirFor;
 
@@ -30,11 +27,10 @@ internal class SourceGeneratorsTestExecutor
   private HashSet<string>? myGoldFileNames;
 
 
-  public SourceGeneratorsTestExecutor(string testName, Func<Compilation, IReadOnlyList<SyntaxTree>> actualTest)
+  public SourceGeneratorsTestExecutor(string testName)
   {
     myDifferences = new HashSet<string>();
     myTestName = testName;
-    myActualTest = actualTest;
     myPathToGoldDirFor = TestPaths.GetPathToGoldDirFor(myTestName);
   }
 
@@ -52,9 +48,12 @@ internal class SourceGeneratorsTestExecutor
     var pathToSources = TestPaths.GetPathToSources(myTestName);
     var files = Directory.EnumerateFiles(pathToSources).Where(path => path.EndsWith(".cs"));
     
-    var generatedTrees = myActualTest(CreateCompilation(files));
+    GeneratorDriver driver = CSharpGeneratorDriver.Create(new TGenerator());
+    driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(files), out _, out var diagnostics);
+
+    Assert.That(diagnostics.IsEmpty, Is.True);
     
-    myGeneratedFiles = generatedTrees
+    myGeneratedFiles =  driver.GetRunResult().GeneratedTrees
       .Select(tree => tree.ToGeneratedFile())
       .ToDictionary(static file => file.Name, static file => file.Text);
     

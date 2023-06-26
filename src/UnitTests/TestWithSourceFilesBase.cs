@@ -2,8 +2,8 @@
 
 namespace UnitTests;
 
-public abstract class TestWithSourceFilesBase
+public abstract class TestWithSourceFilesBase<TGenerator> where TGenerator : ISourceGenerator, new()
 {
-  protected static void DoTest(Func<Compilation, IReadOnlyList<SyntaxTree>> actualTest) => 
-    new SourceGeneratorsTestExecutor(TestContext.CurrentContext.Test.Name, actualTest).ExecuteTest();
+  protected static void DoTest() => 
+    new SourceGeneratorsTestExecutor<TGenerator>(TestContext.CurrentContext.Test.Name).ExecuteTest();
 }
