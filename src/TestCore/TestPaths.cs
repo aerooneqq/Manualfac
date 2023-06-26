@@ -28,4 +28,12 @@ public static class TestPaths
 
     return path;
   }
+
+  public static string GetPathToGoldDirFor(string sourceName)
+  {
+    var path = Path.Combine(GetTestDataPath(), "gold", sourceName);
+    Assert.That(Directory.Exists(path), Is.True);
+
+    return path;
+  }
 }
