@@ -8,14 +8,14 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <ProjectReference Include="../../../src/Manualfac/Manualfac.csproj" 
+        <ProjectReference Include="../../../../src/Manualfac/Manualfac.csproj" 
                           OutputItemType="Analyzer" 
                           ReferenceOutputAssembly="false" />
     </ItemGroup>
     
     <ItemGroup>
         <Reference Include="ManualfacAttributes">
-            <HintPath>..\..\..\src\ManualfacAttributes\bin\Release\netstandard2.0\ManualfacAttributes.dll</HintPath>
+            <HintPath>..\..\..\..\src\ManualfacAttributes\bin\Release\netstandard2.0\ManualfacAttributes.dll</HintPath>
         </Reference>
     </ItemGroup>
     
