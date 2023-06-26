@@ -20,7 +20,11 @@ public abstract class TestWithSourceFilesBase
       .ToDictionary(static file => file.Name, static file => file.Text);
     
     var goldFolderPath = TestPaths.GetPathToGoldDirFor(testName);
-    var goldFileNames = Directory.EnumerateFiles(goldFolderPath).Select(Path.GetFileName).ToHashSet();
+    var goldFileNames = Directory.EnumerateFiles(goldFolderPath)
+      .Select(Path.GetFileName)
+      .Where(name => name.EndsWith(".cs"))
+      .ToHashSet();
+    
     var differences = new HashSet<string>();
 
     foreach (var generatedFileName in generatedFiles.Keys)
