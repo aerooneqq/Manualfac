@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using TestCore;
 
 namespace GeneratorsTests;
 
@@ -29,17 +30,5 @@ public class Tests
 
     var output = process.StandardOutput.ReadToEnd();
     Assert.That(output.Replace("\r\n", " "), Is.EqualTo("True True True True True Hello, World! "));
-  }
-}
-
-public static class TestPaths
-{
-  public static string GetPathToTestConsoleApp()
-  {
-    var dir = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.Parent?.Parent?.FullName!;
-    var path = Path.Combine(dir, "test_data", "TestConsoleApp", "TestConsoleApp", "TestConsoleApp.csproj");
-    Assert.That(File.Exists(path), Is.True);
-
-    return path;
   }
 }
