@@ -16,7 +16,8 @@ internal class GeneratedComponentContainerModel
   private readonly GeneratedUsingsModel myDependenciesUsingsModel;
   private readonly IReadOnlyList<string> myDependenciesAccessors;
   private readonly GeneratedNamespaceModel myGeneratedNamespaceModel;
-  
+  private readonly GeneratedUsingsModel myDefaultUsingsModel;
+
 
   public GeneratedComponentContainerModel(ComponentInfo component)
   {
@@ -40,12 +41,15 @@ internal class GeneratedComponentContainerModel
       });
     
     myGeneratedNamespaceModel = new GeneratedNamespaceModel(component.Namespace, generatedClassModel.GenerateInto);
+    myDefaultUsingsModel = new GeneratedUsingsModel(new[] { "System.Threading" });
   }
 
   
   public void GenerateInto(StringBuilder sb, int indent)
   {
     myDependenciesUsingsModel.GenerateInto(sb, indent);
+    myDefaultUsingsModel.GenerateInto(sb, indent);
+    
     sb.AppendNewLine();
 
     myGeneratedNamespaceModel.GenerateInto(sb, indent);
