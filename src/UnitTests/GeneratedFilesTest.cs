@@ -7,6 +7,6 @@ namespace UnitTests;
 [TestFixture]
 public class GeneratedFilesTest : TestWithSourceFilesBase<ServiceInjectionGenerator>
 {
-  [Test]
-  public void SimpleTest() => DoTest();
+  [Test] public void SimpleTest() => DoTest();
+  [Test] public void SimpleTest2() => DoTest();
 }
