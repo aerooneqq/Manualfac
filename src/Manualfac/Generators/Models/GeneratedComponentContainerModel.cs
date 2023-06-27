@@ -55,26 +55,26 @@ internal class GeneratedComponentContainerModel
     myGeneratedNamespaceModel.GenerateInto(sb, indent);
   }
   
-  private unsafe void GenerateFactoryMethod(StringBuilder sb, int indent)
+  private void GenerateFactoryMethod(StringBuilder sb, int indent)
   {
     sb.AppendIndent(indent)
       .Append($"if (Volatile.Read(ref {InstanceFieldName}) is {{ }} {Existing1}) return {Existing1};")
       .AppendNewLine();
 
-    using (StringBuilderCookies.Lock(sb, SyncFieldName, &indent))
+    using (var lockCookie = StringBuilderCookies.Lock(sb, SyncFieldName, indent))
     {
-      sb.AppendIndent(indent)
+      sb.AppendIndent(lockCookie.Indent)
         .Append($"if (Volatile.Read(ref {InstanceFieldName}) is {{ }} {Existing2}) return {Existing2};")
         .AppendNewLine();
       
-      sb.AppendIndent(indent).Append($"var {CreatedVarName} =").AppendSpace().Append("new").AppendSpace()
+      sb.AppendIndent(lockCookie.Indent).Append($"var {CreatedVarName} =").AppendSpace().Append("new").AppendSpace()
         .Append(myComponentShortTypeName);
 
-      using (StringBuilderCookies.DefaultBraces(sb, &indent, appendEndIndent: true))
+      using (var bracesCookie = StringBuilderCookies.DefaultBraces(sb, lockCookie.Indent, appendEndIndent: true))
       {
         foreach (var dependenciesAccessor in myDependenciesAccessors)
         {
-          sb.AppendIndent(indent).Append(dependenciesAccessor).AppendComma().AppendNewLine();
+          sb.AppendIndent(bracesCookie.Indent).Append(dependenciesAccessor).AppendComma().AppendNewLine();
         }
 
         if (myDependenciesAccessors.Count > 0)
@@ -85,8 +85,8 @@ internal class GeneratedComponentContainerModel
       }
 
       sb.AppendSemicolon().AppendNewLine();
-      sb.AppendIndent(indent).Append($"Volatile.Write(ref {InstanceFieldName}, {CreatedVarName});").AppendNewLine();
-      sb.AppendIndent(indent).Append($"return {CreatedVarName};");
+      sb.AppendIndent(lockCookie.Indent).Append($"Volatile.Write(ref {InstanceFieldName}, {CreatedVarName});").AppendNewLine();
+      sb.AppendIndent(lockCookie.Indent).Append($"return {CreatedVarName};");
     }
   }
 }

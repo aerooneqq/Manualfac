@@ -44,30 +44,30 @@ internal class GeneratedClassModel
   }
 
 
-  public unsafe void GenerateInto(StringBuilder sb, int indent)
+  public void GenerateInto(StringBuilder sb, int indent)
   {
     sb.AppendIndent(indent).Append(myModifier.CreateModifierString())
       .Append(" partial class ").Append(myName).AppendNewLine();
     
-    using (StringBuilderCookies.CurlyBraces(sb, &indent))
+    using (var cookie = StringBuilderCookies.CurlyBraces(sb, indent))
     {
       foreach (var field in myFields)
       {
-        field.GenerateInto(sb, indent);
+        field.GenerateInto(sb, cookie.Indent);
       }
       
       if (myFields.Count > 0) sb.AppendNewLine();
       
       foreach (var constructor in myConstructors)
       {
-        constructor.GenerateInto(sb, indent);
+        constructor.GenerateInto(sb, cookie.Indent);
       }
       
       if (myConstructors.Count > 0) sb.AppendNewLine();
       
       foreach (var method in myMethods)
       {
-        method.GenerateInto(sb, indent);
+        method.GenerateInto(sb, cookie.Indent);
       }
     }
   }

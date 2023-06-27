@@ -15,16 +15,16 @@ internal class GeneratedConstructorModel
   }
 
 
-  public unsafe void GenerateInto(StringBuilder sb, int indent)
+  public void GenerateInto(StringBuilder sb, int indent)
   {
     sb.AppendIndent(indent).Append("public ").Append(myContainingTypeName);
 
-    using (StringBuilderCookies.DefaultBraces(sb, &indent, appendEndIndent: true))
+    using (var cookie = StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true))
     {
       var index = 0;
       foreach (var field in myFieldsToInitialize)
       {
-        sb.AppendIndent(indent).Append(field.TypeName).AppendSpace().Append(GetComponentParamName(index++))
+        sb.AppendIndent(cookie.Indent).Append(field.TypeName).AppendSpace().Append(GetComponentParamName(index++))
           .AppendComma().AppendNewLine();
       }
       
@@ -35,12 +35,12 @@ internal class GeneratedConstructorModel
       }
     }
     
-    using (StringBuilderCookies.CurlyBraces(sb.AppendNewLine(), &indent))
+    using (var cookie = StringBuilderCookies.CurlyBraces(sb.AppendNewLine(), indent))
     {
       var index = 0;
       foreach (var field in myFieldsToInitialize)
       {
-        sb.AppendIndent(indent).Append(field.Name)
+        sb.AppendIndent(cookie.Indent).Append(field.Name)
           .AppendSpace().AppendEq().AppendSpace().Append(GetComponentParamName(index++))
           .AppendSemicolon().AppendNewLine();
       }

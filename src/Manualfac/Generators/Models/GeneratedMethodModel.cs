@@ -29,7 +29,7 @@ internal class GeneratedMethodModel
   }
 
 
-  public unsafe void GenerateInto(StringBuilder sb, int indent)
+  public void GenerateInto(StringBuilder sb, int indent)
   {
     sb.AppendIndent(indent).Append(myModifier.CreateModifierString()).AppendSpace();
     
@@ -37,9 +37,8 @@ internal class GeneratedMethodModel
     if (myIsPartial) sb.Append("partial").AppendSpace();
 
     sb.Append(myReturnTypeName).AppendSpace().Append(myName).Append("()").AppendNewLine();
-    using (StringBuilderCookies.CurlyBraces(sb, &indent))
-    {
-      myBodyGenerator(sb, indent);
-    }
+    
+    using var cookie = StringBuilderCookies.CurlyBraces(sb, indent);
+    myBodyGenerator(sb, cookie.Indent);
   }
 }

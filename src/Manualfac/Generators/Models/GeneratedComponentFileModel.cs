@@ -38,7 +38,7 @@ internal class GeneratedNamespaceModel
   }
 
   
-  public unsafe void GenerateInto(StringBuilder sb, int indent)
+  public void GenerateInto(StringBuilder sb, int indent)
   {
     OpenCloseStringBuilderOperation? namespaceCookie = null;
 
@@ -47,10 +47,10 @@ internal class GeneratedNamespaceModel
       if (myNamespaceName is { })
       {
         sb.Append("namespace").AppendSpace().Append(myNamespaceName).AppendSpace().AppendNewLine();
-        namespaceCookie = StringBuilderCookies.CurlyBraces(sb, &indent);
+        namespaceCookie = StringBuilderCookies.CurlyBraces(sb, indent);
       }
 
-      myNamespaceBodyGenerator(sb, indent);
+      myNamespaceBodyGenerator(sb, namespaceCookie?.Indent ?? indent);
     }
     finally
     {

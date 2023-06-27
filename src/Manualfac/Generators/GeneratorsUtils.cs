@@ -2,59 +2,59 @@
 
 namespace Manualfac.Generators;
 
-internal readonly unsafe struct OpenCloseStringBuilderOperation : IDisposable
+internal readonly struct OpenCloseStringBuilderOperation : IDisposable
 {
   private readonly StringBuilder myStringBuilder;
-  private readonly Action<StringBuilder> myCloseAction;
-  private readonly int* myIndent;
+  private readonly Action<StringBuilder, int> myCloseAction;
+  
+  
+  public int Indent { get; }
 
   
   public OpenCloseStringBuilderOperation(
     StringBuilder sb, 
-    Action<StringBuilder> openAction, 
-    Action<StringBuilder> closeAction,
-    int* indent)
+    Action<StringBuilder, int> openAction, 
+    Action<StringBuilder, int> closeAction,
+    int indent)
   {
-    myIndent = indent;
     myStringBuilder = sb;
     myCloseAction = closeAction;
-    openAction(sb);
+    openAction(sb, indent);
     myStringBuilder.AppendNewLine();
-    *indent += 1;
+    Indent = indent + 1;
   }
   
   
   public void Dispose()
   {
     myStringBuilder.AppendNewLine();
-    *myIndent -= 1;
-    myCloseAction(myStringBuilder);
+    myCloseAction(myStringBuilder, Indent - 1);
   }
 }
 
-internal static unsafe class StringBuilderCookies
+internal static class StringBuilderCookies
 {
-  public static OpenCloseStringBuilderOperation CurlyBraces(StringBuilder sb, int* indent) =>
+  public static OpenCloseStringBuilderOperation CurlyBraces(StringBuilder sb, int indent) =>
     new(
       sb,
-      sb => sb.AppendIndent(*indent).AppendOpenCurlyBrace(),
-      sb => sb.AppendIndent(*indent).AppendClosedCurlyBrace(),
+      (sb, indent) => sb.AppendIndent(indent).AppendOpenCurlyBrace(),
+      (sb, indent) => sb.AppendIndent(indent).AppendClosedCurlyBrace(),
       indent
     );
 
   public static OpenCloseStringBuilderOperation DefaultBraces(
-    StringBuilder sb, int* indent, bool appendStartIndent = false, bool appendEndIndent = false)
+    StringBuilder sb, int indent, bool appendStartIndent = false, bool appendEndIndent = false)
   {
-    void OpenAction(StringBuilder sb)
+    void OpenAction(StringBuilder sb, int indent)
     {
-      if (appendStartIndent) sb.AppendIndent(*indent);
+      if (appendStartIndent) sb.AppendIndent(indent);
 
       sb.AppendOpenBracket();
     }
 
-    void CloseAction(StringBuilder sb)
+    void CloseAction(StringBuilder sb, int indent)
     {
-      if (appendEndIndent) sb.AppendIndent(*indent);
+      if (appendEndIndent) sb.AppendIndent(indent);
 
       sb.AppendClosedBrace();
     }
@@ -62,9 +62,9 @@ internal static unsafe class StringBuilderCookies
     return new OpenCloseStringBuilderOperation(sb, OpenAction, CloseAction, indent);
   }
 
-  public static OpenCloseStringBuilderOperation Lock(StringBuilder sb, string objectName, int* indent)
+  public static OpenCloseStringBuilderOperation Lock(StringBuilder sb, string objectName, int indent)
   {
-    sb.AppendIndent(*indent).Append("lock (").Append(objectName).Append(")").AppendNewLine();
+    sb.AppendIndent(indent).Append("lock (").Append(objectName).Append(")").AppendNewLine();
     return CurlyBraces(sb, indent);
   }
 }
