@@ -11,4 +11,7 @@ internal interface IComponentInfo
   string TypeShortName { get; }
   string FullName { get; }
   string? Namespace { get; }
+
+  IReadOnlyList<ComponentInfo> ResolveConcreteDependencies();
+  IReadOnlyList<ComponentInfo> ResolveUnderlyingConcreteComponents();
 }

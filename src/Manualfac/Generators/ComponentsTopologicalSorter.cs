@@ -36,7 +36,7 @@ internal static class ComponentsTopologicalSorter
     IComponentInfo current, Dictionary<IComponentInfo, ComponentState> visited, List<IComponentInfo> result)
   {
     visited[current] = ComponentState.Gray;
-    foreach (var dependency in current.Dependencies)
+    foreach (var dependency in current.ResolveConcreteDependencies())
     {
       if (visited[dependency] == ComponentState.Gray)
       {

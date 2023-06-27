@@ -2,7 +2,7 @@
 
 namespace Manualfac.Generators.Components;
 
-internal abstract class ComponentInfoBase
+internal abstract class ComponentInfoBase : IComponentInfo
 {
   public abstract INamedTypeSymbol ComponentSymbol { get; }
   public abstract HashSet<IComponentInfo> Dependencies { get; }
@@ -13,4 +13,18 @@ internal abstract class ComponentInfoBase
   
   // ReSharper disable once ReturnTypeCanBeNotNullable
   public string? Namespace => ComponentSymbol.ContainingNamespace.Name;
+  
+  
+  public IReadOnlyList<ComponentInfo> ResolveConcreteDependencies()
+  {
+    var concreteDependencies = new List<ComponentInfo>();
+    foreach (var (component, _) in OrderedDependencies)
+    {
+      concreteDependencies.AddRange(component.ResolveUnderlyingConcreteComponents());
+    }
+
+    return concreteDependencies;
+  }
+  
+  public abstract IReadOnlyList<ComponentInfo> ResolveUnderlyingConcreteComponents();
 }

@@ -9,17 +9,15 @@ internal class LazyInterfaceComponentInfo : ComponentInfoBase, IComponentInfo
   private readonly ComponentInfoStorage myStorage;
 
   private bool myIsInitialized;
-  private INamedTypeSymbol myComponentSymbol = null!;
-  private HashSet<IComponentInfo> myDependencies = null!;
-  private IReadOnlyList<(IComponentInfo Component, AccessModifier Modifier)> myOrderedDependencies = null!;
+  private ComponentInfo myConcreteComponent = null!;
 
-  
+
   public override INamedTypeSymbol ComponentSymbol
   {
     get
     {
       InitializeIfNeededOrThrow();
-      return myComponentSymbol;
+      return myConcreteComponent.ComponentSymbol;
     }
   }
 
@@ -28,7 +26,7 @@ internal class LazyInterfaceComponentInfo : ComponentInfoBase, IComponentInfo
     get
     {
       InitializeIfNeededOrThrow();
-      return myDependencies;
+      return myConcreteComponent.Dependencies;
     }
   }
 
@@ -37,7 +35,7 @@ internal class LazyInterfaceComponentInfo : ComponentInfoBase, IComponentInfo
     get
     {
       InitializeIfNeededOrThrow();
-      return myOrderedDependencies;
+      return myConcreteComponent.OrderedDependencies;
     }
   }
 
@@ -48,6 +46,12 @@ internal class LazyInterfaceComponentInfo : ComponentInfoBase, IComponentInfo
     myStorage = storage;
   }
 
+
+  public override IReadOnlyList<ComponentInfo> ResolveUnderlyingConcreteComponents()
+  {
+    InitializeIfNeededOrThrow();
+    return new[] { myConcreteComponent };
+  }
 
   private void InitializeIfNeededOrThrow()
   {
@@ -63,11 +67,7 @@ internal class LazyInterfaceComponentInfo : ComponentInfoBase, IComponentInfo
       throw new CantResolveConcreteImplementationException(myInterfaceSymbol, impls);
     }
 
-    var resolvedImpl = impls[0];
-    myComponentSymbol = resolvedImpl.ComponentSymbol;
-    myDependencies = new HashSet<IComponentInfo>(resolvedImpl.Dependencies);
-    myOrderedDependencies = resolvedImpl.OrderedDependencies.ToArray();
-    
+    myConcreteComponent = (ComponentInfo)impls[0];
     myIsInitialized = true;
   }
 }

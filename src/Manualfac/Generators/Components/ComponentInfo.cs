@@ -17,4 +17,7 @@ internal class ComponentInfo : ComponentInfoBase, IComponentInfo
     Dependencies = new HashSet<IComponentInfo>(dependencies.Select(dep => dep.Component));
     OrderedDependencies = dependencies.OrderBy(dep => dep.Component.TypeShortName).ToList();
   }
+  
+
+  public override IReadOnlyList<ComponentInfo> ResolveUnderlyingConcreteComponents() => new[] { this };
 }
