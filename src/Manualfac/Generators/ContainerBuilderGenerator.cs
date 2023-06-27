@@ -20,7 +20,7 @@ internal static class ContainerBuilderGenerator
     }
   }
 
-  private static void GenerateComponentBuilderClass(ComponentInfo componentInfo, GeneratorExecutionContext context)
+  private static void GenerateComponentBuilderClass(IComponentInfo componentInfo, GeneratorExecutionContext context)
   {
     var sb = new StringBuilder();
     new GeneratedComponentContainerModel(componentInfo).GenerateInto(sb, 0);

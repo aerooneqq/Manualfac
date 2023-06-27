@@ -8,25 +8,25 @@ internal class ComponentInfoStorage
 {
   private readonly HashSet<INamedTypeSymbol> myComponentsSymbols;
   private readonly HashSet<INamedTypeSymbol> myNotComponentsSymbols;
-  private readonly Dictionary<INamedTypeSymbol, ComponentInfo> myCache;
-  private readonly List<ComponentInfo> myAllComponents;
-  private readonly Dictionary<INamedTypeSymbol, List<ComponentInfo>> myInterfacesToComponents;
-  private readonly List<ComponentInfo> myComponentsWithoutInterfaces;
+  private readonly Dictionary<INamedTypeSymbol, IComponentInfo> myCache;
+  private readonly List<IComponentInfo> myAllComponents;
+  private readonly Dictionary<INamedTypeSymbol, List<IComponentInfo>> myInterfacesToComponents;
+  private readonly List<IComponentInfo> myComponentsWithoutInterfaces;
 
 
-  public IReadOnlyList<ComponentInfo> AllComponents => myAllComponents;
-  public IReadOnlyDictionary<INamedTypeSymbol, List<ComponentInfo>> InterfacesToComponents => myInterfacesToComponents;
-  public IReadOnlyList<ComponentInfo> ComponentsWithoutInterfaces => myComponentsWithoutInterfaces;
+  public IReadOnlyList<IComponentInfo> AllComponents => myAllComponents;
+  public IReadOnlyDictionary<INamedTypeSymbol, List<IComponentInfo>> InterfacesToComponents => myInterfacesToComponents;
+  public IReadOnlyList<IComponentInfo> ComponentsWithoutInterfaces => myComponentsWithoutInterfaces;
 
 
   public ComponentInfoStorage()
   {
-    myCache = new Dictionary<INamedTypeSymbol, ComponentInfo>(SymbolEqualityComparer.Default);
+    myCache = new Dictionary<INamedTypeSymbol, IComponentInfo>(SymbolEqualityComparer.Default);
     myComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
     myNotComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-    myAllComponents = new List<ComponentInfo>();
-    myInterfacesToComponents = new Dictionary<INamedTypeSymbol, List<ComponentInfo>>(SymbolEqualityComparer.Default);
-    myComponentsWithoutInterfaces = new List<ComponentInfo>();
+    myAllComponents = new List<IComponentInfo>();
+    myInterfacesToComponents = new Dictionary<INamedTypeSymbol, List<IComponentInfo>>(SymbolEqualityComparer.Default);
+    myComponentsWithoutInterfaces = new List<IComponentInfo>();
   }
   
   
@@ -61,7 +61,7 @@ internal class ComponentInfoStorage
     }
   }
   
-  private ComponentInfo ToComponentInfo(
+  private IComponentInfo ToComponentInfo(
     INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
   {
     if (myCache.TryGetValue(symbol, out var existingComponent)) return existingComponent;
@@ -70,7 +70,7 @@ internal class ComponentInfoStorage
 
     visited.Add(symbol);
     var compilation = context.Compilation;
-    var dependencies = new List<(ComponentInfo, AccessModifier)>();
+    var dependencies = new List<(IComponentInfo, AccessModifier)>();
     
     foreach (var (attributeSyntax, types) in ExtractDependencies(symbol, compilation))
     {
@@ -78,8 +78,15 @@ internal class ComponentInfoStorage
       
       foreach (var typeSymbol in types.OfType<INamedTypeSymbol>())
       {
-        var dependencyComponent = ToComponentInfo(typeSymbol, visited, context);
-        dependencies.Add((dependencyComponent, modifier));
+        if (typeSymbol.TypeKind == TypeKind.Class)
+        {
+          var dependencyComponent = ToComponentInfo(typeSymbol, visited, context);
+          dependencies.Add((dependencyComponent, modifier));
+        }
+        else if (typeSymbol.TypeKind == TypeKind.Interface)
+        {
+          dependencies.Add((new LazyInterfaceComponentInfo(typeSymbol, this), modifier));
+        }
       }
     }
     
@@ -91,8 +98,10 @@ internal class ComponentInfoStorage
     return createdComponent;
   }
 
-  private void AddToInterfacesToImplementationsMap(ComponentInfo componentInfo)
+  private void AddToInterfacesToImplementationsMap(IComponentInfo componentInfo)
   {
+    if (componentInfo.ComponentSymbol.TypeKind is not TypeKind.Class) return;
+    
     var allInterfaces = componentInfo.ComponentSymbol.AllInterfaces;
     if (allInterfaces.Length == 0)
     {
@@ -108,7 +117,7 @@ internal class ComponentInfoStorage
       }
       else
       {
-        myInterfacesToComponents[@interface] = new List<ComponentInfo> { componentInfo };
+        myInterfacesToComponents[@interface] = new List<IComponentInfo> { componentInfo };
       }
     }
   }

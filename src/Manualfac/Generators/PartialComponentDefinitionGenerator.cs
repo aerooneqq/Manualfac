@@ -5,7 +5,7 @@ namespace Manualfac.Generators;
 
 internal static class PartialComponentDefinitionGenerator
 {
-  public static void GenerateDependenciesPart(ComponentInfo componentInfo, GeneratorExecutionContext context)
+  public static void GenerateDependenciesPart(IComponentInfo componentInfo, GeneratorExecutionContext context)
   {
     var sb = new StringBuilder();
     componentInfo.ToGeneratedFileModel().GenerateInto(sb, 0);

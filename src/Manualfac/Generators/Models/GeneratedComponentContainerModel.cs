@@ -19,7 +19,7 @@ internal class GeneratedComponentContainerModel
   private readonly GeneratedUsingsModel myDefaultUsingsModel;
 
 
-  public GeneratedComponentContainerModel(ComponentInfo component)
+  public GeneratedComponentContainerModel(IComponentInfo component)
   {
     myComponentShortTypeName = component.TypeShortName;
     myDependenciesUsingsModel = component.ToDependenciesUsingsModel();
