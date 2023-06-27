@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics;
-using Manualfac.Exceptions;
 using Microsoft.CodeAnalysis;
 
-namespace Manualfac.Generators;
+namespace Manualfac.Exceptions;
 
 internal class NoImplementationForInterfaceException : ManualfacGeneratorException
 {

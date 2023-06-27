@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Manualfac.Generators.Models;
 
-namespace Manualfac.Generators;
+namespace Manualfac.Generators.Components;
 
 internal static class ExtensionsForIComponentInfo
 {

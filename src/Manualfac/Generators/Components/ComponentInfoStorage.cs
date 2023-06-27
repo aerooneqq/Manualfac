@@ -2,7 +2,7 @@ using Manualfac.Exceptions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Manualfac.Generators;
+namespace Manualfac.Generators.Components;
 
 internal class ComponentInfoStorage
 {

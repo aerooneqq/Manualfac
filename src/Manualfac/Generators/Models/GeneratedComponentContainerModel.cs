@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
+using Manualfac.Generators.Components;
 
 namespace Manualfac.Generators.Models;
 

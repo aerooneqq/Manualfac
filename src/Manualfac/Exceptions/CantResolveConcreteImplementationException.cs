@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using Manualfac.Exceptions;
+using Manualfac.Generators.Components;
 using Microsoft.CodeAnalysis;
 
-namespace Manualfac.Generators;
+namespace Manualfac.Exceptions;
 
 internal class CantResolveConcreteImplementationException : ManualfacGeneratorException
 {

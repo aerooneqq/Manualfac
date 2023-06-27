@@ -1,4 +1,5 @@
 using System.Text;
+using Manualfac.Generators.Components;
 using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators;

@@ -1,6 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Manualfac.Exceptions;
+using Microsoft.CodeAnalysis;
 
-namespace Manualfac.Generators;
+namespace Manualfac.Generators.Components;
 
 internal class LazyInterfaceComponentInfo : ComponentInfoBase, IComponentInfo
 {

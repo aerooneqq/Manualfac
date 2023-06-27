@@ -1,4 +1,5 @@
 ﻿using Manualfac.Exceptions;
+using Manualfac.Generators.Components;
 
 namespace Manualfac.Generators;
 

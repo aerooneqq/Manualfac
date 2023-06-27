@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Manualfac.Generators;
+namespace Manualfac.Generators.Components;
 
 internal interface IComponentInfo
 {
