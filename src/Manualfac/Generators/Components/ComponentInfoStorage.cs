@@ -1,4 +1,5 @@
 using Manualfac.Exceptions;
+using Manualfac.Generators.Components.Dependencies;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 

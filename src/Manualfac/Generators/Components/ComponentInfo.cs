@@ -1,3 +1,4 @@
+using Manualfac.Generators.Components.Dependencies;
 using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Components;
