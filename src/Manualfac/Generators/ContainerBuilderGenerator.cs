@@ -10,7 +10,7 @@ internal static class ContainerBuilderGenerator
     ComponentInfoStorage componentsStorage, GeneratorExecutionContext context)
   {
     var compilationAssembly = context.Compilation.Assembly;
-    foreach (var componentInfo in componentsStorage.GetInTopologicalOrder())
+    foreach (var componentInfo in ComponentsTopologicalSorter.Sort(componentsStorage.AllComponents))
     {
       var componentAssembly = componentInfo.ComponentSymbol.ContainingAssembly;
       if (SymbolEqualityComparer.Default.Equals(compilationAssembly, componentAssembly))
