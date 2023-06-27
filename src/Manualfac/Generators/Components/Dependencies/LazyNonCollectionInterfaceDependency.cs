@@ -9,7 +9,7 @@ internal class LazyNonCollectionInterfaceDependency : IComponentDependency
 
 
   private bool myIsInitialized;
-  private IComponentInfo myConcreteComponent = null!;
+  private IReadOnlyList<IComponentInfo> myResolveResult = null!;
 
 
   public INamedTypeSymbol DependencyTypeSymbol { get; }
@@ -25,7 +25,7 @@ internal class LazyNonCollectionInterfaceDependency : IComponentDependency
   public IReadOnlyList<IComponentInfo> ResolveUnderlyingConcreteComponents()
   {
     InitializeIfNeededOrThrow();
-    return new[] { myConcreteComponent };
+    return myResolveResult;
   }
 
   private void InitializeIfNeededOrThrow()
@@ -42,7 +42,7 @@ internal class LazyNonCollectionInterfaceDependency : IComponentDependency
       throw new CantResolveConcreteImplementationException(DependencyTypeSymbol, impls);
     }
 
-    myConcreteComponent = (ComponentInfo)impls[0];
+    myResolveResult = new[] { impls[0] };
     myIsInitialized = true;
   }
 }
