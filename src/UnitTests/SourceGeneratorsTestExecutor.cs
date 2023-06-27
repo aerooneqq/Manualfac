@@ -53,7 +53,7 @@ internal class SourceGeneratorsTestExecutor<TGenerator> where TGenerator : ISour
 
     Assert.That(diagnostics.IsEmpty, Is.True);
     
-    myGeneratedFiles =  driver.GetRunResult().GeneratedTrees
+    myGeneratedFiles = driver.GetRunResult().GeneratedTrees
       .Select(tree => tree.ToGeneratedFile())
       .ToDictionary(static file => file.Name, static file => file.Text);
     

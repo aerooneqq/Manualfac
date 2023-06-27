@@ -19,7 +19,6 @@ internal class ComponentInfoStorage
   public IReadOnlyList<ComponentInfo> ComponentsWithoutInterfaces => myComponentsWithoutInterfaces;
 
 
-
   public ComponentInfoStorage()
   {
     myCache = new Dictionary<INamedTypeSymbol, ComponentInfo>(SymbolEqualityComparer.Default);
