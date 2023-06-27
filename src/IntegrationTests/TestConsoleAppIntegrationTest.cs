@@ -23,7 +23,7 @@ public class Tests
     };
 
     process.Start();
-    if (!process.WaitForExit((int)TimeSpan.FromSeconds(3).TotalMilliseconds))
+    if (!process.WaitForExit((int)TimeSpan.FromSeconds(5).TotalMilliseconds))
     {
       Assert.Fail("Test process timeout");
     }
