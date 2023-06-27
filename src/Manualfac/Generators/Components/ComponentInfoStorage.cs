@@ -70,7 +70,7 @@ internal class ComponentInfoStorage
 
     visited.Add(symbol);
     var compilation = context.Compilation;
-    var dependencies = new List<(IComponentInfo, AccessModifier)>();
+    var dependencies = new List<(IComponentDependency, AccessModifier)>();
     
     foreach (var (attributeSyntax, types) in ExtractDependencies(symbol, compilation))
     {
@@ -81,11 +81,11 @@ internal class ComponentInfoStorage
         if (typeSymbol.TypeKind == TypeKind.Class)
         {
           var dependencyComponent = ToComponentInfo(typeSymbol, visited, context);
-          dependencies.Add((dependencyComponent, modifier));
+          dependencies.Add((new ConcreteComponentDependency(dependencyComponent), modifier));
         }
         else if (typeSymbol.TypeKind == TypeKind.Interface)
         {
-          dependencies.Add((new LazyInterfaceComponentInfo(typeSymbol, this), modifier));
+          dependencies.Add((new LazyNonCollectionInterfaceDependency(typeSymbol, this), modifier));
         }
       }
     }

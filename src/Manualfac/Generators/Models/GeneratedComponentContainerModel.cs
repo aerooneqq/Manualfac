@@ -24,8 +24,10 @@ internal class GeneratedComponentContainerModel
   {
     myComponentShortTypeName = component.TypeShortName;
     myDependenciesUsingsModel = component.ToDependenciesUsingsModel();
+    
+    //todo: collection case
     myDependenciesAccessors = component.Dependencies
-      .Select(dep => $"{dep.CreateContainerName()}.{ResolveMethodName}()")
+      .Select(dep => $"{dep.ResolveUnderlyingConcreteComponents().First().CreateContainerName()}.{ResolveMethodName}()")
       .ToList();
     
     var generatedClassModel = new GeneratedClassModel(

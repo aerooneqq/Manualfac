@@ -8,7 +8,11 @@ internal static class ExtensionsForIComponentInfo
   public static string CreateContainerName(this IComponentInfo component) => $"{component.TypeShortName}Container";
   
   public static GeneratedUsingsModel ToDependenciesUsingsModel(this IComponentInfo component) => 
-    new(component.Dependencies.Select(dep => dep.Namespace).Where(ns => ns is { }).Distinct().ToList()!);
+    new(component.Dependencies
+      .SelectMany(dep => dep.ResolveUnderlyingConcreteComponents().Select(c => c.Namespace))
+      .Where(ns => ns is { })
+      .Distinct()
+      .ToList()!);
   
   public static GeneratedComponentFileModel ToGeneratedFileModel(this IComponentInfo component) => new(component);
 
@@ -26,6 +30,6 @@ internal static class ExtensionsForIComponentInfo
 
   public static IReadOnlyList<GeneratedFieldModel> ExtractGeneratedFieldsModels(this IComponentInfo component) => 
     component.OrderedDependencies
-      .Select(dep => new GeneratedFieldModel(dep.Component.TypeShortName, $"my{dep.Component.TypeShortName}", dep.Modifier))
+      .Select(dep => new GeneratedFieldModel(dep.Component.DependencyTypeSymbol.Name, $"my{dep.Component.DependencyTypeSymbol.Name}", dep.Modifier))
       .ToList();
 }

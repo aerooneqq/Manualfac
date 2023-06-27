@@ -5,19 +5,16 @@ namespace Manualfac.Generators.Components;
 internal class ComponentInfo : ComponentInfoBase, IComponentInfo
 {
   public override INamedTypeSymbol ComponentSymbol { get; }
-  public override HashSet<IComponentInfo> Dependencies { get; }
-  public override IReadOnlyList<(IComponentInfo Component, AccessModifier Modifier)> OrderedDependencies { get; }
+  public override HashSet<IComponentDependency> Dependencies { get; }
+  public override IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)> OrderedDependencies { get; }
   
   
   public ComponentInfo(
     INamedTypeSymbol componentSymbol, 
-    IReadOnlyCollection<(IComponentInfo Component, AccessModifier Modifier)> dependencies)
+    IReadOnlyCollection<(IComponentDependency Component, AccessModifier Modifier)> dependencies)
   {
     ComponentSymbol = componentSymbol;
-    Dependencies = new HashSet<IComponentInfo>(dependencies.Select(dep => dep.Component));
-    OrderedDependencies = dependencies.OrderBy(dep => dep.Component.TypeShortName).ToList();
+    Dependencies = new HashSet<IComponentDependency>(dependencies.Select(dep => dep.Component));
+    OrderedDependencies = dependencies.OrderBy(dep => dep.Component.DependencyTypeSymbol.Name).ToList();
   }
-  
-
-  public override IReadOnlyList<ComponentInfo> ResolveUnderlyingConcreteComponents() => new[] { this };
 }
