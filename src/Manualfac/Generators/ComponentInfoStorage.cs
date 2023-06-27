@@ -9,10 +9,15 @@ internal class ComponentInfoStorage
   private readonly HashSet<INamedTypeSymbol> myComponentsSymbols;
   private readonly HashSet<INamedTypeSymbol> myNotComponentsSymbols;
   private readonly Dictionary<INamedTypeSymbol, ComponentInfo> myCache;
-  private readonly List<ComponentInfo> myComponents;
+  private readonly List<ComponentInfo> myAllComponents;
+  private readonly Dictionary<INamedTypeSymbol, List<ComponentInfo>> myInterfacesToComponents;
+  private readonly List<ComponentInfo> myComponentsWithoutInterfaces;
 
 
-  public IReadOnlyList<ComponentInfo> Components => myComponents; 
+  public IReadOnlyList<ComponentInfo> AllComponents => myAllComponents;
+  public IReadOnlyDictionary<INamedTypeSymbol, List<ComponentInfo>> InterfacesToComponents => myInterfacesToComponents;
+  public IReadOnlyList<ComponentInfo> ComponentsWithoutInterfaces => myComponentsWithoutInterfaces;
+
 
 
   public ComponentInfoStorage()
@@ -20,7 +25,9 @@ internal class ComponentInfoStorage
     myCache = new Dictionary<INamedTypeSymbol, ComponentInfo>(SymbolEqualityComparer.Default);
     myComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
     myNotComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-    myComponents = new List<ComponentInfo>();
+    myAllComponents = new List<ComponentInfo>();
+    myInterfacesToComponents = new Dictionary<INamedTypeSymbol, List<ComponentInfo>>(SymbolEqualityComparer.Default);
+    myComponentsWithoutInterfaces = new List<ComponentInfo>();
   }
 
 
@@ -33,10 +40,10 @@ internal class ComponentInfoStorage
   
   public IReadOnlyList<ComponentInfo> GetInTopologicalOrder()
   {
-    var visited = myComponents.ToDictionary(static c => c, static _ => ComponentState.NotVisited);
+    var visited = myAllComponents.ToDictionary(static c => c, static _ => ComponentState.NotVisited);
     var result = new List<ComponentInfo>();
     
-    foreach (var component in myComponents)
+    foreach (var component in myAllComponents)
     {
       if (visited[component] == ComponentState.NotVisited)
       {
@@ -90,7 +97,7 @@ internal class ComponentInfoStorage
       var componentInfos = componentTypes
         .Select(type => ToComponentInfo(type, new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default), context));
       
-      myComponents.AddRange(componentInfos);
+      myAllComponents.AddRange(componentInfos);
 
       foreach (var refAsm in module.ReferencedAssemblySymbols)
       {
@@ -129,7 +136,32 @@ internal class ComponentInfoStorage
     
     var createdComponent = new ComponentInfo(symbol, dependencies);
     myCache[symbol] = createdComponent;
+    
+    AddToInterfacesToImplementationsMap(createdComponent);
+    
     return createdComponent;
+  }
+
+  private void AddToInterfacesToImplementationsMap(ComponentInfo componentInfo)
+  {
+    var allInterfaces = componentInfo.ComponentSymbol.AllInterfaces;
+    if (allInterfaces.Length == 0)
+    {
+      myComponentsWithoutInterfaces.Add(componentInfo);
+      return;
+    }
+    
+    foreach (var @interface in allInterfaces)
+    {
+      if (myInterfacesToComponents.TryGetValue(@interface, out var components))
+      {
+        components.Add(componentInfo);
+      }
+      else
+      {
+        myInterfacesToComponents[@interface] = new List<ComponentInfo> { componentInfo };
+      }
+    }
   }
 
   private static IEnumerable<(AttributeSyntax, IEnumerable<ITypeSymbol?>)> ExtractDependencies(

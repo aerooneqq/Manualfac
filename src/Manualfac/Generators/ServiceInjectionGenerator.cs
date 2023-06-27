@@ -14,7 +14,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
     var storage = new ComponentInfoStorage();
     storage.FillComponents(context);
     
-    GenerateDependenciesPart(storage.Components, context);
+    GenerateDependenciesPart(storage.AllComponents, context);
     GenerateContainerBuilder(storage, context);
   }
 
