@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Components;
 
-internal class ComponentInfo : IComponentInfo
+internal class ConcreteComponent : IConcreteComponent
 {
   public INamedTypeSymbol ComponentSymbol { get; }
   public HashSet<IComponentDependency> Dependencies { get; }
@@ -16,7 +16,7 @@ internal class ComponentInfo : IComponentInfo
   public string? Namespace => ComponentSymbol.ContainingNamespace.Name;
 
 
-  public ComponentInfo(
+  public ConcreteComponent(
     INamedTypeSymbol componentSymbol, 
     IReadOnlyCollection<(IComponentDependency Component, AccessModifier Modifier)> dependencies)
   {
@@ -26,9 +26,9 @@ internal class ComponentInfo : IComponentInfo
   }
   
   
-  public IReadOnlyList<IComponentInfo> ResolveConcreteDependencies()
+  public IReadOnlyList<IConcreteComponent> ResolveConcreteDependencies()
   {
-    var concreteDependencies = new List<IComponentInfo>();
+    var concreteDependencies = new List<IConcreteComponent>();
     foreach (var (component, _) in OrderedDependencies)
     {
       concreteDependencies.AddRange(component.ResolveUnderlyingConcreteComponents());

@@ -12,7 +12,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
 
   public void Execute(GeneratorExecutionContext context)
   {
-    var storage = new ComponentInfoStorage();
+    var storage = new ComponentsStorage();
     storage.FillComponents(context);
     
     GenerateDependenciesPart(storage.AllComponents, context);
@@ -20,7 +20,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
   }
 
   private static void GenerateDependenciesPart(
-    IReadOnlyList<IComponentInfo> components, GeneratorExecutionContext context)
+    IReadOnlyList<IConcreteComponent> components, GeneratorExecutionContext context)
   {
     foreach (var componentInfo in components)
     {
@@ -32,7 +32,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
     }
   }
 
-  private static void GenerateContainerBuilder(ComponentInfoStorage storage, GeneratorExecutionContext context)
+  private static void GenerateContainerBuilder(ComponentsStorage storage, GeneratorExecutionContext context)
   {
     ContainerBuilderGenerator.GenerateContainerInitialization(storage, context);
   }

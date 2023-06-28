@@ -3,26 +3,26 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Components.Dependencies;
 
-internal class LazyNonCollectionInterfaceDependency : IComponentDependency
+internal class NonCollectionInterfaceDependency : IComponentDependency
 {
-  private readonly ComponentInfoStorage myStorage;
+  private readonly ComponentsStorage myStorage;
 
 
   private bool myIsInitialized;
-  private IReadOnlyList<IComponentInfo> myResolveResult = null!;
+  private IReadOnlyList<IConcreteComponent> myResolveResult = null!;
 
 
   public INamedTypeSymbol DependencyTypeSymbol { get; }
 
 
-  public LazyNonCollectionInterfaceDependency(INamedTypeSymbol interfaceSymbol, ComponentInfoStorage storage)
+  public NonCollectionInterfaceDependency(INamedTypeSymbol interfaceSymbol, ComponentsStorage storage)
   {
     DependencyTypeSymbol = interfaceSymbol;
     myStorage = storage;
   }
   
 
-  public IReadOnlyList<IComponentInfo> ResolveUnderlyingConcreteComponents()
+  public IReadOnlyList<IConcreteComponent> ResolveUnderlyingConcreteComponents()
   {
     InitializeIfNeededOrThrow();
     return myResolveResult;

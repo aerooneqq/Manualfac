@@ -9,7 +9,7 @@ internal class CantResolveConcreteImplementationException : ManualfacGeneratorEx
   public override string Message { get; }
 
 
-  public CantResolveConcreteImplementationException(INamedTypeSymbol interfaceSymbol, IReadOnlyList<IComponentInfo> impls)
+  public CantResolveConcreteImplementationException(INamedTypeSymbol interfaceSymbol, IReadOnlyList<IConcreteComponent> impls)
   {
     Debug.Assert(interfaceSymbol.TypeKind == TypeKind.Interface);
     Message = $"Expected that {interfaceSymbol.Name} has one implementation, instead it has [{string.Join(",", impls.Select(impl => impl.FullName))}]";

@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Components;
 
-internal interface IComponentInfo
+internal interface IConcreteComponent
 {
   INamedTypeSymbol ComponentSymbol { get; }
   HashSet<IComponentDependency> Dependencies { get; }
@@ -13,5 +13,5 @@ internal interface IComponentInfo
   string FullName { get; }
   string? Namespace { get; }
 
-  IReadOnlyList<IComponentInfo> ResolveConcreteDependencies();
+  IReadOnlyList<IConcreteComponent> ResolveConcreteDependencies();
 }

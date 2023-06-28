@@ -12,10 +12,10 @@ internal static class ComponentsTopologicalSorter
     Gray
   }
   
-  public static IReadOnlyList<IComponentInfo> Sort(IReadOnlyList<IComponentInfo> components)
+  public static IReadOnlyList<IConcreteComponent> Sort(IReadOnlyList<IConcreteComponent> components)
   {
     var visited = components.ToDictionary(static c => c, static _ => ComponentState.NotVisited);
-    var result = new List<IComponentInfo>();
+    var result = new List<IConcreteComponent>();
     
     foreach (var component in components)
     {
@@ -33,7 +33,7 @@ internal static class ComponentsTopologicalSorter
   }
 
   private static bool Dfs(
-    IComponentInfo current, Dictionary<IComponentInfo, ComponentState> visited, List<IComponentInfo> result)
+    IConcreteComponent current, Dictionary<IConcreteComponent, ComponentState> visited, List<IConcreteComponent> result)
   {
     visited[current] = ComponentState.Gray;
     foreach (var dependency in current.ResolveConcreteDependencies())

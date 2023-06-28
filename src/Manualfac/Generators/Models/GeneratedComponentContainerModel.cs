@@ -20,30 +20,30 @@ internal class GeneratedComponentContainerModel
   private readonly GeneratedUsingsModel myDefaultUsingsModel;
 
 
-  public GeneratedComponentContainerModel(IComponentInfo component)
+  public GeneratedComponentContainerModel(IConcreteComponent concreteComponent)
   {
-    myComponentShortTypeName = component.TypeShortName;
-    myDependenciesUsingsModel = component.ToDependenciesUsingsModel();
+    myComponentShortTypeName = concreteComponent.TypeShortName;
+    myDependenciesUsingsModel = concreteComponent.ToDependenciesUsingsModel();
     
     //todo: collection case
-    myDependenciesAccessors = component.Dependencies
+    myDependenciesAccessors = concreteComponent.Dependencies
       .Select(dep => $"{dep.ResolveUnderlyingConcreteComponents().First().CreateContainerName()}.{ResolveMethodName}()")
       .ToList();
     
     var generatedClassModel = new GeneratedClassModel(
-      component.CreateContainerName(),
+      concreteComponent.CreateContainerName(),
       ImmutableArray<GeneratedConstructorModel>.Empty,
       new[]
       {
-        new GeneratedFieldModel(component.TypeShortName, InstanceFieldName, AccessModifier.Private, false, true),
+        new GeneratedFieldModel(concreteComponent.TypeShortName, InstanceFieldName, AccessModifier.Private, false, true),
         new GeneratedFieldModel("object", SyncFieldName, AccessModifier.Private, false, true, "new object()")
       },
       new[]
       {
-        new GeneratedMethodModel(ResolveMethodName, component.TypeShortName, GenerateFactoryMethod, isStatic: true)
+        new GeneratedMethodModel(ResolveMethodName, concreteComponent.TypeShortName, GenerateFactoryMethod, isStatic: true)
       });
     
-    myGeneratedNamespaceModel = new GeneratedNamespaceModel(component.Namespace, generatedClassModel.GenerateInto);
+    myGeneratedNamespaceModel = new GeneratedNamespaceModel(concreteComponent.Namespace, generatedClassModel.GenerateInto);
     myDefaultUsingsModel = new GeneratedUsingsModel(new[] { "System.Threading" });
   }
 

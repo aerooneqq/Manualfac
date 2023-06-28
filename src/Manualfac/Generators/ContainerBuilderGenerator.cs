@@ -8,7 +8,7 @@ namespace Manualfac.Generators;
 internal static class ContainerBuilderGenerator
 {
   public static void GenerateContainerInitialization(
-    ComponentInfoStorage componentsStorage, GeneratorExecutionContext context)
+    ComponentsStorage componentsStorage, GeneratorExecutionContext context)
   {
     var compilationAssembly = context.Compilation.Assembly;
     foreach (var componentInfo in ComponentsTopologicalSorter.Sort(componentsStorage.AllComponents))
@@ -21,11 +21,11 @@ internal static class ContainerBuilderGenerator
     }
   }
 
-  private static void GenerateComponentBuilderClass(IComponentInfo componentInfo, GeneratorExecutionContext context)
+  private static void GenerateComponentBuilderClass(IConcreteComponent concreteComponent, GeneratorExecutionContext context)
   {
     var sb = new StringBuilder();
-    new GeneratedComponentContainerModel(componentInfo).GenerateInto(sb, 0);
+    new GeneratedComponentContainerModel(concreteComponent).GenerateInto(sb, 0);
     
-    context.AddSource($"{componentInfo.CreateContainerName()}.g", sb.ToString());
+    context.AddSource($"{concreteComponent.CreateContainerName()}.g", sb.ToString());
   }
 }
