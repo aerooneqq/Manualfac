@@ -15,7 +15,7 @@ public abstract class DependsOnAttributeBase : ManualfacAttribute
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class DependsOnAttribute<TF> : DependsOnAttributeBase where TF : class
+public class DependsOnAttribute<T1> : DependsOnAttributeBase where T1 : class
 {
   public DependsOnAttribute(AccessModifier modifier)
   {
@@ -23,9 +23,9 @@ public class DependsOnAttribute<TF> : DependsOnAttributeBase where TF : class
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class DependsOnAttribute<TF, TS> : DependsOnAttributeBase
-  where TF : class
-  where TS : class
+public class DependsOnAttribute<T1, T2> : DependsOnAttributeBase
+  where T1 : class
+  where T2 : class
 {
   public DependsOnAttribute(AccessModifier modifier)
   {
@@ -33,10 +33,10 @@ public class DependsOnAttribute<TF, TS> : DependsOnAttributeBase
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class DependsOnAttribute<TF, TS, TT> : DependsOnAttributeBase
-  where TF : class
-  where TS : class
-  where TT : class
+public class DependsOnAttribute<T1, T2, T3> : DependsOnAttributeBase
+  where T1 : class
+  where T2 : class
+  where T3 : class
 {
   public DependsOnAttribute(AccessModifier modifier)
   {
@@ -44,11 +44,11 @@ public class DependsOnAttribute<TF, TS, TT> : DependsOnAttributeBase
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class DependsOnAttribute<TF, TS, TT, TFourth> : DependsOnAttributeBase
-  where TF : class
-  where TS : class
-  where TT : class
-  where TFourth : class
+public class DependsOnAttribute<T1, T2, T3, T4> : DependsOnAttributeBase
+  where T1 : class
+  where T2 : class
+  where T3 : class
+  where T4 : class
 {
   public DependsOnAttribute(AccessModifier modifier)
   {
@@ -56,12 +56,12 @@ public class DependsOnAttribute<TF, TS, TT, TFourth> : DependsOnAttributeBase
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class DependsOnAttribute<TF, TS, TT, TFourth, TFifth> : DependsOnAttributeBase
-  where TF : class
-  where TS : class
-  where TT : class
-  where TFourth : class
-  where TFifth : class
+public class DependsOnAttribute<T1, T2, T3, T4, T5> : DependsOnAttributeBase
+  where T1 : class
+  where T2 : class
+  where T3 : class
+  where T4 : class
+  where T5 : class
 {
   public DependsOnAttribute(AccessModifier modifier)
   {
@@ -69,13 +69,13 @@ public class DependsOnAttribute<TF, TS, TT, TFourth, TFifth> : DependsOnAttribut
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class DependsOnAttribute<TF, TS, TT, TFourth, TFifth, TSixth> : DependsOnAttributeBase
-  where TF : class
-  where TS : class
-  where TT : class
-  where TFourth : class
-  where TFifth : class
-  where TSixth : class
+public class DependsOnAttribute<T1, T2, T3, T4, T5, T6> : DependsOnAttributeBase
+  where T1 : class
+  where T2 : class
+  where T3 : class
+  where T4 : class
+  where T5 : class
+  where T6 : class
 {
   public DependsOnAttribute(AccessModifier modifier)
   {
