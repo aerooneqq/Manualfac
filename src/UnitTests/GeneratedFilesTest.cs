@@ -10,4 +10,6 @@ public class GeneratedFilesTest : TestWithSourceFilesBase<ServiceInjectionGenera
   [Test] public void SimpleTest() => DoTest();
   [Test] public void SimpleTest2() => DoTest();
   [Test] public void SimpleTest3() => DoTest();
+  [Test] public void SimpleTest4() => DoTest();
+  [Test] public void SimpleTest5() => DoTest();
 }
