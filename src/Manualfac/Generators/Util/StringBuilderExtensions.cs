@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Manualfac.Generators;
+namespace Manualfac.Generators.Util;
 
 public static class StringBuilderExtensions
 {

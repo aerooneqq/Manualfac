@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Manualfac.Generators;
+namespace Manualfac.Generators.Util;
 
 internal readonly struct OpenCloseStringBuilderOperation : IDisposable
 {

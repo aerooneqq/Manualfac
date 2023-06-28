@@ -1,6 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
 using Manualfac.Generators.Components;
+using Manualfac.Generators.Components.Dependencies;
+using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Models;
 
@@ -25,10 +27,7 @@ internal class GeneratedComponentContainerModel
     myComponentShortTypeName = concreteComponent.TypeShortName;
     myDependenciesUsingsModel = concreteComponent.ToDependenciesUsingsModel();
     
-    //todo: collection case
-    myDependenciesAccessors = concreteComponent.Dependencies
-      .Select(dep => $"{dep.ResolveUnderlyingConcreteComponents().First().CreateContainerName()}.{ResolveMethodName}()")
-      .ToList();
+    myDependenciesAccessors = concreteComponent.Dependencies.Select(GenerateDependencyAccessor).ToList();
     
     var generatedClassModel = new GeneratedClassModel(
       concreteComponent.CreateContainerName(),
@@ -90,6 +89,21 @@ internal class GeneratedComponentContainerModel
       sb.AppendSemicolon().AppendNewLine();
       sb.AppendIndent(lockCookie.Indent).Append($"Volatile.Write(ref {InstanceFieldName}, {CreatedVarName});").AppendNewLine();
       sb.AppendIndent(lockCookie.Indent).Append($"return {CreatedVarName};");
+    }
+  }
+
+  private string GenerateDependencyAccessor(IComponentDependency dependency)
+  {
+    switch (dependency)
+    {
+      case ConcreteComponentDependency or NonCollectionInterfaceDependency:
+        return $"{dependency.ResolveUnderlyingConcreteComponents().First().CreateContainerResolveExpression()}";
+      case CollectionDependency collectionDependency:
+        var impls = collectionDependency.ResolveUnderlyingConcreteComponents();
+        var name = collectionDependency.CollectionItemInterface.GetFullName();
+        return $"new {name}[] {{{string.Join(",", impls.Select(impl => impl.CreateContainerResolveExpression()))}}}";
+      default:
+        throw new ArgumentOutOfRangeException(dependency.GetType().Name);
     }
   }
 }

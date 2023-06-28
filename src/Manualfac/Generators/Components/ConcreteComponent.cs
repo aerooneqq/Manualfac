@@ -1,4 +1,5 @@
 using Manualfac.Generators.Components.Dependencies;
+using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Components;
@@ -10,7 +11,7 @@ internal class ConcreteComponent : IConcreteComponent
   public IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)> OrderedDependencies { get; }
   
   public string TypeShortName => ComponentSymbol.Name;
-  public string FullName => Namespace is { } @namespace ? @namespace + "." + TypeShortName : TypeShortName;
+  public string FullName => ComponentSymbol.GetFullName();
   
   // ReSharper disable once ReturnTypeCanBeNotNullable
   public string? Namespace => ComponentSymbol.ContainingNamespace.Name;

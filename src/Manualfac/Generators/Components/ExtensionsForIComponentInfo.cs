@@ -1,11 +1,15 @@
 ﻿using System.Collections.Immutable;
 using Manualfac.Generators.Models;
+using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Components;
 
 internal static class ExtensionsForIComponentInfo
 {
   public static string CreateContainerName(this IConcreteComponent concreteComponent) => $"{concreteComponent.TypeShortName}Container";
+
+  public static string CreateContainerResolveExpression(this IConcreteComponent concreteComponent) =>
+    $"{concreteComponent.CreateContainerName()}.Resolve()";
   
   public static GeneratedUsingsModel ToDependenciesUsingsModel(this IConcreteComponent concreteComponent) => 
     new(concreteComponent.Dependencies
@@ -30,6 +34,6 @@ internal static class ExtensionsForIComponentInfo
 
   public static IReadOnlyList<GeneratedFieldModel> ExtractGeneratedFieldsModels(this IConcreteComponent concreteComponent) => 
     concreteComponent.OrderedDependencies
-      .Select(dep => new GeneratedFieldModel(dep.Component.DependencyTypeSymbol.Name, $"my{dep.Component.DependencyTypeSymbol.Name}", dep.Modifier))
+      .Select(dep => new GeneratedFieldModel(dep.Component.DependencyTypeSymbol.GetFullName(), $"my{dep.Component.DependencyTypeSymbol.Name}", dep.Modifier))
       .ToList();
 }

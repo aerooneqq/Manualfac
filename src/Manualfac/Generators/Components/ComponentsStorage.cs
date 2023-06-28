@@ -87,7 +87,14 @@ internal class ComponentsStorage
         }
         else if (typeSymbol.TypeKind == TypeKind.Interface)
         {
-          dependencies.Add((new NonCollectionInterfaceDependency(typeSymbol, this), modifier));
+          if (typeSymbol.MetadataName == "IEnumerable`1")
+          {
+            dependencies.Add((new CollectionDependency(typeSymbol, this), modifier));
+          }
+          else
+          {
+            dependencies.Add((new NonCollectionInterfaceDependency(typeSymbol, this), modifier));
+          }
         }
       }
     }
