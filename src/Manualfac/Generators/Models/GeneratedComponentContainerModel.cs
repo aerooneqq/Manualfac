@@ -15,7 +15,7 @@ internal class GeneratedComponentContainerModel
   private const string Existing1 = "existing1";
   private const string Existing2 = "exiting2";
   
-  private readonly string myComponentShortTypeName;
+  private readonly string myComponentFullTypeName;
   private readonly GeneratedUsingsModel myDependenciesUsingsModel;
   private readonly IReadOnlyList<string> myDependenciesAccessors;
   private readonly GeneratedNamespaceModel myGeneratedNamespaceModel;
@@ -24,7 +24,7 @@ internal class GeneratedComponentContainerModel
 
   public GeneratedComponentContainerModel(IConcreteComponent concreteComponent)
   {
-    myComponentShortTypeName = concreteComponent.TypeShortName;
+    myComponentFullTypeName = concreteComponent.FullName;
     myDependenciesUsingsModel = concreteComponent.ToDependenciesUsingsModel();
     
     myDependenciesAccessors = concreteComponent.Dependencies.Select(GenerateDependencyAccessor).ToList();
@@ -34,12 +34,12 @@ internal class GeneratedComponentContainerModel
       ImmutableArray<GeneratedConstructorModel>.Empty,
       new[]
       {
-        new GeneratedFieldModel(concreteComponent.TypeShortName, InstanceFieldName, AccessModifier.Private, false, true),
+        new GeneratedFieldModel(concreteComponent.FullName, InstanceFieldName, AccessModifier.Private, false, true),
         new GeneratedFieldModel("object", SyncFieldName, AccessModifier.Private, false, true, "new object()")
       },
       new[]
       {
-        new GeneratedMethodModel(ResolveMethodName, concreteComponent.TypeShortName, GenerateFactoryMethod, isStatic: true)
+        new GeneratedMethodModel(ResolveMethodName, concreteComponent.FullName, GenerateFactoryMethod, isStatic: true)
       });
     
     myGeneratedNamespaceModel = new GeneratedNamespaceModel(concreteComponent.Namespace, generatedClassModel.GenerateInto);
@@ -70,7 +70,7 @@ internal class GeneratedComponentContainerModel
         .AppendNewLine();
       
       sb.AppendIndent(lockCookie.Indent).Append($"var {CreatedVarName} =").AppendSpace().Append("new").AppendSpace()
-        .Append(myComponentShortTypeName);
+        .Append(myComponentFullTypeName);
 
       using (var bracesCookie = StringBuilderCookies.DefaultBraces(sb, lockCookie.Indent, appendEndIndent: true))
       {
