@@ -4,10 +4,10 @@ namespace DefaultNamespace
 {
   public partial class Class3
   {
-    private protected readonly IClass11 myIClass11;
+    private protected readonly DefaultNamespace.IClass11 myIClass11;
 
     public Class3(
-      IClass11 c0
+      DefaultNamespace.IClass11 c0
     )
     {
       myIClass11 = c0;

@@ -15,7 +15,7 @@ namespace DefaultNamespace
       {
         if (Volatile.Read(ref ourInstance) is { } exiting2) return exiting2;
         var created = new DefaultNamespace.Class3(
-          Class1Container.Resolve()
+          new DefaultNamespace.IClass1[] {Class1Container.Resolve(),Class11Container.Resolve(),Class111Container.Resolve(),Class1111Container.Resolve()}
         );
         Volatile.Write(ref ourInstance, created);
         return created;

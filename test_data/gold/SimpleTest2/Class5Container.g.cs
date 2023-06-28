@@ -5,16 +5,16 @@ namespace DefaultNamespace
 {
   public partial class Class5Container
   {
-    private static Class5 ourInstance;
+    private static DefaultNamespace.Class5 ourInstance;
     private static object ourSync = new object();
 
-    public static Class5 Resolve()
+    public static DefaultNamespace.Class5 Resolve()
     {
       if (Volatile.Read(ref ourInstance) is { } existing1) return existing1;
       lock (ourSync)
       {
         if (Volatile.Read(ref ourInstance) is { } exiting2) return exiting2;
-        var created = new Class5(
+        var created = new DefaultNamespace.Class5(
           Class1Container.Resolve(),
           Class2Container.Resolve(),
           Class3Container.Resolve(),
