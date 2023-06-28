@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Manualfac.Exceptions;
 using Manualfac.Generators.Components.Dependencies;
 using Microsoft.CodeAnalysis;
@@ -94,17 +95,17 @@ internal class ComponentsStorage
     var createdComponent = new ConcreteComponent(symbol, dependencies);
     myCache[symbol] = createdComponent;
     
-    AddToInterfacesToImplementationsMap(createdComponent);
+    AddToInterfacesToImplementationsMap(createdComponent, compilation);
     
     return createdComponent;
   }
 
-  private void AddToInterfacesToImplementationsMap(IConcreteComponent concreteComponent)
+  private void AddToInterfacesToImplementationsMap(IConcreteComponent concreteComponent, Compilation compilation)
   {
     if (concreteComponent.ComponentSymbol.TypeKind is not TypeKind.Class) return;
-    
-    var allInterfaces = concreteComponent.ComponentSymbol.AllInterfaces;
-    if (allInterfaces.Length == 0)
+
+    var allInterfaces = ExtractInterfaces(concreteComponent.ComponentSymbol, compilation);
+    if (allInterfaces.Count == 0)
     {
       myComponentsWithoutInterfaces.Add(concreteComponent);
       return;
@@ -112,6 +113,7 @@ internal class ComponentsStorage
     
     foreach (var @interface in allInterfaces)
     {
+      Debug.Assert(@interface.TypeKind == TypeKind.Interface);
       if (myInterfacesToComponents.TryGetValue(@interface, out var components))
       {
         components.Add(concreteComponent);
@@ -123,11 +125,30 @@ internal class ComponentsStorage
     }
   }
 
+  private IReadOnlyList<INamedTypeSymbol> ExtractInterfaces(INamedTypeSymbol symbol, Compilation compilation)
+  {
+    var asAttributes = ExtractAttributeByNameWithTypeArgs(symbol, "AsAttribute", compilation).ToList();
+    if (asAttributes.Count == 0)
+    {
+      return symbol.AllInterfaces;
+    }
+
+    return asAttributes.SelectMany(pair => pair.Interfaces).OfType<INamedTypeSymbol>().ToList();
+  }
+
   private static IEnumerable<(AttributeSyntax, IEnumerable<ITypeSymbol?>)> ExtractDependencies(
     INamedTypeSymbol symbol, Compilation compilation)
   {
+    return ExtractAttributeByNameWithTypeArgs(symbol, "DependsOnAttribute", compilation);
+  }
+
+  private static IEnumerable<(AttributeSyntax Attribute, IEnumerable<ITypeSymbol?> Interfaces)> ExtractAttributeByNameWithTypeArgs(
+    ISymbol symbol,
+    string attributeName,
+    Compilation compilation)
+  {
     return symbol.GetAttributes()
-      .Where(attr => attr.AttributeClass?.Name == "DependsOnAttribute")
+      .Where(attr => attr.AttributeClass?.Name == attributeName)
       .Select(attr => attr.ApplicationSyntaxReference?.GetSyntax())
       .OfType<AttributeSyntax>()
       .Select(attributeSyntax =>
