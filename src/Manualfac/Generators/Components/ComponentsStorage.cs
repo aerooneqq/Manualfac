@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using Manualfac.Exceptions;
+using Manualfac.Generators.Components.Caches;
 using Manualfac.Generators.Components.Dependencies;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,27 +8,18 @@ namespace Manualfac.Generators.Components;
 
 internal class ComponentsStorage
 {
-  private readonly HashSet<INamedTypeSymbol> myComponentsSymbols;
-  private readonly HashSet<INamedTypeSymbol> myNotComponentsSymbols;
-  private readonly Dictionary<INamedTypeSymbol, IConcreteComponent> myCache;
-  private readonly List<IConcreteComponent> myAllComponents;
-  private readonly Dictionary<INamedTypeSymbol, List<IConcreteComponent>> myInterfacesToComponents;
-  private readonly List<IConcreteComponent> myComponentsWithoutInterfaces;
+  private readonly ComponentAndNonComponentSymbols mySymbolsCache;
+  private readonly ComponentsCache myCache;
 
 
-  public IReadOnlyList<IConcreteComponent> AllComponents => myAllComponents;
-  public IReadOnlyDictionary<INamedTypeSymbol, List<IConcreteComponent>> InterfacesToComponents => myInterfacesToComponents;
-  public IReadOnlyList<IConcreteComponent> ComponentsWithoutInterfaces => myComponentsWithoutInterfaces;
+  public IReadOnlyList<IConcreteComponent> AllComponents => myCache.AllComponents;
+  public IReadOnlyDictionary<INamedTypeSymbol, List<IConcreteComponent>> InterfacesToComponents => myCache.InterfacesToComponents;
 
 
   public ComponentsStorage()
   {
-    myCache = new Dictionary<INamedTypeSymbol, IConcreteComponent>(SymbolEqualityComparer.Default);
-    myComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-    myNotComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-    myAllComponents = new List<IConcreteComponent>();
-    myInterfacesToComponents = new Dictionary<INamedTypeSymbol, List<IConcreteComponent>>(SymbolEqualityComparer.Default);
-    myComponentsWithoutInterfaces = new List<IConcreteComponent>();
+    mySymbolsCache = new ComponentAndNonComponentSymbols();
+    myCache = new ComponentsCache();
   }
   
   
@@ -44,11 +35,10 @@ internal class ComponentsStorage
       var module = modulesQueue.Dequeue();
       visited.Add(module);
 
-      var componentTypes = GetComponentTypesFrom(module);
-      var componentInfos = componentTypes
-        .Select(type => ToComponentInfo(type, new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default), context));
-      
-      myAllComponents.AddRange(componentInfos);
+      foreach (var componentType in GetComponentTypesFrom(module))
+      {
+        ToComponentInfo(componentType, new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default), context);
+      }
 
       foreach (var refAsm in module.ReferencedAssemblySymbols)
       {
@@ -66,9 +56,9 @@ internal class ComponentsStorage
   private IConcreteComponent ToComponentInfo(
     INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
   {
-    if (myCache.TryGetValue(symbol, out var existingComponent)) return existingComponent;
+    if (myCache.TryGetExistingComponent(symbol) is { } existingComponent) return existingComponent;
     if (visited.Contains(symbol)) throw new CyclicDependencyException();
-    if (!CheckIfManualfacComponent(symbol)) throw new TypeSymbolIsNotManualfacComponentException(symbol);
+    if (!mySymbolsCache.CheckIfManualfacComponent(symbol)) throw new TypeSymbolIsNotManualfacComponentException(symbol);
 
     visited.Add(symbol);
     var compilation = context.Compilation;
@@ -100,7 +90,7 @@ internal class ComponentsStorage
     }
     
     var createdComponent = new ConcreteComponent(symbol, dependencies);
-    myCache[symbol] = createdComponent;
+    myCache.UpdateExistingComponent(symbol, createdComponent);
     
     AddToInterfacesToImplementationsMap(createdComponent, compilation);
     
@@ -112,23 +102,11 @@ internal class ComponentsStorage
     if (concreteComponent.ComponentSymbol.TypeKind is not TypeKind.Class) return;
 
     var allInterfaces = ExtractInterfaces(concreteComponent.ComponentSymbol, compilation);
-    if (allInterfaces.Count == 0)
-    {
-      myComponentsWithoutInterfaces.Add(concreteComponent);
-      return;
-    }
-    
+    if (allInterfaces.Count == 0) return;
+
     foreach (var @interface in allInterfaces)
     {
-      Debug.Assert(@interface.TypeKind == TypeKind.Interface);
-      if (myInterfacesToComponents.TryGetValue(@interface, out var components))
-      {
-        components.Add(concreteComponent);
-      }
-      else
-      {
-        myInterfacesToComponents[@interface] = new List<IConcreteComponent> { concreteComponent };
-      }
+      myCache.AddInterfaceImplementation(@interface, concreteComponent);
     }
   }
 
@@ -199,38 +177,12 @@ internal class ComponentsStorage
     return AccessModifier.Private;
   }
 
-  private bool CheckIfManualfacComponent(INamedTypeSymbol symbol)
-  {
-    if (myNotComponentsSymbols.Contains(symbol)) return false;
-    if (myComponentsSymbols.Contains(symbol)) return true;
-
-    if (symbol.GetAttributes().Any(IsManualfacAttribute))
-    {
-      myComponentsSymbols.Add(symbol);
-      return true;
-    }
-
-    myNotComponentsSymbols.Add(symbol);
-    return false;
-  }
 
   private IEnumerable<INamedTypeSymbol> GetComponentTypesFrom(IModuleSymbol module)
   {
     return GetAllNamespacesFrom(module.GlobalNamespace)
       .SelectMany(ns => ns.GetTypeMembers())
-      .Where(CheckIfManualfacComponent);
-  }
-  
-  private static bool IsManualfacAttribute(AttributeData attribute)
-  {
-    var attributeClass = attribute.AttributeClass;
-    while (attributeClass is { })
-    {
-      if (attributeClass.Name == "ManualfacAttribute") return true;
-      attributeClass = attributeClass.BaseType;
-    }
-
-    return false;
+      .Where(mySymbolsCache.CheckIfManualfacComponent);
   }
 
   private static IEnumerable<INamespaceSymbol> GetAllNamespacesFrom(INamespaceSymbol namespaceSymbol)
