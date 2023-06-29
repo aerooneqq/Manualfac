@@ -54,43 +54,51 @@ internal class ComponentsStorage
   }
   
   private IConcreteComponent ToComponentInfo(
-    INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
+    INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
   {
-    if (myCache.TryGetExistingComponent(symbol) is { } existingComponent) return existingComponent;
-    if (visited.Contains(symbol)) throw new CyclicDependencyException();
-    if (!mySymbolsCache.CheckIfManualfacComponent(symbol)) throw new TypeSymbolIsNotManualfacComponentException(symbol);
+    if (myCache.TryGetExistingComponent(componentSymbol) is { } existingComponent) return existingComponent;
+    if (visited.Contains(componentSymbol)) throw new CyclicDependencyException();
+    if (!mySymbolsCache.CheckIfManualfacComponent(componentSymbol)) throw new TypeSymbolIsNotManualfacComponentException(componentSymbol);
 
-    visited.Add(symbol);
+    visited.Add(componentSymbol);
     var compilation = context.Compilation;
     var dependencies = new List<(IComponentDependency, AccessModifier)>();
+    var alreadyAddedDependencySymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
     
-    foreach (var (attributeSyntax, types) in ExtractDependencies(symbol, compilation))
+    foreach (var (attributeSyntax, dependencyTypes) in ExtractDependencies(componentSymbol, compilation))
     {
       var modifier = ExtractAccessModifierOrDefault(attributeSyntax, compilation);
       
-      foreach (var typeSymbol in types.OfType<INamedTypeSymbol>())
+      foreach (var dependencySymbol in dependencyTypes.OfType<INamedTypeSymbol>())
       {
-        if (typeSymbol.TypeKind == TypeKind.Class)
+        if (alreadyAddedDependencySymbols.Contains(dependencySymbol))
         {
-          var dependencyComponent = ToComponentInfo(typeSymbol, visited, context);
+          throw new DuplicatedDependencyException(componentSymbol, dependencySymbol);
+        }
+        
+        if (dependencySymbol.TypeKind == TypeKind.Class)
+        {
+          var dependencyComponent = ToComponentInfo(dependencySymbol, visited, context);
           dependencies.Add((new ConcreteComponentDependency(dependencyComponent), modifier));
         }
-        else if (typeSymbol.TypeKind == TypeKind.Interface)
+        else if (dependencySymbol.TypeKind == TypeKind.Interface)
         {
-          if (typeSymbol.MetadataName == "IEnumerable`1")
+          if (dependencySymbol.MetadataName == "IEnumerable`1")
           {
-            dependencies.Add((new CollectionDependency(typeSymbol, this), modifier));
+            dependencies.Add((new CollectionDependency(dependencySymbol, this), modifier));
           }
           else
           {
-            dependencies.Add((new NonCollectionInterfaceDependency(typeSymbol, this), modifier));
+            dependencies.Add((new NonCollectionInterfaceDependency(dependencySymbol, this), modifier));
           }
         }
+
+        alreadyAddedDependencySymbols.Add(dependencySymbol);
       }
     }
     
-    var createdComponent = new ConcreteComponent(symbol, dependencies);
-    myCache.UpdateExistingComponent(symbol, createdComponent);
+    var createdComponent = new ConcreteComponent(componentSymbol, dependencies);
+    myCache.UpdateExistingComponent(componentSymbol, createdComponent);
     
     AddToInterfacesToImplementationsMap(createdComponent, compilation);
     
