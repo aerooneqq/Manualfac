@@ -10,8 +10,10 @@ internal class ComponentsStorage
 {
   private readonly ComponentAndNonComponentSymbols mySymbolsCache;
   private readonly ComponentsCache myCache;
+  private readonly OverridesCache myOverridesCache;
 
-
+  
+  public IReadOnlyDictionary<IConcreteComponent, IConcreteComponent> BaseToOverrides => myOverridesCache.BaseToOverrides;
   public IReadOnlyList<IConcreteComponent> AllComponents => myCache.AllComponents;
   public IReadOnlyDictionary<INamedTypeSymbol, List<IConcreteComponent>> InterfacesToComponents => myCache.InterfacesToComponents;
 
@@ -20,6 +22,7 @@ internal class ComponentsStorage
   {
     mySymbolsCache = new ComponentAndNonComponentSymbols();
     myCache = new ComponentsCache();
+    myOverridesCache = new OverridesCache();
   }
   
   
@@ -101,6 +104,7 @@ internal class ComponentsStorage
     myCache.UpdateExistingComponent(componentSymbol, createdComponent);
     
     AddToInterfacesToImplementationsMap(createdComponent, compilation);
+    AddToOverridesIfPresent(createdComponent, context);
     
     return createdComponent;
   }
@@ -116,6 +120,36 @@ internal class ComponentsStorage
     {
       myCache.AddInterfaceImplementation(@interface, concreteComponent);
     }
+  }
+
+  private void AddToOverridesIfPresent(IConcreteComponent concreteComponent, GeneratorExecutionContext context)
+  {
+    var compilation = context.Compilation;
+    var symbol = concreteComponent.ComponentSymbol;
+    var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, "OverridesAttribute", compilation);
+    var baseSymbols = overridesAttributes.SelectMany(pair => pair.Interfaces).OfType<INamedTypeSymbol>().ToList();
+    if (baseSymbols.Count == 0) return;
+    
+    if (baseSymbols.Count != 1)
+    {
+      throw new TooManyOverridesException(symbol, baseSymbols);
+    }
+
+    var baseSymbol = baseSymbols.First();
+    if (baseSymbol.TypeKind != TypeKind.Class)
+    {
+      throw new OverrideMustBeClassException(symbol, baseSymbol);
+    }
+
+    if (!mySymbolsCache.CheckIfManualfacComponent(baseSymbol))
+    {
+      throw new CanNotOverrideNonComponentException(symbol, baseSymbol);
+    }
+    
+    var baseComponent = ToComponentInfo(
+      baseSymbol, new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default), context);
+    
+    myOverridesCache.AddOverride(concreteComponent, baseComponent);
   }
 
   private IReadOnlyList<INamedTypeSymbol> ExtractInterfaces(INamedTypeSymbol symbol, Compilation compilation)

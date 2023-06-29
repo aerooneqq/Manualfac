@@ -17,6 +17,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
     
     GenerateDependenciesPart(storage.AllComponents, context);
     GenerateContainerBuilder(storage, context);
+    GenerateContainerInitialization(storage, context);
   }
 
   private static void GenerateDependenciesPart(
@@ -35,5 +36,10 @@ public class ServiceInjectionGenerator : ISourceGenerator
   private static void GenerateContainerBuilder(ComponentsStorage storage, GeneratorExecutionContext context)
   {
     ContainerBuilderGenerator.GenerateContainerInitialization(storage, context);
+  }
+
+  private static void GenerateContainerInitialization(ComponentsStorage storage, GeneratorExecutionContext context)
+  {
+    ContainerInitializationGenerator.Generate(storage, context);
   }
 }
