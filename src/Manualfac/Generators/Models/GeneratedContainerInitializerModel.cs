@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
 using Manualfac.Generators.Components;
+using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Models;
@@ -31,7 +32,20 @@ internal class GeneratedContainerInitializerModel
 
   private void GenerateInitializeMethod(StringBuilder sb, int indent)
   {
-    
+    foreach (var component in myStorage.AllComponents)
+    {
+      sb.Append(component.CreateContainerName()).Append(".Initialize");
+      using (var cookie = StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true))
+      {
+        sb.Append("() => ");
+        using (var methodCookie = StringBuilderCookies.CurlyBraces(sb, cookie.Indent))
+        {
+          
+        }
+      }
+
+      sb.AppendSemicolon().AppendNewLine().AppendNewLine();
+    }
   }
   
   public void GenerateInto(StringBuilder sb, int indent)
