@@ -121,10 +121,20 @@ internal class ComponentsStorage
     return asAttributes.SelectMany(pair => pair.Interfaces).OfType<INamedTypeSymbol>().ToList();
   }
 
-  private static IEnumerable<(AttributeSyntax, IEnumerable<ITypeSymbol?>)> ExtractDependencies(
+  private IEnumerable<(AttributeSyntax, IEnumerable<ITypeSymbol?>)> ExtractDependencies(
     INamedTypeSymbol symbol, Compilation compilation)
   {
-    return ExtractAttributeByNameWithTypeArgs(symbol, "DependsOnAttribute", compilation);
+    const string DependsOnAttribute = "DependsOnAttribute";
+    var immediateDependencies = ExtractAttributeByNameWithTypeArgs(symbol, DependsOnAttribute, compilation).ToList();
+    var current = symbol.BaseType;
+    
+    while (current is { })
+    {
+      immediateDependencies.AddRange(ExtractAttributeByNameWithTypeArgs(current, DependsOnAttribute, compilation));
+      current = current.BaseType;
+    }
+
+    return immediateDependencies;
   }
 
   private static IEnumerable<(AttributeSyntax Attribute, IEnumerable<ITypeSymbol?> Interfaces)> ExtractAttributeByNameWithTypeArgs(

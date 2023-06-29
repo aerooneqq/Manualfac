@@ -33,10 +33,9 @@ internal class ComponentAndNonComponentSymbols
   private static bool IsManualfacAttribute(AttributeData attribute)
   {
     var attributeClass = attribute.AttributeClass;
-    while (attributeClass is { })
+    if (attributeClass is { })
     {
-      if (attributeClass.Name == "ManualfacAttribute") return true;
-      attributeClass = attributeClass.BaseType;
+      return attributeClass.Name == "ComponentAttribute";
     }
 
     return false;
