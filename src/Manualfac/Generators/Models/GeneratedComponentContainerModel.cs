@@ -9,11 +9,19 @@ namespace Manualfac.Generators.Models;
 internal class GeneratedComponentContainerModel
 {
   private const string ResolveMethodName = "Resolve";
+  private const string InitializeMethodName = "Initialize";
+  private const string DefaultInitializeMethodName = "DefaultInitialize";
+  
   private const string InstanceFieldName = "ourInstance";
   private const string SyncFieldName = "ourSync";
+  private const string InitializationFuncFieldName = "ourF";
+  private const string InitializeFuncParamName = "f";
+
   private const string CreatedVarName = "created";
   private const string Existing1 = "existing1";
   private const string Existing2 = "exiting2";
+
+  private const string Void = "void";
   
   private readonly string myComponentFullTypeName;
   private readonly GeneratedUsingsModel myDependenciesUsingsModel;
@@ -34,12 +42,25 @@ internal class GeneratedComponentContainerModel
       ImmutableArray<GeneratedConstructorModel>.Empty,
       new[]
       {
-        new GeneratedFieldModel(concreteComponent.FullName, InstanceFieldName, AccessModifier.Private, false, true),
-        new GeneratedFieldModel("object", SyncFieldName, AccessModifier.Private, false, true, "new object()")
+        new GeneratedFieldModel(myComponentFullTypeName, InstanceFieldName, AccessModifier.Private, false, true),
+        new GeneratedFieldModel("object", SyncFieldName, AccessModifier.Private, false, true, "new object()"),
+        new GeneratedFieldModel($"Func<{myComponentFullTypeName}>", InitializationFuncFieldName, AccessModifier.Private, 
+          false, true, defaultValue: DefaultInitializeMethodName)
       },
       new[]
       {
-        new GeneratedMethodModel(ResolveMethodName, concreteComponent.FullName, GenerateFactoryMethod, isStatic: true)
+        new GeneratedMethodModel(
+          ResolveMethodName, myComponentFullTypeName, GenerateFactoryMethod, 
+          ImmutableList<GeneratedParameterModel>.Empty, isStatic: true),
+        
+        new GeneratedMethodModel(InitializeMethodName, Void, GenerateInitializeMethod, new []
+        {
+          new GeneratedParameterModel($"Func<{myComponentFullTypeName}>", InitializeFuncParamName)
+        }, isStatic: true),
+        
+        new GeneratedMethodModel(
+          DefaultInitializeMethodName, myComponentFullTypeName, GenerateDefaultInitializeMethod, 
+          ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Private, isStatic: true)
       });
     
     myGeneratedNamespaceModel = new GeneratedNamespaceModel(concreteComponent.Namespace, generatedClassModel.GenerateInto);
@@ -63,33 +84,46 @@ internal class GeneratedComponentContainerModel
       .Append($"if (Volatile.Read(ref {InstanceFieldName}) is {{ }} {Existing1}) return {Existing1};")
       .AppendNewLine();
 
-    using (var lockCookie = StringBuilderCookies.Lock(sb, SyncFieldName, indent))
+    using var lockCookie = StringBuilderCookies.Lock(sb, SyncFieldName, indent);
+    
+    sb.AppendIndent(lockCookie.Indent)
+      .Append($"if (Volatile.Read(ref {InstanceFieldName}) is {{ }} {Existing2}) return {Existing2};")
+      .AppendNewLine();
+
+    sb.AppendIndent(lockCookie.Indent).Append($"var {CreatedVarName} = ").Append(InitializationFuncFieldName)
+      .Append("()").AppendSemicolon().AppendNewLine();
+    
+    sb.AppendIndent(lockCookie.Indent).Append($"Volatile.Write(ref {InstanceFieldName}, {CreatedVarName});").AppendNewLine();
+    sb.AppendIndent(lockCookie.Indent).Append($"return {CreatedVarName};");
+  }
+
+  private void GenerateInitializeMethod(StringBuilder sb, int indent)
+  {
+    using var lockCookie = StringBuilderCookies.Lock(sb, SyncFieldName, indent);
+    sb.AppendIndent(lockCookie.Indent).Append($"{InitializationFuncFieldName}").AppendEq()
+      .Append(InitializeFuncParamName).AppendSemicolon();
+  }
+
+  private void GenerateDefaultInitializeMethod(StringBuilder sb, int indent)
+  {
+    sb.AppendIndent(indent).Append($"var {CreatedVarName} =").AppendSpace().Append("new").AppendSpace()
+      .Append(myComponentFullTypeName);
+
+    using (var bracesCookie = StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true))
     {
-      sb.AppendIndent(lockCookie.Indent)
-        .Append($"if (Volatile.Read(ref {InstanceFieldName}) is {{ }} {Existing2}) return {Existing2};")
-        .AppendNewLine();
-      
-      sb.AppendIndent(lockCookie.Indent).Append($"var {CreatedVarName} =").AppendSpace().Append("new").AppendSpace()
-        .Append(myComponentFullTypeName);
-
-      using (var bracesCookie = StringBuilderCookies.DefaultBraces(sb, lockCookie.Indent, appendEndIndent: true))
+      foreach (var dependenciesAccessor in myDependenciesAccessors)
       {
-        foreach (var dependenciesAccessor in myDependenciesAccessors)
-        {
-          sb.AppendIndent(bracesCookie.Indent).Append(dependenciesAccessor).AppendComma().AppendNewLine();
-        }
-
-        if (myDependenciesAccessors.Count > 0)
-        {
-          //remove last command and new line
-          sb.Remove(sb.Length - 2, 2);
-        }
+        sb.AppendIndent(bracesCookie.Indent).Append(dependenciesAccessor).AppendComma().AppendNewLine();
       }
 
-      sb.AppendSemicolon().AppendNewLine();
-      sb.AppendIndent(lockCookie.Indent).Append($"Volatile.Write(ref {InstanceFieldName}, {CreatedVarName});").AppendNewLine();
-      sb.AppendIndent(lockCookie.Indent).Append($"return {CreatedVarName};");
+      if (myDependenciesAccessors.Count > 0)
+      {
+        //remove last command and new line
+        sb.Remove(sb.Length - 2, 2);
+      }
     }
+
+    sb.AppendSemicolon().AppendNewLine().AppendIndent(indent).Append("return ").Append(CreatedVarName).AppendSemicolon();
   }
 
   private string GenerateDependencyAccessor(IComponentDependency dependency)

@@ -49,27 +49,26 @@ internal class GeneratedClassModel
   {
     sb.AppendIndent(indent).Append(myModifier.CreateModifierString())
       .Append(" partial class ").Append(myName).AppendNewLine();
-    
-    using (var cookie = StringBuilderCookies.CurlyBraces(sb, indent))
+
+    using var cookie = StringBuilderCookies.CurlyBraces(sb, indent);
+    foreach (var field in myFields)
     {
-      foreach (var field in myFields)
-      {
-        field.GenerateInto(sb, cookie.Indent);
-      }
+      field.GenerateInto(sb, cookie.Indent);
+    }
       
-      if (myFields.Count > 0) sb.AppendNewLine();
+    if (myFields.Count > 0) sb.AppendNewLine();
       
-      foreach (var constructor in myConstructors)
-      {
-        constructor.GenerateInto(sb, cookie.Indent);
-      }
+    foreach (var constructor in myConstructors)
+    {
+      constructor.GenerateInto(sb, cookie.Indent);
+    }
       
-      if (myConstructors.Count > 0) sb.AppendNewLine();
+    if (myConstructors.Count > 0) sb.AppendNewLine();
       
-      foreach (var method in myMethods)
-      {
-        method.GenerateInto(sb, cookie.Indent);
-      }
+    foreach (var method in myMethods)
+    {
+      method.GenerateInto(sb, cookie.Indent);
+      sb.AppendNewLine().AppendNewLine();
     }
   }
 }
