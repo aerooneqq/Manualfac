@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
 using Manualfac.Generators.Components;
+using Manualfac.Generators.Components.Dependencies;
 using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
@@ -34,20 +35,31 @@ internal class GeneratedContainerInitializerModel
   {
     foreach (var component in myStorage.AllComponents)
     {
-      sb.Append(component.CreateContainerName()).Append(".Initialize");
+      sb.AppendIndent(indent).Append(component.CreateContainerName()).Append(".Initialize");
       using (var cookie = StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true))
       {
-        sb.Append("() => ");
+        sb.AppendIndent(cookie.Indent).Append("() => ").AppendNewLine();
         using (var methodCookie = StringBuilderCookies.CurlyBraces(sb, cookie.Indent))
         {
-          
+          new GeneratedComponentObjectCreationModel(component, AdjustComponent).GenerateInto(sb, methodCookie.Indent);
         }
       }
 
       sb.AppendSemicolon().AppendNewLine().AppendNewLine();
     }
   }
-  
+
+  private IConcreteComponent AdjustComponent(IConcreteComponent component)
+  {
+    var current = component;
+    while (myStorage.BaseToOverrides.TryGetValue(current, out var @override))
+    {
+      current = @override;
+    }
+    
+    return current;
+  }
+
   public void GenerateInto(StringBuilder sb, int indent)
   {
     myGeneratedClassModel.GenerateInto(sb, indent);

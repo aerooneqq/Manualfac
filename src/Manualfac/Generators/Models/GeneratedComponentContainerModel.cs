@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.SymbolStore;
 using System.Text;
 using Manualfac.Generators.Components;
 using Manualfac.Generators.Components.Dependencies;
@@ -23,47 +24,44 @@ internal class GeneratedComponentContainerModel
 
   private const string Void = "void";
   
-  private readonly string myComponentFullTypeName;
   private readonly GeneratedUsingsModel myDependenciesUsingsModel;
-  private readonly IReadOnlyList<string> myDependenciesAccessors;
   private readonly GeneratedNamespaceModel myGeneratedNamespaceModel;
   private readonly GeneratedUsingsModel myDefaultUsingsModel;
+  private readonly GeneratedComponentObjectCreationModel myComponentCreationModel;
 
 
-  public GeneratedComponentContainerModel(IConcreteComponent concreteComponent)
+  public GeneratedComponentContainerModel(IConcreteComponent component)
   {
-    myComponentFullTypeName = concreteComponent.FullName;
-    myDependenciesUsingsModel = concreteComponent.ToDependenciesUsingsModel();
-    
-    myDependenciesAccessors = concreteComponent.Dependencies.Select(GenerateDependencyAccessor).ToList();
-    
+    myDependenciesUsingsModel = component.ToDependenciesUsingsModel();
+    myComponentCreationModel = new GeneratedComponentObjectCreationModel(component, static c => c);
+
     var generatedClassModel = new GeneratedClassModel(
-      concreteComponent.CreateContainerName(),
+      component.CreateContainerName(),
       ImmutableArray<GeneratedConstructorModel>.Empty,
       new[]
       {
-        new GeneratedFieldModel(myComponentFullTypeName, InstanceFieldName, AccessModifier.Private, false, true),
+        new GeneratedFieldModel(component.FullName, InstanceFieldName, AccessModifier.Private, false, true),
         new GeneratedFieldModel("object", SyncFieldName, AccessModifier.Private, false, true, "new object()"),
-        new GeneratedFieldModel($"Func<{myComponentFullTypeName}>", InitializationFuncFieldName, AccessModifier.Private, 
+        new GeneratedFieldModel($"Func<{component.FullName}>", InitializationFuncFieldName, AccessModifier.Private, 
           false, true, defaultValue: DefaultInitializeMethodName)
       },
       new[]
       {
         new GeneratedMethodModel(
-          ResolveMethodName, myComponentFullTypeName, GenerateFactoryMethod, 
+          ResolveMethodName, component.FullName, GenerateFactoryMethod, 
           ImmutableList<GeneratedParameterModel>.Empty, isStatic: true),
         
         new GeneratedMethodModel(InitializeMethodName, Void, GenerateInitializeMethod, new []
         {
-          new GeneratedParameterModel($"Func<{myComponentFullTypeName}>", InitializeFuncParamName)
+          new GeneratedParameterModel($"Func<{component.FullName}>", InitializeFuncParamName)
         }, isStatic: true),
         
         new GeneratedMethodModel(
-          DefaultInitializeMethodName, myComponentFullTypeName, GenerateDefaultInitializeMethod, 
+          DefaultInitializeMethodName, component.FullName, GenerateDefaultInitializeMethod, 
           ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Private, isStatic: true)
       });
     
-    myGeneratedNamespaceModel = new GeneratedNamespaceModel(concreteComponent.Namespace, generatedClassModel.GenerateInto);
+    myGeneratedNamespaceModel = new GeneratedNamespaceModel(component.Namespace, generatedClassModel.GenerateInto);
     myDefaultUsingsModel = new GeneratedUsingsModel(new[] { "System.Threading" });
   }
 
@@ -104,7 +102,29 @@ internal class GeneratedComponentContainerModel
       .Append(InitializeFuncParamName).AppendSemicolon();
   }
 
-  private void GenerateDefaultInitializeMethod(StringBuilder sb, int indent)
+  private void GenerateDefaultInitializeMethod(StringBuilder sb, int indent) => 
+    myComponentCreationModel.GenerateInto(sb, indent);
+}
+
+internal class GeneratedComponentObjectCreationModel
+{
+  private const string CreatedVarName = "created";
+
+  private readonly IReadOnlyList<string> myDependenciesAccessors;
+  private readonly string myComponentFullTypeName;
+
+
+  public GeneratedComponentObjectCreationModel(
+    IConcreteComponent concreteComponent, Func<IConcreteComponent, IConcreteComponent> componentAdjustFunc)
+  {
+    myComponentFullTypeName = concreteComponent.FullName;
+    myDependenciesAccessors = concreteComponent.Dependencies
+      .Select(dep => DependencyAccessorUtil.GenerateDependencyAccessor(dep, componentAdjustFunc))
+      .ToList();
+  }
+
+
+  public void GenerateInto(StringBuilder sb, int indent)
   {
     sb.AppendIndent(indent).Append($"var {CreatedVarName} =").AppendSpace().Append("new").AppendSpace()
       .Append(myComponentFullTypeName);
@@ -123,17 +143,23 @@ internal class GeneratedComponentContainerModel
       }
     }
 
-    sb.AppendSemicolon().AppendNewLine().AppendIndent(indent).Append("return ").Append(CreatedVarName).AppendSemicolon();
+    sb.AppendSemicolon().AppendNewLine().AppendIndent(indent).Append("return ")
+      .Append(CreatedVarName).AppendSemicolon();
   }
+}
 
-  private string GenerateDependencyAccessor(IComponentDependency dependency)
+internal static class DependencyAccessorUtil
+{
+  public static string GenerateDependencyAccessor(
+    IComponentDependency dependency, Func<IConcreteComponent, IConcreteComponent> adjustComponentFunc)
   {
     switch (dependency)
     {
       case ConcreteComponentDependency or NonCollectionInterfaceDependency:
-        return $"{dependency.ResolveUnderlyingConcreteComponents().First().CreateContainerResolveExpression()}";
+        var dep = adjustComponentFunc(dependency.ResolveUnderlyingConcreteComponents().First());
+        return $"{dep.CreateContainerResolveExpression()}";
       case CollectionDependency collectionDependency:
-        var impls = collectionDependency.ResolveUnderlyingConcreteComponents();
+        var impls = collectionDependency.ResolveUnderlyingConcreteComponents().Select(adjustComponentFunc);
         var name = collectionDependency.CollectionItemInterface.GetFullName();
         return $"new {name}[] {{{string.Join(",", impls.Select(impl => impl.CreateContainerResolveExpression()))}}}";
       default:
