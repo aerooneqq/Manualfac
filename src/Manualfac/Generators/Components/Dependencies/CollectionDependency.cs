@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Manualfac.Exceptions;
+using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Components.Dependencies;
@@ -19,7 +20,7 @@ internal class CollectionDependency : IComponentDependency
     DependencyTypeSymbol = collectionInterface;
     
     Debug.Assert(collectionInterface.TypeArguments.Length == 1);
-    Debug.Assert(collectionInterface.MetadataName == "IEnumerable`1");
+    Debug.Assert(collectionInterface.MetadataName == Constants.GenericIEnumerable);
 
     CollectionItemInterface = (INamedTypeSymbol)collectionInterface.TypeArguments.First();
     

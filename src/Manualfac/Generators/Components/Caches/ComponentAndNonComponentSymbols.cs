@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Manualfac.Generators.Util;
+using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Components.Caches;
 
@@ -35,7 +36,7 @@ internal class ComponentAndNonComponentSymbols
     var attributeClass = attribute.AttributeClass;
     if (attributeClass is { })
     {
-      return attributeClass.Name == "ComponentAttribute";
+      return attributeClass.Name == Constants.ComponentAttribute;
     }
 
     return false;

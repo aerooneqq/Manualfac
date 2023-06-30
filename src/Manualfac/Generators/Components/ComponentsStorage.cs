@@ -1,6 +1,7 @@
 using Manualfac.Exceptions;
 using Manualfac.Generators.Components.Caches;
 using Manualfac.Generators.Components.Dependencies;
+using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -86,7 +87,7 @@ internal class ComponentsStorage
         }
         else if (dependencySymbol.TypeKind == TypeKind.Interface)
         {
-          if (dependencySymbol.MetadataName == "IEnumerable`1")
+          if (dependencySymbol.MetadataName == Constants.GenericIEnumerable)
           {
             dependencies.Add((new CollectionDependency(dependencySymbol, this), modifier));
           }
@@ -126,7 +127,7 @@ internal class ComponentsStorage
   {
     var compilation = context.Compilation;
     var symbol = concreteComponent.ComponentSymbol;
-    var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, "OverridesAttribute", compilation);
+    var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.OverridesAttribute, compilation);
     var baseSymbols = overridesAttributes.SelectMany(pair => pair.Interfaces).OfType<INamedTypeSymbol>().ToList();
     if (baseSymbols.Count == 0) return;
     
@@ -154,7 +155,7 @@ internal class ComponentsStorage
 
   private IReadOnlyList<INamedTypeSymbol> ExtractInterfaces(INamedTypeSymbol symbol, Compilation compilation)
   {
-    var asAttributes = ExtractAttributeByNameWithTypeArgs(symbol, "AsAttribute", compilation).ToList();
+    var asAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.AsAttribute, compilation).ToList();
     if (asAttributes.Count == 0)
     {
       return symbol.AllInterfaces;
@@ -166,13 +167,13 @@ internal class ComponentsStorage
   private IEnumerable<(AttributeSyntax, IEnumerable<ITypeSymbol?>)> ExtractDependencies(
     INamedTypeSymbol symbol, Compilation compilation)
   {
-    const string DependsOnAttribute = "DependsOnAttribute";
-    var immediateDependencies = ExtractAttributeByNameWithTypeArgs(symbol, DependsOnAttribute, compilation).ToList();
-    var current = symbol.BaseType;
+    var immediateDependencies = ExtractAttributeByNameWithTypeArgs(symbol, Constants.DependsOnAttribute, compilation)
+      .ToList();
     
+    var current = symbol.BaseType;
     while (current is { })
     {
-      immediateDependencies.AddRange(ExtractAttributeByNameWithTypeArgs(current, DependsOnAttribute, compilation));
+      immediateDependencies.AddRange(ExtractAttributeByNameWithTypeArgs(current, Constants.DependsOnAttribute, compilation));
       current = current.BaseType;
     }
 

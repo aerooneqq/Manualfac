@@ -9,7 +9,7 @@ internal static class ExtensionsForIComponentInfo
   public static string CreateContainerName(this IConcreteComponent concreteComponent) => $"{concreteComponent.TypeShortName}Container";
 
   public static string CreateContainerResolveExpression(this IConcreteComponent concreteComponent) =>
-    $"{concreteComponent.CreateContainerName()}.Resolve()";
+    $"{concreteComponent.CreateContainerName()}.{Constants.ResolveMethod}()";
   
   public static GeneratedUsingsModel ToDependenciesUsingsModel(this IConcreteComponent concreteComponent) => 
     new(concreteComponent.Dependencies

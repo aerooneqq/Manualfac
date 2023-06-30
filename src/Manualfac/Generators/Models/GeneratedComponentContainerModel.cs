@@ -9,8 +9,6 @@ namespace Manualfac.Generators.Models;
 
 internal class GeneratedComponentContainerModel
 {
-  private const string ResolveMethodName = "Resolve";
-  private const string InitializeMethodName = "Initialize";
   private const string DefaultInitializeMethodName = "DefaultInitialize";
   
   private const string InstanceFieldName = "ourInstance";
@@ -48,10 +46,10 @@ internal class GeneratedComponentContainerModel
       new[]
       {
         new GeneratedMethodModel(
-          ResolveMethodName, component.FullName, GenerateFactoryMethod, 
+          Constants.ResolveMethod, component.FullName, GenerateFactoryMethod, 
           ImmutableList<GeneratedParameterModel>.Empty, isStatic: true),
         
-        new GeneratedMethodModel(InitializeMethodName, Void, GenerateInitializeMethod, new []
+        new GeneratedMethodModel(Constants.InitializeMethod, Void, GenerateInitializeMethod, new []
         {
           new GeneratedParameterModel($"Func<{component.FullName}>", InitializeFuncParamName)
         }, isStatic: true),
