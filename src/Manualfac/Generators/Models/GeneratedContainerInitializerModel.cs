@@ -11,6 +11,7 @@ internal class GeneratedContainerInitializerModel
 {
   private readonly ComponentsStorage myStorage;
   private readonly GeneratedClassModel myGeneratedClassModel;
+  private GeneratedUsingsModel myGeneratedUsingsModel;
 
 
   public GeneratedContainerInitializerModel(ComponentsStorage storage, IAssemblySymbol assemblySymbol)
@@ -33,7 +34,7 @@ internal class GeneratedContainerInitializerModel
   {
     foreach (var component in myStorage.AllComponents)
     {
-      sb.AppendIndent(indent).Append(component.CreateContainerName()).Append(".Initialize");
+      sb.AppendIndent(indent).Append(component.CreateContainerFullName()).Append($".{Constants.InitializeMethod}");
       using (var cookie = StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true))
       {
         sb.AppendIndent(cookie.Indent).Append("() => ").AppendNewLine();

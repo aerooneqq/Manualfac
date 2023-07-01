@@ -8,9 +8,12 @@ namespace Manualfac.Generators.Components;
 
 internal static class ExtensionsForIComponentInfo
 {
-  public static string CreateContainerName(this IConcreteComponent concreteComponent) => 
-    $"{concreteComponent.TypeShortName}Container";
+  public static string CreateContainerName(this IConcreteComponent component) => 
+    $"{component.TypeShortName}Container";
 
+  public static string CreateContainerFullName(this IConcreteComponent component) =>
+    $"{component.Namespace}{(string.IsNullOrWhiteSpace(component.Namespace) ? "" : ".")}{component.CreateContainerName()}";
+  
   public static string CreateContainerResolveExpression(this IConcreteComponent concreteComponent) =>
     $"{concreteComponent.CreateContainerName()}.{Constants.ResolveMethod}()";
   
