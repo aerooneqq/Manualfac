@@ -46,7 +46,7 @@ internal class GeneratedNamespaceModel
 
     try
     {
-      if (myNamespaceName is { })
+      if (myNamespaceName is { } && !string.IsNullOrWhiteSpace(myNamespaceName))
       {
         sb.Append("namespace").AppendSpace().Append(myNamespaceName).AppendSpace().AppendNewLine();
         namespaceCookie = StringBuilderCookies.CurlyBraces(sb, indent);

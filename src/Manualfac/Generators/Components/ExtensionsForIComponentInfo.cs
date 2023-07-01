@@ -17,7 +17,7 @@ internal static class ExtensionsForIComponentInfo
   public static GeneratedUsingsModel ToDependenciesUsingsModel(this IConcreteComponent concreteComponent) => 
     new(concreteComponent.Dependencies.AllDependenciesSet
       .SelectMany(dep => dep.ResolveUnderlyingConcreteComponents().Select(c => c.Namespace))
-      .Where(ns => ns is { })
+      .Where(ns => ns is { } && !string.IsNullOrWhiteSpace(ns))
       .Distinct()
       .ToList()!);
   
