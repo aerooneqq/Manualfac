@@ -42,6 +42,8 @@ internal class GeneratedConstructorModel
       }
     }
     
+    myBaseConstructorModel?.GenerateInto(sb, indent);
+    
     using (var cookie = StringBuilderCookies.CurlyBraces(sb.AppendNewLine(), indent))
     {
       var index = 0;
@@ -76,8 +78,8 @@ internal class GeneratedBaseConstructorModel
 
   public void GenerateInto(StringBuilder sb, int indent)
   {
-    sb.Append(": base");
-    using var cookie = StringBuilderCookies.DefaultBraces(sb, indent);
+    sb.Append(" : base");
+    using var cookie = StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true);
     foreach (var argument in myBaseConstructorArgs)
     {
       sb.AppendIndent(cookie.Indent).Append(argument).AppendComma().AppendNewLine();

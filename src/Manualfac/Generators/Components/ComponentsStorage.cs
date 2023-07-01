@@ -110,31 +110,41 @@ internal class ComponentsStorage
             throw new DuplicatedDependencyException(componentSymbol, dependencySymbol);
           }
 
-          if (dependencySymbol.TypeKind == TypeKind.Class)
+          if (TryGetDependency(dependencySymbol, visited, context) is { } dependency)
           {
-            var dependencyComponent = ToComponentInfo(dependencySymbol, visited, context);
-            currentLevel.Add((new ConcreteComponentDependency(dependencyComponent), modifier));
-          }
-          else if (dependencySymbol.TypeKind == TypeKind.Interface)
-          {
-            if (dependencySymbol.MetadataName == Constants.GenericIEnumerable)
-            {
-              currentLevel.Add((new CollectionDependency(dependencySymbol, this), modifier));
-            }
-            else
-            {
-              currentLevel.Add((new NonCollectionInterfaceDependency(dependencySymbol, this), modifier));
-            }
+            currentLevel.Add((dependency, modifier));
           }
 
           alreadyAddedDependencySymbols.Add(dependencySymbol);
         }
-
-        componentsDepsByLevels.Add(currentLevel);
       }
+      
+      componentsDepsByLevels.Add(currentLevel);
     }
 
     return componentsDepsByLevels;
+  }
+
+  private IComponentDependency? TryGetDependency(
+    INamedTypeSymbol dependencySymbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
+  {
+    if (dependencySymbol.TypeKind == TypeKind.Class)
+    {
+      var dependencyComponent = ToComponentInfo(dependencySymbol, visited, context);
+      return new ConcreteComponentDependency(dependencyComponent);
+    }
+
+    if (dependencySymbol.TypeKind == TypeKind.Interface)
+    {
+      if (dependencySymbol.MetadataName == Constants.GenericIEnumerable)
+      {
+        return new CollectionDependency(dependencySymbol, this);
+      }
+
+      return new NonCollectionInterfaceDependency(dependencySymbol, this);
+    }
+
+    return null;
   }
 
   private void AddToInterfacesToImplementationsMap(IConcreteComponent concreteComponent, Compilation compilation)
@@ -202,6 +212,8 @@ internal class ComponentsStorage
     
     while (current is { })
     {
+      if (!mySymbolsCache.CheckIfManualfacComponent(current)) break;
+
       var nextLevelDeps = ExtractAttributeByNameWithTypeArgs(current, Constants.DependsOnAttribute, compilation)
         .ToList();
       
