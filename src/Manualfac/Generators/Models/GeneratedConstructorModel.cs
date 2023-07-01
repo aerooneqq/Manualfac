@@ -6,16 +6,19 @@ namespace Manualfac.Generators.Models;
 internal class GeneratedConstructorModel
 {
   private readonly string myContainingTypeName;
+  private readonly IReadOnlyList<GeneratedFieldModel> myConstructorParameters;
   private readonly IReadOnlyList<GeneratedFieldModel> myFieldsToInitialize;
   private readonly GeneratedBaseConstructorModel? myBaseConstructorModel;
 
 
   public GeneratedConstructorModel(
     string containingTypeName, 
+    IReadOnlyList<GeneratedFieldModel> constructorParameters,
     IReadOnlyList<GeneratedFieldModel> fieldsToInitialize,
     GeneratedBaseConstructorModel? baseConstructorModel = null)
   {
     myContainingTypeName = containingTypeName;
+    myConstructorParameters = constructorParameters;
     myFieldsToInitialize = fieldsToInitialize;
     myBaseConstructorModel = baseConstructorModel;
   }
@@ -28,7 +31,7 @@ internal class GeneratedConstructorModel
     using (var cookie = StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true))
     {
       var index = 0;
-      foreach (var field in myFieldsToInitialize)
+      foreach (var field in myConstructorParameters)
       {
         sb.AppendIndent(cookie.Indent).Append(field.TypeName).AppendSpace()
           .Append(GeneratedConstructorUtil.GetComponentParamName(index++))
