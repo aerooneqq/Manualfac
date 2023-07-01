@@ -78,6 +78,8 @@ internal class GeneratedBaseConstructorModel
 
   public void GenerateInto(StringBuilder sb, int indent)
   {
+    if (myBaseConstructorArgs.Count == 0) return;
+    
     sb.Append(" : base");
     using var cookie = StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true);
     foreach (var argument in myBaseConstructorArgs)
