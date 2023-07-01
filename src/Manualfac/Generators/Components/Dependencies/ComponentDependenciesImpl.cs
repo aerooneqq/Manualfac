@@ -6,21 +6,21 @@ internal class ComponentDependenciesImpl : IComponentDependencies
   
 
   public HashSet<IComponentDependency> AllDependenciesSet { get; }
-  public IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)> ImmediateDependencies { get; }
+  public IReadOnlyList<ComponentDependencyDescriptor> ImmediateDependencies { get; }
 
 
   public ComponentDependenciesImpl(
     IConcreteComponent thisComponent, 
-    IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)> immediateDependencies)
+    IReadOnlyList<ComponentDependencyDescriptor> immediateDependencies)
   {
     myComponent = thisComponent;
     ImmediateDependencies = immediateDependencies;
-    var allComponents = DependenciesByLevels.SelectMany(deps => deps.Select(dep => dep.Component));
-    AllDependenciesSet = new HashSet<IComponentDependency>(allComponents);
+    var allDependencies = DependenciesByLevels.SelectMany(deps => deps.Select(dep => dep.Dependency));
+    AllDependenciesSet = new HashSet<IComponentDependency>(allDependencies);
   }
   
   
-  public IEnumerable<IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)>> DependenciesByLevels
+  public IEnumerable<IReadOnlyList<ComponentDependencyDescriptor>> DependenciesByLevels
   {
     get
     {
@@ -34,7 +34,7 @@ internal class ComponentDependenciesImpl : IComponentDependencies
     }
   }
   
-  public IEnumerable<(IComponentDependency Component, AccessModifier Modifier)> AllOrderedDependencies
+  public IEnumerable<ComponentDependencyDescriptor> AllOrderedDependencies
   {
     get
     {

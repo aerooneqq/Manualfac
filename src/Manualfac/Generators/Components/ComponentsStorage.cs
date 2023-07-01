@@ -87,7 +87,7 @@ internal class ComponentsStorage
     return createdComponent;
   }
 
-  private IReadOnlyList<(IComponentDependency, AccessModifier)> ExtractComponentsDependencies(
+  private IReadOnlyList<ComponentDependencyDescriptor> ExtractComponentsDependencies(
     INamedTypeSymbol componentSymbol, 
     ISet<INamedTypeSymbol> visited,
     GeneratorExecutionContext context)
@@ -95,7 +95,7 @@ internal class ComponentsStorage
     var compilation = context.Compilation;
     var alreadyAddedDependencySymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
   
-    var dependencies = new List<(IComponentDependency, AccessModifier)>();
+    var dependencies = new List<ComponentDependencyDescriptor>();
     foreach (var (attributeSyntax, dependencyTypes) in ExtractDependenciesByLevels(componentSymbol, compilation))
     {
       var modifier = ExtractAccessModifierOrDefault(attributeSyntax, compilation);
@@ -109,7 +109,7 @@ internal class ComponentsStorage
 
         if (TryGetDependency(dependencySymbol, visited, context) is { } dependency)
         {
-          dependencies.Add((dependency, modifier));
+          dependencies.Add(new ComponentDependencyDescriptor(dependency, modifier));
         }
 
         alreadyAddedDependencySymbols.Add(dependencySymbol);
