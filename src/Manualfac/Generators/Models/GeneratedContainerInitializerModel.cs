@@ -11,7 +11,6 @@ internal class GeneratedContainerInitializerModel
 {
   private readonly ComponentsStorage myStorage;
   private readonly GeneratedClassModel myGeneratedClassModel;
-  private GeneratedUsingsModel myGeneratedUsingsModel;
 
 
   public GeneratedContainerInitializerModel(ComponentsStorage storage, IAssemblySymbol assemblySymbol)
