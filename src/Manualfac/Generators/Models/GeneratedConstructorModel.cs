@@ -7,12 +7,17 @@ internal class GeneratedConstructorModel
 {
   private readonly string myContainingTypeName;
   private readonly IReadOnlyList<GeneratedFieldModel> myFieldsToInitialize;
+  private readonly GeneratedBaseConstructorModel? myBaseConstructorModel;
 
 
-  public GeneratedConstructorModel(string containingTypeName, IReadOnlyList<GeneratedFieldModel> fieldsToInitialize)
+  public GeneratedConstructorModel(
+    string containingTypeName, 
+    IReadOnlyList<GeneratedFieldModel> fieldsToInitialize,
+    GeneratedBaseConstructorModel? baseConstructorModel = null)
   {
     myContainingTypeName = containingTypeName;
     myFieldsToInitialize = fieldsToInitialize;
+    myBaseConstructorModel = baseConstructorModel;
   }
 
 
@@ -25,7 +30,8 @@ internal class GeneratedConstructorModel
       var index = 0;
       foreach (var field in myFieldsToInitialize)
       {
-        sb.AppendIndent(cookie.Indent).Append(field.TypeName).AppendSpace().Append(GetComponentParamName(index++))
+        sb.AppendIndent(cookie.Indent).Append(field.TypeName).AppendSpace()
+          .Append(GeneratedConstructorUtil.GetComponentParamName(index++))
           .AppendComma().AppendNewLine();
       }
       
@@ -42,16 +48,45 @@ internal class GeneratedConstructorModel
       foreach (var field in myFieldsToInitialize)
       {
         sb.AppendIndent(cookie.Indent).Append(field.Name)
-          .AppendSpace().AppendEq().AppendSpace().Append(GetComponentParamName(index++))
+          .AppendSpace().AppendEq().AppendSpace().Append(GeneratedConstructorUtil.GetComponentParamName(index++))
           .AppendSemicolon().AppendNewLine();
       }
 
       //remove last new line
       sb.Remove(sb.Length - 1, 1);
     }
+  }
+}
 
-    return;
+internal static class GeneratedConstructorUtil
+{
+  public static string GetComponentParamName(int index) => $"c{index}";
+}
 
-    static string GetComponentParamName(int index) => $"c{index}";
+internal class GeneratedBaseConstructorModel
+{
+  private readonly IReadOnlyList<string> myBaseConstructorArgs;
+
+  
+  public GeneratedBaseConstructorModel(IReadOnlyList<string> baseConstructorArgs)
+  {
+    myBaseConstructorArgs = baseConstructorArgs;
+  }
+
+
+  public void GenerateInto(StringBuilder sb, int indent)
+  {
+    sb.Append(": base");
+    using var cookie = StringBuilderCookies.DefaultBraces(sb, indent);
+    foreach (var argument in myBaseConstructorArgs)
+    {
+      sb.AppendIndent(cookie.Indent).Append(argument).AppendComma().AppendNewLine();
+    }
+
+    if (myBaseConstructorArgs.Count > 0)
+    {
+      //remove last new line and comma
+      sb.Remove(sb.Length - 2, 2);
+    }
   }
 }

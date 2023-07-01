@@ -16,10 +16,8 @@ internal class GeneratedContainerInitializerModel
   public GeneratedContainerInitializerModel(ComponentsStorage storage, IAssemblySymbol assemblySymbol)
   {
     myStorage = storage;
-    var initializerClassName = $"{assemblySymbol.Name}Initializer";
-
     myGeneratedClassModel = new GeneratedClassModel(
-      initializerClassName,
+      $"{assemblySymbol.Name}Initializer",
       ImmutableList<GeneratedConstructorModel>.Empty,
       ImmutableList<GeneratedFieldModel>.Empty,
       new[]

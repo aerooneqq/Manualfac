@@ -7,8 +7,8 @@ namespace Manualfac.Generators.Components;
 internal class ConcreteComponent : IConcreteComponent
 {
   public INamedTypeSymbol ComponentSymbol { get; }
-  public HashSet<IComponentDependency> Dependencies { get; }
-  public IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)> OrderedDependencies { get; }
+  public IComponentDependencies Dependencies { get; }
+  public IConcreteComponent? BaseComponent { get; }
   
   public string TypeShortName => ComponentSymbol.Name;
   public string FullName => ComponentSymbol.GetFullName();
@@ -19,18 +19,19 @@ internal class ConcreteComponent : IConcreteComponent
 
   public ConcreteComponent(
     INamedTypeSymbol componentSymbol, 
-    IReadOnlyCollection<(IComponentDependency Component, AccessModifier Modifier)> dependencies)
+    IReadOnlyList<IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)>> dependenciesByLevels,
+    IConcreteComponent? baseComponent)
   {
+    BaseComponent = baseComponent;
     ComponentSymbol = componentSymbol;
-    Dependencies = new HashSet<IComponentDependency>(dependencies.Select(dep => dep.Component));
-    OrderedDependencies = dependencies.OrderBy(dep => dep.Component.DependencyTypeSymbol.Name).ToList();
+    Dependencies = new ComponentDependenciesImpl(dependenciesByLevels);
   }
   
   
   public IReadOnlyList<IConcreteComponent> ResolveConcreteDependencies()
   {
     var concreteDependencies = new List<IConcreteComponent>();
-    foreach (var (component, _) in OrderedDependencies)
+    foreach (var (component, _) in Dependencies.AllOrderedDependencies)
     {
       concreteDependencies.AddRange(component.ResolveUnderlyingConcreteComponents());
     }

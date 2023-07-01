@@ -116,7 +116,7 @@ internal class GeneratedComponentObjectCreationModel
     IConcreteComponent concreteComponent, Func<IConcreteComponent, IConcreteComponent> componentAdjustFunc)
   {
     myComponentFullTypeName = concreteComponent.FullName;
-    myDependenciesAccessors = concreteComponent.Dependencies
+    myDependenciesAccessors = concreteComponent.Dependencies.AllDependenciesSet
       .Select(dep => DependencyAccessorUtil.GenerateDependencyAccessor(dep, componentAdjustFunc))
       .ToList();
   }
