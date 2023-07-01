@@ -75,9 +75,9 @@ internal class ComponentsStorage
     var baseComponent = TryFindBaseComponent(componentSymbol, context);
     var createdComponent = new ConcreteComponent(componentSymbol, componentsDepsByLevels, baseComponent);
 
-    if (baseComponent is { })
+    if (TryFindOverridenComponent(componentSymbol, context) is { } overridenComponent)
     {
-      myOverridesCache.AddOverride(createdComponent, baseComponent);
+      myOverridesCache.AddOverride(createdComponent, overridenComponent);
     }
     
     myCache.UpdateExistingComponent(componentSymbol, createdComponent);
@@ -87,42 +87,36 @@ internal class ComponentsStorage
     return createdComponent;
   }
 
-  private IReadOnlyList<IReadOnlyList<(IComponentDependency, AccessModifier)>> ExtractComponentsDependencies(
+  private IReadOnlyList<(IComponentDependency, AccessModifier)> ExtractComponentsDependencies(
     INamedTypeSymbol componentSymbol, 
     ISet<INamedTypeSymbol> visited,
     GeneratorExecutionContext context)
   {
     var compilation = context.Compilation;
     var alreadyAddedDependencySymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-    var componentsDepsByLevels = new List<IReadOnlyList<(IComponentDependency, AccessModifier)>>();
-
-    foreach (var level in ExtractDependenciesByLevels(componentSymbol, compilation))
+  
+    var dependencies = new List<(IComponentDependency, AccessModifier)>();
+    foreach (var (attributeSyntax, dependencyTypes) in ExtractDependenciesByLevels(componentSymbol, compilation))
     {
-      var currentLevel = new List<(IComponentDependency, AccessModifier)>();
-      foreach (var (attributeSyntax, dependencyTypes) in level)
+      var modifier = ExtractAccessModifierOrDefault(attributeSyntax, compilation);
+
+      foreach (var dependencySymbol in dependencyTypes.OfType<INamedTypeSymbol>())
       {
-        var modifier = ExtractAccessModifierOrDefault(attributeSyntax, compilation);
-
-        foreach (var dependencySymbol in dependencyTypes.OfType<INamedTypeSymbol>())
+        if (alreadyAddedDependencySymbols.Contains(dependencySymbol))
         {
-          if (alreadyAddedDependencySymbols.Contains(dependencySymbol))
-          {
-            throw new DuplicatedDependencyException(componentSymbol, dependencySymbol);
-          }
-
-          if (TryGetDependency(dependencySymbol, visited, context) is { } dependency)
-          {
-            currentLevel.Add((dependency, modifier));
-          }
-
-          alreadyAddedDependencySymbols.Add(dependencySymbol);
+          throw new DuplicatedDependencyException(componentSymbol, dependencySymbol);
         }
+
+        if (TryGetDependency(dependencySymbol, visited, context) is { } dependency)
+        {
+          dependencies.Add((dependency, modifier));
+        }
+
+        alreadyAddedDependencySymbols.Add(dependencySymbol);
       }
-      
-      componentsDepsByLevels.Add(currentLevel);
     }
 
-    return componentsDepsByLevels;
+    return dependencies;
   }
 
   private IComponentDependency? TryGetDependency(
@@ -162,6 +156,17 @@ internal class ComponentsStorage
 
   private IConcreteComponent? TryFindBaseComponent(INamedTypeSymbol symbol, GeneratorExecutionContext context)
   {
+    if (symbol.BaseType is not { } baseType ||
+        !mySymbolsCache.CheckIfManualfacComponent(baseType))
+    {
+      return null;
+    }
+
+    return ToComponentInfo(baseType, new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default), context);
+  }
+
+  private IConcreteComponent? TryFindOverridenComponent(INamedTypeSymbol symbol, GeneratorExecutionContext context)
+  {
     var compilation = context.Compilation;
     var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.OverridesAttribute, compilation);
     var baseSymbols = overridesAttributes.SelectMany(pair => pair.Interfaces).OfType<INamedTypeSymbol>().ToList();
@@ -199,29 +204,11 @@ internal class ComponentsStorage
     return asAttributes.SelectMany(pair => pair.Interfaces).OfType<INamedTypeSymbol>().ToList();
   }
 
-  private IReadOnlyList<IReadOnlyList<(AttributeSyntax, IEnumerable<ITypeSymbol?>)>> ExtractDependenciesByLevels(
+  private IReadOnlyList<(AttributeSyntax, IEnumerable<ITypeSymbol?>)> ExtractDependenciesByLevels(
     INamedTypeSymbol symbol, 
     Compilation compilation)
   {
-    var dependenciesByLevels = new List<IReadOnlyList<(AttributeSyntax, IEnumerable<ITypeSymbol?>)>>();
-    var immediateDependencies = ExtractAttributeByNameWithTypeArgs(symbol, Constants.DependsOnAttribute, compilation)
-      .ToList();
-    
-    dependenciesByLevels.Add(immediateDependencies);
-    var current = symbol.BaseType;
-    
-    while (current is { })
-    {
-      if (!mySymbolsCache.CheckIfManualfacComponent(current)) break;
-
-      var nextLevelDeps = ExtractAttributeByNameWithTypeArgs(current, Constants.DependsOnAttribute, compilation)
-        .ToList();
-      
-      dependenciesByLevels.Add(nextLevelDeps);
-      current = current.BaseType;
-    }
-
-    return dependenciesByLevels;
+    return ExtractAttributeByNameWithTypeArgs(symbol, Constants.DependsOnAttribute, compilation).ToList();
   }
 
   private static IEnumerable<(AttributeSyntax Attribute, IEnumerable<ITypeSymbol?> Interfaces)> ExtractAttributeByNameWithTypeArgs(
@@ -273,8 +260,7 @@ internal class ComponentsStorage
 
     return AccessModifier.Private;
   }
-
-
+  
   private IEnumerable<INamedTypeSymbol> GetComponentTypesFrom(IModuleSymbol module)
   {
     return GetAllNamespacesFrom(module.GlobalNamespace)

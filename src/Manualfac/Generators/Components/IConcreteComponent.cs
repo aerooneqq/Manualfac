@@ -19,19 +19,34 @@ internal interface IConcreteComponent
 internal interface IComponentDependencies
 {
   public IEnumerable<(IComponentDependency Component, AccessModifier Modifier)> AllOrderedDependencies { get; }
-  public IReadOnlyList<IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)>> DependenciesByLevels { get; }
+  public IEnumerable<IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)>> DependenciesByLevels { get; }
   public HashSet<IComponentDependency> AllDependenciesSet { get; }
   public IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)> ImmediateDependencies { get; }
 }
 
 internal class ComponentDependenciesImpl : IComponentDependencies
 {
-  public IReadOnlyList<IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)>> DependenciesByLevels { get; }
+  private readonly IConcreteComponent myComponent;
+  
+  
+  public IEnumerable<IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)>> DependenciesByLevels
+  {
+    get
+    {
+      yield return ImmediateDependencies;
+      var current = myComponent.BaseComponent;
+      while (current is { })
+      {
+        yield return current.Dependencies.ImmediateDependencies;
+        current = current.BaseComponent;
+      }
+    }
+  }
+
   public HashSet<IComponentDependency> AllDependenciesSet { get; }
 
-  public IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)> ImmediateDependencies =>
-    DependenciesByLevels.First();
-
+  public IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)> ImmediateDependencies { get; }
+  
   public IEnumerable<(IComponentDependency Component, AccessModifier Modifier)> AllOrderedDependencies
   {
     get
@@ -48,9 +63,11 @@ internal class ComponentDependenciesImpl : IComponentDependencies
 
   
   public ComponentDependenciesImpl(
-    IReadOnlyList<IReadOnlyList<(IComponentDependency, AccessModifier)>> dependenciesByLevels)
+    IConcreteComponent thisComponent, 
+    IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)> immediateDependencies)
   {
-    DependenciesByLevels = dependenciesByLevels;
+    myComponent = thisComponent;
+    ImmediateDependencies = immediateDependencies;
     var allComponents = DependenciesByLevels.SelectMany(deps => deps.Select(dep => dep.Component));
     AllDependenciesSet = new HashSet<IComponentDependency>(allComponents);
   }

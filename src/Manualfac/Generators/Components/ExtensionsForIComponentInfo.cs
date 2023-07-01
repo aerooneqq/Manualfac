@@ -52,7 +52,7 @@ internal static class ExtensionsForIComponentInfo
   }
 
   public static IReadOnlyList<GeneratedFieldModel> ExtractGeneratedFieldsModels(this IConcreteComponent concreteComponent) => 
-    concreteComponent.Dependencies.AllOrderedDependencies
+    concreteComponent.Dependencies.ImmediateDependencies
       .Select(dep => new GeneratedFieldModel(dep.Component.DependencyTypeSymbol.GetFullName(), $"my{dep.Component.DependencyTypeSymbol.Name}", dep.Modifier))
       .ToList();
 }

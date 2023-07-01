@@ -19,12 +19,12 @@ internal class ConcreteComponent : IConcreteComponent
 
   public ConcreteComponent(
     INamedTypeSymbol componentSymbol, 
-    IReadOnlyList<IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)>> dependenciesByLevels,
+    IReadOnlyList<(IComponentDependency Component, AccessModifier Modifier)> dependenciesByLevels,
     IConcreteComponent? baseComponent)
   {
     BaseComponent = baseComponent;
     ComponentSymbol = componentSymbol;
-    Dependencies = new ComponentDependenciesImpl(dependenciesByLevels);
+    Dependencies = new ComponentDependenciesImpl(this, dependenciesByLevels);
   }
   
   
