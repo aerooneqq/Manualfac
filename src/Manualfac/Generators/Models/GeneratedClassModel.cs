@@ -28,15 +28,18 @@ internal class GeneratedClassModel
   private readonly IReadOnlyList<GeneratedFieldModel> myFields;
   private readonly IReadOnlyList<GeneratedMethodModel> myMethods;
   private readonly GeneratedClassAccessModifier myModifier;
+  private readonly string? myBaseClass;
 
-
+  
   public GeneratedClassModel(
     string name,
     IReadOnlyList<GeneratedConstructorModel> constructors,
     IReadOnlyList<GeneratedFieldModel> fields,
     IReadOnlyList<GeneratedMethodModel> methods,
-    GeneratedClassAccessModifier modifier = GeneratedClassAccessModifier.Public)
+    GeneratedClassAccessModifier modifier = GeneratedClassAccessModifier.Public,
+    string? baseClass = null)
   {
+    myBaseClass = baseClass;
     myName = name;
     myConstructors = constructors;
     myFields = fields;
@@ -48,8 +51,14 @@ internal class GeneratedClassModel
   public void GenerateInto(StringBuilder sb, int indent)
   {
     sb.AppendIndent(indent).Append(myModifier.CreateModifierString())
-      .Append(" partial class ").Append(myName).AppendNewLine();
+      .Append(" partial class ").Append(myName);
 
+    if (myBaseClass is { })
+    {
+      sb.Append(" : ").Append(myBaseClass);
+    }
+    
+    sb.AppendNewLine();
     using var cookie = StringBuilderCookies.CurlyBraces(sb, indent);
     foreach (var field in myFields)
     {
