@@ -4,16 +4,16 @@ namespace DefaultNamespace
 {
   public partial class Class3
   {
-    protected readonly DefaultNamespace.Class1 myClass1;
     public readonly DefaultNamespace.Class2 myClass2;
 
     public Class3(
-      DefaultNamespace.Class1 c0,
-      DefaultNamespace.Class2 c1
+      DefaultNamespace.Class2 c0,
+      DefaultNamespace.Class1 c1
+    ) : base(
+      c1
     )
     {
-      myClass1 = c0;
-      myClass2 = c1;
+      myClass2 = c0;
     }
 
   }
