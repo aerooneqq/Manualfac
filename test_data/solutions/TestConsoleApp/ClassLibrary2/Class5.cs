@@ -2,7 +2,7 @@
 
 namespace ClassLibrary2;
 
-[Component, DependsOn<Class4>(AccessModifier.Private)]
+[Component, DependsOn<Private, Class4>]
 public partial class Class5
 {
   

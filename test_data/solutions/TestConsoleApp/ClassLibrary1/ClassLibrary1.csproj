@@ -7,6 +7,10 @@
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    </PropertyGroup>
+    
     <ItemGroup>
         <ProjectReference Include="../../../../src/Manualfac/Manualfac.csproj"
                           OutputItemType="Analyzer"

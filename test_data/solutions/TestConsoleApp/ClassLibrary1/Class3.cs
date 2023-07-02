@@ -4,7 +4,7 @@ using ManualfacAttributes;
 namespace ClassLibrary1;
 
 [Component]
-[DependsOn<Class4, Class5>(AccessModifier.Private)]
+[DependsOn<Private, Class4, Class5>]
 public partial class Class3
 {
 }

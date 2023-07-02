@@ -3,7 +3,7 @@
 namespace ClassLibrary1;
 
 [Component]
-[DependsOn<Class3>(AccessModifier.Public)]
+[DependsOn<Public, Class3>]
 public partial class Class2
 {
   
