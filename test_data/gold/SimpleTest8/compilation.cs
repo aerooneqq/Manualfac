@@ -17,10 +17,7 @@ public partial class compilationInitializer
     DefaultNamespace.Class2Container.Initialize(
       () => 
       {
-        var created = new DefaultNamespace.Class2(
-          Class1Container.Resolve()
-        );
-        return created;
+        return DefaultNamespace.Class3Container.Resolve();
       }
     );
 
@@ -28,7 +25,7 @@ public partial class compilationInitializer
       () => 
       {
         var created = new DefaultNamespace.Class3(
-          Class1Container.Resolve()
+          DefaultNamespace.Class1Container.Resolve()
         );
         return created;
       }
@@ -38,7 +35,7 @@ public partial class compilationInitializer
       () => 
       {
         var created = new DefaultNamespace.Class4(
-          Class3Container.Resolve()
+          DefaultNamespace.Class3Container.Resolve()
         );
         return created;
       }

@@ -38,8 +38,8 @@ namespace DefaultNamespace
     )
     {
       var created = new DefaultNamespace.Class3(
-        Class2Container.Resolve(),
-        Class1Container.Resolve()
+        DefaultNamespace.Class2Container.Resolve(),
+        DefaultNamespace.Class1Container.Resolve()
       );
       return created;
     }
