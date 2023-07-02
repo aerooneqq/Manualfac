@@ -12,7 +12,7 @@ public class Class1 : IClass1
 {
 }
 
-[Component, DependsOn<IClass1>(AccessModifier.Protected)]
+[Component, DependsOn<Protected, IClass1>()]
 public class Class2
 {
 }

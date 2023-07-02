@@ -17,7 +17,7 @@ public class Class1 : IClass1, IClass11
 {
 }
 
-[Component, DependsOn<IClass11>(AccessModifier.PrivateProtected)]
+[Component, DependsOn<PrivateProtected, IClass11>()]
 public class Class3
 {
 }

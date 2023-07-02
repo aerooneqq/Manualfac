@@ -7,22 +7,22 @@ public class Class1
 {
 }
 
-[Component, DependsOn<Class1>(AccessModifier.Protected)]
+[Component, DependsOn<Protected, Class1>()]
 public class Class2
 {
 }
 
-[Component, DependsOn<Class1, Class2>(AccessModifier.Public)]
+[Component, DependsOn<Public, Class1, Class2>()]
 public class Class3
 {
 }
 
-[Component, DependsOn<Class1, Class2, Class3>(AccessModifier.Internal)]
+[Component, DependsOn<Internal, Class1, Class2, Class3>()]
 public class Class4
 {
 }
 
-[Component, DependsOn<Class1, Class2, Class3, Class4>(AccessModifier.PrivateProtected)]
+[Component, DependsOn<PrivateProtected, Class1, Class2, Class3, Class4>()]
 public class Class5
 {
 }

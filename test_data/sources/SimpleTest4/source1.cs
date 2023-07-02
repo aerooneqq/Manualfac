@@ -17,12 +17,12 @@ public class Class1 : IClass1, IClass11
 {
 }
 
-[Component, DependsOn<IClass1>(AccessModifier.ProtectedInternal)]
+[Component, DependsOn<ProtectedInternal, IClass1>()]
 public class Class2
 {
 }
 
-[Component, DependsOn<IClass11>(AccessModifier.PrivateProtected)]
+[Component, DependsOn<PrivateProtected, IClass11>()]
 public class Class3
 {
 }

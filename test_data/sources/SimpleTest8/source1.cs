@@ -7,17 +7,17 @@ public class Class1
 {
 }
 
-[Component, DependsOn<Class1>(AccessModifier.Protected)]
+[Component, DependsOn<Protected, Class1>()]
 public class Class2
 {
 }
 
-[Component, Overrides<Class2>(AccessModifier.Public)]
+[Component, Overrides<Class2>()]
 public class Class3 : Class2
 {
 }
 
-[Component, DependsOn<Class2>(AccessModifier.Private)]
+[Component, DependsOn<Private, Class2>()]
 public class Class4
 {
 }

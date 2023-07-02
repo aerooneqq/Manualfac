@@ -28,7 +28,7 @@ public class Class1111 : IClass1
 {
 }
 
-[Component, DependsOn<IEnumerable<IClass1>>(AccessModifier.Internal)]
+[Component, DependsOn<Internal, IEnumerable<IClass1>>()]
 public class Class3
 {
 }
