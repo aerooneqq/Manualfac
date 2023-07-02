@@ -113,10 +113,10 @@ internal class GeneratedComponentObjectCreationModel
 
 
   public GeneratedComponentObjectCreationModel(
-    IConcreteComponent concreteComponent, Func<IConcreteComponent, IConcreteComponent> componentAdjustFunc)
+    IConcreteComponent component, Func<IConcreteComponent, IConcreteComponent> componentAdjustFunc)
   {
-    myComponentFullTypeName = concreteComponent.FullName;
-    myDependenciesAccessors = concreteComponent.Dependencies.AllDependenciesSet
+    myComponentFullTypeName = component.FullName;
+    myDependenciesAccessors = component.Dependencies.AllDependenciesSet
       .Select(dep => DependencyAccessorUtil.GenerateDependencyAccessor(dep, componentAdjustFunc))
       .ToList();
   }
@@ -143,6 +143,22 @@ internal class GeneratedComponentObjectCreationModel
 
     sb.AppendSemicolon().AppendNewLine().AppendIndent(indent).Append("return ")
       .Append(CreatedVarName).AppendSemicolon();
+  }
+}
+
+internal class GeneratedOverridenComponentObjectCreationModel
+{
+  private readonly string myContainerResolveExpression;
+
+  public GeneratedOverridenComponentObjectCreationModel(IConcreteComponent overrideComponent)
+  {
+    myContainerResolveExpression = overrideComponent.CreateContainerResolveExpression();
+  }
+
+
+  public void GenerateInto(StringBuilder sb, int indent)
+  {
+    sb.AppendIndent(indent).Append("return ").Append(myContainerResolveExpression).AppendSemicolon();
   }
 }
 

@@ -39,7 +39,15 @@ internal class GeneratedContainerInitializerModel
         sb.AppendIndent(cookie.Indent).Append("() => ").AppendNewLine();
         using (var methodCookie = StringBuilderCookies.CurlyBraces(sb, cookie.Indent))
         {
-          new GeneratedComponentObjectCreationModel(component, AdjustComponent).GenerateInto(sb, methodCookie.Indent);
+          var adjustedComponent = AdjustComponent(component);
+          if (!ReferenceEquals(adjustedComponent, component))
+          {
+            new GeneratedOverridenComponentObjectCreationModel(adjustedComponent).GenerateInto(sb, methodCookie.Indent);
+          }
+          else
+          {
+            new GeneratedComponentObjectCreationModel(component, AdjustComponent).GenerateInto(sb, methodCookie.Indent);
+          }
         }
       }
 

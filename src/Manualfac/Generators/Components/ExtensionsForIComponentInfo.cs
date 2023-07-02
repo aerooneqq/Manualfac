@@ -15,7 +15,7 @@ internal static class ExtensionsForIComponentInfo
     $"{component.Namespace}{(string.IsNullOrWhiteSpace(component.Namespace) ? "" : ".")}{component.CreateContainerName()}";
   
   public static string CreateContainerResolveExpression(this IConcreteComponent concreteComponent) =>
-    $"{concreteComponent.CreateContainerName()}.{Constants.ResolveMethod}()";
+    $"{concreteComponent.CreateContainerFullName()}.{Constants.ResolveMethod}()";
   
   public static GeneratedUsingsModel ToDependenciesUsingsModel(this IConcreteComponent concreteComponent) => 
     new(concreteComponent.Dependencies.AllDependenciesSet
