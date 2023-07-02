@@ -1,6 +1,4 @@
 ﻿using Manualfac.Generators;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace UnitTests;
 

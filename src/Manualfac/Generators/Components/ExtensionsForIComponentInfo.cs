@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Data.SqlTypes;
 using Manualfac.Generators.Components.Dependencies;
 using Manualfac.Generators.Models;
 using Manualfac.Generators.Util;

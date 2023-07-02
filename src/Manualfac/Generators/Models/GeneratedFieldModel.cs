@@ -3,7 +3,7 @@ using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Models;
 
-internal class GeneratedFieldModel
+internal class GeneratedFieldModel : IGeneratedModel
 {
   private readonly AccessModifier myAccessModifier;
   private readonly bool myReadonly;

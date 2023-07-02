@@ -1,13 +1,12 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
 using Manualfac.Generators.Components;
-using Manualfac.Generators.Components.Dependencies;
 using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Models;
 
-internal class GeneratedContainerInitializerModel
+internal class GeneratedContainerInitializerModel : IGeneratedModel
 {
   private readonly ComponentsStorage myStorage;
   private readonly GeneratedClassModel myGeneratedClassModel;
@@ -40,14 +39,13 @@ internal class GeneratedContainerInitializerModel
         using (var methodCookie = StringBuilderCookies.CurlyBraces(sb, cookie.Indent))
         {
           var adjustedComponent = AdjustComponent(component);
-          if (!ReferenceEquals(adjustedComponent, component))
+          IGeneratedModel model = ReferenceEquals(adjustedComponent, component) switch
           {
-            new GeneratedOverridenComponentObjectCreationModel(adjustedComponent).GenerateInto(sb, methodCookie.Indent);
-          }
-          else
-          {
-            new GeneratedComponentObjectCreationModel(component, AdjustComponent).GenerateInto(sb, methodCookie.Indent);
-          }
+            true => new GeneratedComponentObjectCreationModel(component, AdjustComponent),
+            false => new GeneratedOverridenComponentObjectCreationModel(adjustedComponent)
+          };
+          
+          model.GenerateInto(sb, methodCookie.Indent);
         }
       }
 

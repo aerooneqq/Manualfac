@@ -3,7 +3,7 @@ using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Models;
 
-internal class GeneratedUsingsModel
+internal class GeneratedUsingsModel : IGeneratedModel
 {
   private readonly IReadOnlyList<string> myUsings;
 
