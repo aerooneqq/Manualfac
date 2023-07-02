@@ -4,7 +4,7 @@ public partial class compilationInitializer
 
   )
   {
-    Class1Container.Initialize(
+    DefaultNamespace.Class1Container.Initialize(
       () => 
       {
         var created = new DefaultNamespace.Class1(
@@ -14,7 +14,7 @@ public partial class compilationInitializer
       }
     );
 
-    Class2Container.Initialize(
+    DefaultNamespace.Class2Container.Initialize(
       () => 
       {
         var created = new DefaultNamespace.Class2(
@@ -24,7 +24,7 @@ public partial class compilationInitializer
       }
     );
 
-    Class3Container.Initialize(
+    DefaultNamespace.Class3Container.Initialize(
       () => 
       {
         var created = new DefaultNamespace.Class3(
@@ -34,7 +34,7 @@ public partial class compilationInitializer
       }
     );
 
-    Class4Container.Initialize(
+    DefaultNamespace.Class4Container.Initialize(
       () => 
       {
         var created = new DefaultNamespace.Class4(
