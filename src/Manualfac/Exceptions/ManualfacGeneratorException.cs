@@ -1,5 +1,5 @@
 namespace Manualfac.Exceptions;
 
-public class ManualfacGeneratorException : Exception
+public abstract class ManualfacGeneratorException : Exception
 {
 }

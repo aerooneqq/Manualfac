@@ -39,7 +39,7 @@ internal class NonCollectionInterfaceDependency : IComponentDependency
 
     if (impls.Count != 1)
     {
-      throw new CantResolveConcreteImplementationException(DependencyTypeSymbol, impls);
+      throw new CantResolveConcreteImplementationException(DependencyTypeSymbol, impls.Select(impl => impl.FullName).ToList());
     }
 
     myResolveResult = new[] { impls[0] };

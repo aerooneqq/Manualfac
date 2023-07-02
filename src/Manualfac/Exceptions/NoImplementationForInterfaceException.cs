@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Exceptions;
 
-internal class NoImplementationForInterfaceException : ManualfacGeneratorException
+public class NoImplementationForInterfaceException : ManualfacGeneratorException
 {
   public override string Message { get; }
 

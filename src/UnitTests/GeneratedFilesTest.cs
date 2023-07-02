@@ -17,4 +17,9 @@ public class GeneratedFilesTest : TestWithSourceFilesBase<ServiceInjectionGenera
 
   [Test] public void DuplicatedDepsTest() => DoTestWithException<DuplicatedDependencyException>();
   [Test] public void CyclicDepsTest() => DoTestWithException<CyclicDependencyException>();
+  [Test] public void NotComponentTest() => DoTestWithException<TypeSymbolIsNotManualfacComponentException>();
+  [Test] public void OverrideNotComponentTest() => DoTestWithException<CanNotOverrideNonComponentException>();
+  [Test] public void NoImplementationForInterfaceTest() => DoTestWithException<NoImplementationForInterfaceException>();
+  [Test] public void TooManyOverridesTest() => DoTestWithException<TooManyOverridesException>();
+  [Test] public void CantResolveImplTest() => DoTestWithException<CantResolveConcreteImplementationException>();
 }
