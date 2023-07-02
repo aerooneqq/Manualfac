@@ -13,7 +13,7 @@ internal static class SyntaxTreeExtensions
   public static GeneratedFile ToGeneratedFile(this SyntaxTree tree) =>
     new(
       tree.FilePath[(tree.FilePath.LastIndexOf(Path.DirectorySeparatorChar) + 1)..],
-      tree.GetText().ToString().Replace("\r\n", "\n")
+      tree.GetText().ToString().ReplaceRn()
     );
 }
 
@@ -100,7 +100,7 @@ internal class SourceGeneratorsTestExecutor<TGenerator> where TGenerator : ISour
     
     foreach (var (generatedFileName, generatedText) in myGeneratedFiles)
     {
-      var goldText = File.ReadAllText(Path.Join(myPathToGoldDirFor, generatedFileName));
+      var goldText = File.ReadAllText(Path.Join(myPathToGoldDirFor, generatedFileName)).ReplaceRn();
       if (goldText != generatedText)
       {
         myDifferences.Add(generatedFileName);
@@ -127,7 +127,7 @@ internal class SourceGeneratorsTestExecutor<TGenerator> where TGenerator : ISour
   }
   
   private static void WriteTmpFile(string goldDirectory, string originalFileName, string text) => 
-    File.WriteAllText(Path.Combine(goldDirectory, $"{originalFileName}.tmp"), text);
+    File.WriteAllText(Path.Combine(goldDirectory, $"{originalFileName}.tmp"), text.ReplaceRn());
 
   private static Compilation CreateCompilation(IEnumerable<string> files) =>
     CSharpCompilation.Create(
@@ -144,4 +144,9 @@ internal class SourceGeneratorsTestExecutor<TGenerator> where TGenerator : ISour
       {
         MetadataReference.CreateFromFile(typeof(ManualfacAttribute).Assembly.Location)
       });
+}
+
+internal static class StringExtensions
+{
+  public static string ReplaceRn(this string text) => text.Replace("\r\n", "\n");
 }
