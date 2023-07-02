@@ -1,9 +1,9 @@
+using System.Diagnostics;
 using Manualfac.Exceptions;
 using Manualfac.Generators.Components.Caches;
 using Manualfac.Generators.Components.Dependencies;
 using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Manualfac.Generators.Components;
 
@@ -69,7 +69,6 @@ internal class ComponentsStorage
     }
 
     visited.Add(componentSymbol);
-    var compilation = context.Compilation;
 
     var componentsDepsByLevels = ExtractComponentsDependencies(componentSymbol, visited, context);
     var baseComponent = TryFindBaseComponent(componentSymbol, context);
@@ -82,7 +81,7 @@ internal class ComponentsStorage
     
     myCache.UpdateExistingComponent(componentSymbol, createdComponent);
     
-    AddToInterfacesToImplementationsMap(createdComponent, compilation);
+    AddToInterfacesToImplementationsMap(createdComponent);
     
     return createdComponent;
   }
@@ -92,15 +91,14 @@ internal class ComponentsStorage
     ISet<INamedTypeSymbol> visited,
     GeneratorExecutionContext context)
   {
-    var compilation = context.Compilation;
     var alreadyAddedDependencySymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-  
-    var dependencies = new List<ComponentDependencyDescriptor>();
-    foreach (var (attributeSyntax, dependencyTypes) in ExtractDependenciesByLevels(componentSymbol, compilation))
-    {
-      var modifier = ExtractAccessModifierOrDefault(attributeSyntax, compilation);
 
-      foreach (var dependencySymbol in dependencyTypes.OfType<INamedTypeSymbol>())
+    var dependencies = new List<ComponentDependencyDescriptor>();
+    foreach (var dependencyTypes in ExtractDependenciesByLevels(componentSymbol))
+    {
+      var modifier = ExtractAccessModifierOrDefault(dependencyTypes);
+
+      foreach (var dependencySymbol in dependencyTypes.Skip(1))
       {
         if (alreadyAddedDependencySymbols.Contains(dependencySymbol))
         {
@@ -141,11 +139,11 @@ internal class ComponentsStorage
     return null;
   }
 
-  private void AddToInterfacesToImplementationsMap(IConcreteComponent concreteComponent, Compilation compilation)
+  private void AddToInterfacesToImplementationsMap(IConcreteComponent concreteComponent)
   {
     if (concreteComponent.ComponentSymbol.TypeKind is not TypeKind.Class) return;
 
-    var allInterfaces = ExtractInterfaces(concreteComponent.ComponentSymbol, compilation);
+    var allInterfaces = ExtractInterfaces(concreteComponent.ComponentSymbol);
     if (allInterfaces.Count == 0) return;
 
     foreach (var @interface in allInterfaces)
@@ -167,9 +165,8 @@ internal class ComponentsStorage
 
   private IConcreteComponent? TryFindOverridenComponent(INamedTypeSymbol symbol, GeneratorExecutionContext context)
   {
-    var compilation = context.Compilation;
-    var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.OverridesAttribute, compilation);
-    var baseSymbols = overridesAttributes.SelectMany(pair => pair.Interfaces).OfType<INamedTypeSymbol>().ToList();
+    var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.OverridesAttribute);
+    var baseSymbols = overridesAttributes.SelectMany(pair => pair).ToList();
     if (baseSymbols.Count == 0) return null;
     
     if (baseSymbols.Count != 1)
@@ -193,72 +190,45 @@ internal class ComponentsStorage
     return baseComponent;
   }
 
-  private IReadOnlyList<INamedTypeSymbol> ExtractInterfaces(INamedTypeSymbol symbol, Compilation compilation)
+  private IReadOnlyList<INamedTypeSymbol> ExtractInterfaces(INamedTypeSymbol symbol)
   {
-    var asAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.AsAttribute, compilation).ToList();
+    var asAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.AsAttribute).ToList();
     if (asAttributes.Count == 0)
     {
       return symbol.AllInterfaces;
     }
 
-    return asAttributes.SelectMany(pair => pair.Interfaces).OfType<INamedTypeSymbol>().ToList();
+    return asAttributes.SelectMany(pair => pair).ToList();
   }
 
-  private IReadOnlyList<(AttributeSyntax, IEnumerable<ITypeSymbol?>)> ExtractDependenciesByLevels(
-    INamedTypeSymbol symbol, 
-    Compilation compilation)
+  private static IReadOnlyList<IReadOnlyList<INamedTypeSymbol>> ExtractDependenciesByLevels(INamedTypeSymbol symbol)
   {
-    return ExtractAttributeByNameWithTypeArgs(symbol, Constants.DependsOnAttribute, compilation).ToList();
+    return ExtractAttributeByNameWithTypeArgs(symbol, Constants.DependsOnAttribute).ToList();
   }
 
-  private static IEnumerable<(AttributeSyntax Attribute, IEnumerable<ITypeSymbol?> Interfaces)> ExtractAttributeByNameWithTypeArgs(
-    ISymbol symbol,
-    string attributeName,
-    Compilation compilation)
+  private static IReadOnlyList<IReadOnlyList<INamedTypeSymbol>> ExtractAttributeByNameWithTypeArgs(
+    ISymbol symbol, string attributeName)
   {
     return symbol.GetAttributes()
       .Where(attr => attr.AttributeClass?.Name == attributeName)
-      .Select(attr => attr.ApplicationSyntaxReference?.GetSyntax())
-      .OfType<AttributeSyntax>()
-      .Select(attributeSyntax =>
-      {
-        var typeArgs = attributeSyntax.DescendantNodes().OfType<TypeArgumentListSyntax>().FirstOrDefault();
-        return (Attribute: attributeSyntax, TypeArgs: typeArgs);
-      })
-      .Where(tuple => tuple.TypeArgs is { })
-      .Select(tuple =>
-      {
-        var args = tuple.TypeArgs!.Arguments;
-        var types = args.Select(arg => compilation.GetSemanticModel(arg.SyntaxTree).GetTypeInfo(arg).Type);
-        return (tuple.Attribute, Types: types);
-      });
+      .Select(attr => attr.AttributeClass!.TypeArguments.OfType<INamedTypeSymbol>().ToList())
+      .ToList();
   }
 
-  private AccessModifier ExtractAccessModifierOrDefault(AttributeSyntax attributeSyntax, Compilation compilation)
+  private AccessModifier ExtractAccessModifierOrDefault(IReadOnlyList<ITypeSymbol> dependencyAttributeTypeArgs)
   {
-    if (attributeSyntax.ArgumentList is not { } argumentList) return AccessModifier.Private;
-    
-    foreach (var argument in argumentList.Arguments)
+    Debug.Assert(dependencyAttributeTypeArgs.Count > 1);
+    var first = dependencyAttributeTypeArgs.First();
+    return first.Name switch
     {
-      if (argument.Expression is not MemberAccessExpressionSyntax accessSyntax) continue;
-      var foundSymbol = compilation.GetSemanticModel(accessSyntax.SyntaxTree).GetSymbolInfo(accessSyntax).Symbol;
-      
-      if (foundSymbol is IFieldSymbol { Type.Name: "AccessModifier" } fieldSymbol)
-      {
-        return foundSymbol.Name switch
-        {
-          nameof(AccessModifier.Internal) => AccessModifier.Internal,
-          nameof(AccessModifier.Protected) => AccessModifier.Protected,
-          nameof(AccessModifier.Private) => AccessModifier.Private,
-          nameof(AccessModifier.Public) => AccessModifier.Public,
-          nameof(AccessModifier.PrivateProtected) => AccessModifier.PrivateProtected,
-          nameof(AccessModifier.ProtectedInternal) => AccessModifier.ProtectedInternal,
-          _ => throw new ArgumentOutOfRangeException(fieldSymbol.Name)
-        };
-      }
-    }
-
-    return AccessModifier.Private;
+      nameof(AccessModifier.Internal) => AccessModifier.Internal,
+      nameof(AccessModifier.Protected) => AccessModifier.Protected,
+      nameof(AccessModifier.Private) => AccessModifier.Private,
+      nameof(AccessModifier.Public) => AccessModifier.Public,
+      nameof(AccessModifier.PrivateProtected) => AccessModifier.PrivateProtected,
+      nameof(AccessModifier.ProtectedInternal) => AccessModifier.ProtectedInternal,
+      _ => throw new ArgumentOutOfRangeException(first.Name)
+    };
   }
   
   private IEnumerable<INamedTypeSymbol> GetComponentTypesFrom(IModuleSymbol module)
