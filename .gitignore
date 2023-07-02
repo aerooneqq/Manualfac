@@ -3,3 +3,4 @@ bin
 obj
 *.user
 *.tmp
+.DS_Store
