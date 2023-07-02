@@ -71,10 +71,10 @@ internal class ComponentsStorage
     visited.Add(componentSymbol);
 
     var componentsDepsByLevels = ExtractComponentsDependencies(componentSymbol, visited, context);
-    var baseComponent = TryFindBaseComponent(componentSymbol, context);
+    var baseComponent = TryFindBaseComponent(componentSymbol, visited, context);
     var createdComponent = new ConcreteComponent(componentSymbol, componentsDepsByLevels, baseComponent);
 
-    if (TryFindOverridenComponent(componentSymbol, context) is { } overridenComponent)
+    if (TryFindOverridenComponent(componentSymbol, visited, context) is { } overridenComponent)
     {
       myOverridesCache.AddOverride(createdComponent, overridenComponent);
     }
@@ -152,7 +152,8 @@ internal class ComponentsStorage
     }
   }
 
-  private IConcreteComponent? TryFindBaseComponent(INamedTypeSymbol symbol, GeneratorExecutionContext context)
+  private IConcreteComponent? TryFindBaseComponent(
+    INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
   {
     if (symbol.BaseType is not { } baseType ||
         !mySymbolsCache.CheckIfManualfacComponent(baseType))
@@ -160,10 +161,11 @@ internal class ComponentsStorage
       return null;
     }
 
-    return ToComponentInfo(baseType, new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default), context);
+    return ToComponentInfo(baseType, visited, context);
   }
 
-  private IConcreteComponent? TryFindOverridenComponent(INamedTypeSymbol symbol, GeneratorExecutionContext context)
+  private IConcreteComponent? TryFindOverridenComponent(
+    INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
   {
     var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.OverridesAttribute);
     var baseSymbols = overridesAttributes.SelectMany(pair => pair).ToList();
@@ -185,7 +187,6 @@ internal class ComponentsStorage
       throw new CanNotOverrideNonComponentException(symbol, baseSymbol);
     }
 
-    var visited = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
     var baseComponent = ToComponentInfo(baseSymbol, visited, context);
     return baseComponent;
   }
@@ -248,5 +249,19 @@ internal class ComponentsStorage
         yield return nextNamespace;
       }
     }
+  }
+}
+
+internal static class ComponentsStorageExtensions
+{
+  public static IConcreteComponent AdjustComponent(this ComponentsStorage storage, IConcreteComponent component)
+  {
+    var current = component;
+    while (storage.BaseToOverrides.TryGetValue(current, out var @override))
+    {
+      current = @override;
+    }
+    
+    return current;
   }
 }

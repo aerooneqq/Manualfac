@@ -38,10 +38,10 @@ internal class GeneratedContainerInitializerModel : IGeneratedModel
         sb.AppendIndent(cookie.Indent).Append("() => ").AppendNewLine();
         using (var methodCookie = StringBuilderCookies.CurlyBraces(sb, cookie.Indent))
         {
-          var adjustedComponent = AdjustComponent(component);
+          var adjustedComponent = myStorage.AdjustComponent(component);
           IGeneratedModel model = ReferenceEquals(adjustedComponent, component) switch
           {
-            true => new GeneratedComponentObjectCreationModel(component, AdjustComponent),
+            true => new GeneratedComponentObjectCreationModel(component, myStorage.AdjustComponent),
             false => new GeneratedOverridenComponentObjectCreationModel(adjustedComponent)
           };
           
@@ -52,18 +52,7 @@ internal class GeneratedContainerInitializerModel : IGeneratedModel
       sb.AppendSemicolon().AppendNewLine().AppendNewLine();
     }
   }
-
-  private IConcreteComponent AdjustComponent(IConcreteComponent component)
-  {
-    var current = component;
-    while (myStorage.BaseToOverrides.TryGetValue(current, out var @override))
-    {
-      current = @override;
-    }
-    
-    return current;
-  }
-
+  
   public void GenerateInto(StringBuilder sb, int indent)
   {
     myGeneratedClassModel.GenerateInto(sb, indent);
