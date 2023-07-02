@@ -17,118 +17,35 @@ internal static class SyntaxTreeExtensions
     );
 }
 
-internal class SourceGeneratorsTestExecutor<TGenerator> where TGenerator : ISourceGenerator, new()
+internal abstract class SourceGeneratorTestExecutorBase<TGenerator> where TGenerator : ISourceGenerator, new()
 {
   private readonly string myTestName;
-  private readonly HashSet<string> myDifferences;
-  private readonly string myPathToGoldDirFor;
 
-  private Dictionary<string, string>? myGeneratedFiles;
-  private HashSet<string>? myGoldFileNames;
+  protected Dictionary<string, string>? GeneratedFiles;
+  protected GeneratorDriverRunResult? RunResult;
 
 
-  public SourceGeneratorsTestExecutor(string testName)
+  protected SourceGeneratorTestExecutorBase(string testName)
   {
-    myDifferences = new HashSet<string>();
     myTestName = testName;
-    myPathToGoldDirFor = TestPaths.GetPathToGoldDirFor(myTestName);
   }
 
   
-  public void ExecuteTest()
-  {
-    DoExecuteTest();
-    AssertAllGeneratedFilesInGold();
-    AssertAllGoldInGeneratedFiles();
-    AssertGeneratedFilesAndGoldSameContent();
-  }
-
-  private void DoExecuteTest()
+  public virtual void ExecuteTest()
   {
     var pathToSources = TestPaths.GetPathToSources(myTestName);
     var files = Directory.EnumerateFiles(pathToSources).Where(path => path.EndsWith(".cs"));
     
     GeneratorDriver driver = CSharpGeneratorDriver.Create(new TGenerator());
-    driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(files), out _, out var diagnostics);
-
-    Assert.That(diagnostics.IsEmpty, Is.True);
+    driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(files), out _, out _);
     
-    myGeneratedFiles = driver.GetRunResult().GeneratedTrees
+    RunResult = driver.GetRunResult();
+    
+    GeneratedFiles = RunResult.GeneratedTrees
       .Select(tree => tree.ToGeneratedFile())
       .ToDictionary(static file => file.Name, static file => file.Text);
-    
-    myGoldFileNames = Directory.EnumerateFiles(myPathToGoldDirFor)
-      .Select(Path.GetFileName)
-      .Where(name => name.EndsWith(".cs"))
-      .ToHashSet();
-  }
-
-  private void AssertAllGeneratedFilesInGold()
-  {
-    Debug.Assert(myGeneratedFiles is { });
-    Debug.Assert(myGoldFileNames is { });
-    
-    foreach (var generatedFileName in myGeneratedFiles.Keys)
-    {
-      if (!myGoldFileNames.Contains(generatedFileName))
-      {
-        myDifferences.Add(generatedFileName);
-      }
-    }
-    
-    FailWithDifferencesIfNeeded($"Generated files: {string.Join(',', myDifferences)} were not in gold");
-  }
-
-  private void AssertAllGoldInGeneratedFiles()
-  {
-    Debug.Assert(myGeneratedFiles is { });
-    Debug.Assert(myGoldFileNames is { });
-    
-    foreach (var goldFileName in myGoldFileNames)
-    {
-      if (!myGeneratedFiles.ContainsKey(goldFileName))
-      {
-        Assert.Fail($"Gold file {goldFileName} was not generated");
-      }
-    }
-  }
-
-  private void AssertGeneratedFilesAndGoldSameContent()
-  {
-    Debug.Assert(myGeneratedFiles is { });
-    Debug.Assert(myGoldFileNames is { });
-    
-    foreach (var (generatedFileName, generatedText) in myGeneratedFiles)
-    {
-      var goldText = File.ReadAllText(Path.Join(myPathToGoldDirFor, generatedFileName)).ReplaceRn();
-      if (goldText != generatedText)
-      {
-        myDifferences.Add(generatedFileName);
-      }
-    }
-    
-    FailWithDifferencesIfNeeded($"Following files have different generated content: {string.Join(',', myDifferences)}");
   }
   
-  private void FailWithDifferencesIfNeeded(string message)
-  {
-    Debug.Assert(myGeneratedFiles is { });
-    if (myDifferences.Count != 0)
-    {
-      foreach (var difference in myDifferences)
-      {
-        WriteTmpFile(myPathToGoldDirFor, difference, myGeneratedFiles[difference]);
-      }
-
-      Assert.Fail(message);
-    }
-      
-    myDifferences.Clear();
-  }
-  
-  private static void WriteTmpFile(string goldDirectory, string originalFileName, string text) => 
-    File.WriteAllText(Path.Combine(goldDirectory, $"{originalFileName}.tmp"), text.ReplaceRn());
-
   private static Compilation CreateCompilation(IEnumerable<string> files) =>
     CSharpCompilation.Create(
       "compilation", 
@@ -144,6 +61,127 @@ internal class SourceGeneratorsTestExecutor<TGenerator> where TGenerator : ISour
       {
         MetadataReference.CreateFromFile(typeof(ManualfacAttribute).Assembly.Location)
       });
+}
+
+internal class SourceGeneratorsTestExecutor<TGenerator> : SourceGeneratorTestExecutorBase<TGenerator> 
+  where TGenerator : ISourceGenerator, new()
+{
+  private readonly HashSet<string> myDifferences;
+  private readonly string myPathToGoldDirFor;
+  
+  private HashSet<string>? myGoldFileNames;
+
+
+  public SourceGeneratorsTestExecutor(string testName) : base(testName)
+  {
+    myDifferences = new HashSet<string>();
+    myPathToGoldDirFor = TestPaths.GetPathToGoldDirFor(testName);
+  }
+
+
+  public override void ExecuteTest()
+  {
+    base.ExecuteTest();
+    
+    Assert.Multiple(() =>
+    {
+      Assert.That(RunResult, Is.Not.Null);
+      Assert.That(RunResult!.Diagnostics.IsEmpty);
+    });
+    
+    myGoldFileNames = Directory.EnumerateFiles(myPathToGoldDirFor)
+      .Select(Path.GetFileName)
+      .Where(name => name.EndsWith(".cs"))
+      .ToHashSet();
+  
+    AssertAllGeneratedFilesInGold();
+    AssertAllGoldInGeneratedFiles();
+    AssertGeneratedFilesAndGoldSameContent();
+  }
+
+  private void AssertAllGeneratedFilesInGold()
+  {
+    Debug.Assert(GeneratedFiles is { });
+    Debug.Assert(myGoldFileNames is { });
+    
+    foreach (var generatedFileName in GeneratedFiles.Keys)
+    {
+      if (!myGoldFileNames.Contains(generatedFileName))
+      {
+        myDifferences.Add(generatedFileName);
+      }
+    }
+    
+    FailWithDifferencesIfNeeded($"Generated files: {string.Join(',', myDifferences)} were not in gold");
+  }
+
+  private void AssertAllGoldInGeneratedFiles()
+  {
+    Debug.Assert(GeneratedFiles is { });
+    Debug.Assert(myGoldFileNames is { });
+    
+    foreach (var goldFileName in myGoldFileNames)
+    {
+      if (!GeneratedFiles.ContainsKey(goldFileName))
+      {
+        Assert.Fail($"Gold file {goldFileName} was not generated");
+      }
+    }
+  }
+
+  private void AssertGeneratedFilesAndGoldSameContent()
+  {
+    Debug.Assert(GeneratedFiles is { });
+    Debug.Assert(myGoldFileNames is { });
+    
+    foreach (var (generatedFileName, generatedText) in GeneratedFiles)
+    {
+      var goldText = File.ReadAllText(Path.Join(myPathToGoldDirFor, generatedFileName)).ReplaceRn();
+      if (goldText != generatedText)
+      {
+        myDifferences.Add(generatedFileName);
+      }
+    }
+    
+    FailWithDifferencesIfNeeded($"Following files have different generated content: {string.Join(',', myDifferences)}");
+  }
+  
+  private void FailWithDifferencesIfNeeded(string message)
+  {
+    Debug.Assert(GeneratedFiles is { });
+    if (myDifferences.Count != 0)
+    {
+      foreach (var difference in myDifferences)
+      {
+        WriteTmpFile(myPathToGoldDirFor, difference, GeneratedFiles[difference]);
+      }
+
+      Assert.Fail(message);
+    }
+      
+    myDifferences.Clear();
+  }
+  
+  private static void WriteTmpFile(string goldDirectory, string originalFileName, string text) => 
+    File.WriteAllText(Path.Combine(goldDirectory, $"{originalFileName}.tmp"), text.ReplaceRn());
+}
+
+internal class SourceGeneratorsTestExecutorWithException<TGenerator, TException> : SourceGeneratorTestExecutorBase<TGenerator>
+  where TGenerator : ISourceGenerator, new()
+  where TException : Exception
+{
+  public SourceGeneratorsTestExecutorWithException(string testName) : base(testName)
+  {
+  }
+  
+  
+  public override void ExecuteTest()
+  {
+    base.ExecuteTest();
+    
+    Assert.That(RunResult, Is.Not.Null);
+    Assert.That(RunResult!.Results.First().Exception is TException);
+  }
 }
 
 internal static class StringExtensions

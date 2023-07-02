@@ -1,4 +1,5 @@
-﻿using Manualfac.Generators;
+﻿using Manualfac.Exceptions;
+using Manualfac.Generators;
 
 namespace UnitTests;
 
@@ -13,4 +14,7 @@ public class GeneratedFilesTest : TestWithSourceFilesBase<ServiceInjectionGenera
   [Test] public void SimpleTest6() => DoTest();
   [Test] public void SimpleTest7() => DoTest();
   [Test] public void SimpleTest8() => DoTest();
+
+  [Test] public void DuplicatedDepsTest() => DoTestWithException<DuplicatedDependencyException>();
+  [Test] public void CyclicDepsTest() => DoTestWithException<CyclicDependencyException>();
 }
