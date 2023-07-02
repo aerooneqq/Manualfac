@@ -6,5 +6,5 @@ internal interface IComponentDependency
 {
   INamedTypeSymbol DependencyTypeSymbol { get; }
   
-  IReadOnlyList<IConcreteComponent> ResolveUnderlyingConcreteComponents();
+  IReadOnlyList<IComponent> ResolveUnderlyingConcreteComponents();
 }

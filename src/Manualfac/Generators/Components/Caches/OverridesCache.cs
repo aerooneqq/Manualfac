@@ -2,19 +2,19 @@
 
 internal class OverridesCache
 {
-  private readonly Dictionary<IConcreteComponent, IConcreteComponent> myBaseToOverrides;
+  private readonly Dictionary<IComponent, IComponent> myBaseToOverrides;
 
 
-  public IReadOnlyDictionary<IConcreteComponent, IConcreteComponent> BaseToOverrides => myBaseToOverrides;
+  public IReadOnlyDictionary<IComponent, IComponent> BaseToOverrides => myBaseToOverrides;
 
 
   public OverridesCache()
   {
-    myBaseToOverrides = new Dictionary<IConcreteComponent,IConcreteComponent>();
+    myBaseToOverrides = new Dictionary<IComponent,IComponent>();
   }
 
 
-  public void AddOverride(IConcreteComponent overrideComponent, IConcreteComponent baseComponent)
+  public void AddOverride(IComponent overrideComponent, IComponent baseComponent)
   {
     if (myBaseToOverrides.ContainsKey(baseComponent)) return;
 

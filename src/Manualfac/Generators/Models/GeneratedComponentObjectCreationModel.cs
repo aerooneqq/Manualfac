@@ -13,7 +13,7 @@ internal class GeneratedComponentObjectCreationModel : IGeneratedModel
 
 
   public GeneratedComponentObjectCreationModel(
-    IConcreteComponent component, Func<IConcreteComponent, IConcreteComponent> componentAdjustFunc)
+    IComponent component, Func<IComponent, IComponent> componentAdjustFunc)
   {
     myComponentFullTypeName = component.FullName;
     myDependenciesAccessors = component.Dependencies.AllDependenciesSet

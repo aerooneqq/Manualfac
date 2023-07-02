@@ -28,7 +28,7 @@ internal class CollectionDependency : IComponentDependency
   }
 
 
-  public IReadOnlyList<IConcreteComponent> ResolveUnderlyingConcreteComponents()
+  public IReadOnlyList<IComponent> ResolveUnderlyingConcreteComponents()
   {
     if (!myStorage.InterfacesToComponents.TryGetValue(CollectionItemInterface, out var components))
     {

@@ -7,26 +7,26 @@ namespace Manualfac.Generators.Components;
 
 internal static class ExtensionsForIComponentInfo
 {
-  public static string CreateContainerName(this IConcreteComponent component) => 
+  public static string CreateContainerName(this IComponent component) => 
     $"{component.TypeShortName}Container";
 
-  public static string CreateContainerFullName(this IConcreteComponent component) =>
+  public static string CreateContainerFullName(this IComponent component) =>
     $"{component.Namespace}{(string.IsNullOrWhiteSpace(component.Namespace) ? "" : ".")}{component.CreateContainerName()}";
   
-  public static string CreateContainerResolveExpression(this IConcreteComponent concreteComponent) =>
-    $"{concreteComponent.CreateContainerFullName()}.{Constants.ResolveMethod}()";
+  public static string CreateContainerResolveExpression(this IComponent component) =>
+    $"{component.CreateContainerFullName()}.{Constants.ResolveMethod}()";
   
-  public static GeneratedUsingsModel ToDependenciesUsingsModel(this IConcreteComponent concreteComponent) => 
-    new(concreteComponent.Dependencies.AllDependenciesSet
+  public static GeneratedUsingsModel ToDependenciesUsingsModel(this IComponent component) => 
+    new(component.Dependencies.AllDependenciesSet
       .SelectMany(dep => dep.ResolveUnderlyingConcreteComponents().Select(c => c.Namespace))
       .Where(ns => ns is { } && !string.IsNullOrWhiteSpace(ns))
       .Distinct()
       .ToList()!);
   
-  public static GeneratedComponentFileModel ToGeneratedFileModel(this IConcreteComponent concreteComponent) => 
-    new(concreteComponent);
+  public static GeneratedComponentFileModel ToGeneratedFileModel(this IComponent component) => 
+    new(component);
 
-  public static GeneratedClassModel ToGeneratedClassModel(this IConcreteComponent component)
+  public static GeneratedClassModel ToGeneratedClassModel(this IComponent component)
   {
     GeneratedBaseConstructorModel? baseConstructorModel = null;
     if (component.BaseComponent is { })
@@ -57,7 +57,7 @@ internal static class ExtensionsForIComponentInfo
   }
 
   public static IReadOnlyList<GeneratedFieldModel> ExtractFields(
-    this IConcreteComponent component) =>
+    this IComponent component) =>
     ExtractGeneratedFieldModelsInternal(component.Dependencies.ImmediateDependencies);
   
   private static IReadOnlyList<GeneratedFieldModel> ExtractGeneratedFieldModelsInternal(
@@ -73,6 +73,6 @@ internal static class ExtensionsForIComponentInfo
   }
 
   public static IReadOnlyList<GeneratedFieldModel> ExtractFieldsForConstructor(
-    this IConcreteComponent component) =>
+    this IComponent component) =>
     ExtractGeneratedFieldModelsInternal(component.Dependencies.AllOrderedDependencies);
 }

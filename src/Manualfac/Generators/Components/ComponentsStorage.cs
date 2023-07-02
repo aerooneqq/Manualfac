@@ -14,9 +14,9 @@ internal class ComponentsStorage
   private readonly OverridesCache myOverridesCache;
 
   
-  public IReadOnlyDictionary<IConcreteComponent, IConcreteComponent> BaseToOverrides => myOverridesCache.BaseToOverrides;
-  public IReadOnlyList<IConcreteComponent> AllComponents => myCache.AllComponents;
-  public IReadOnlyDictionary<INamedTypeSymbol, List<IConcreteComponent>> InterfacesToComponents => myCache.InterfacesToComponents;
+  public IReadOnlyDictionary<IComponent, IComponent> BaseToOverrides => myOverridesCache.BaseToOverrides;
+  public IReadOnlyList<IComponent> AllComponents => myCache.AllComponents;
+  public IReadOnlyDictionary<INamedTypeSymbol, List<IComponent>> InterfacesToComponents => myCache.InterfacesToComponents;
 
 
   public ComponentsStorage()
@@ -57,7 +57,7 @@ internal class ComponentsStorage
     }
   }
   
-  private IConcreteComponent ToComponentInfo(
+  private IComponent ToComponentInfo(
     INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
   {
     if (myCache.TryGetExistingComponent(componentSymbol) is { } existingComponent) return existingComponent;
@@ -72,7 +72,7 @@ internal class ComponentsStorage
 
     var componentsDepsByLevels = ExtractComponentsDependencies(componentSymbol, visited, context);
     var baseComponent = TryFindBaseComponent(componentSymbol, visited, context);
-    var createdComponent = new ConcreteComponent(componentSymbol, componentsDepsByLevels, baseComponent);
+    var createdComponent = new Component(componentSymbol, componentsDepsByLevels, baseComponent);
 
     if (TryFindOverridenComponent(componentSymbol, visited, context) is { } overridenComponent)
     {
@@ -139,20 +139,20 @@ internal class ComponentsStorage
     return null;
   }
 
-  private void AddToInterfacesToImplementationsMap(IConcreteComponent concreteComponent)
+  private void AddToInterfacesToImplementationsMap(IComponent component)
   {
-    if (concreteComponent.ComponentSymbol.TypeKind is not TypeKind.Class) return;
+    if (component.ComponentSymbol.TypeKind is not TypeKind.Class) return;
 
-    var allInterfaces = ExtractInterfaces(concreteComponent.ComponentSymbol);
+    var allInterfaces = ExtractInterfaces(component.ComponentSymbol);
     if (allInterfaces.Count == 0) return;
 
     foreach (var @interface in allInterfaces)
     {
-      myCache.AddInterfaceImplementation(@interface, concreteComponent);
+      myCache.AddInterfaceImplementation(@interface, component);
     }
   }
 
-  private IConcreteComponent? TryFindBaseComponent(
+  private IComponent? TryFindBaseComponent(
     INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
   {
     if (symbol.BaseType is not { } baseType ||
@@ -164,7 +164,7 @@ internal class ComponentsStorage
     return ToComponentInfo(baseType, visited, context);
   }
 
-  private IConcreteComponent? TryFindOverridenComponent(
+  private IComponent? TryFindOverridenComponent(
     INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
   {
     var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.OverridesAttribute);
@@ -254,7 +254,7 @@ internal class ComponentsStorage
 
 internal static class ComponentsStorageExtensions
 {
-  public static IConcreteComponent AdjustComponent(this ComponentsStorage storage, IConcreteComponent component)
+  public static IComponent AdjustComponent(this ComponentsStorage storage, IComponent component)
   {
     var current = component;
     while (storage.BaseToOverrides.TryGetValue(current, out var @override))

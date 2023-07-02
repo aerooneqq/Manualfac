@@ -23,7 +23,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
   }
 
   private static void GenerateDependenciesPart(
-    IReadOnlyList<IConcreteComponent> components, GeneratorExecutionContext context)
+    IReadOnlyList<IComponent> components, GeneratorExecutionContext context)
   {
     foreach (var componentInfo in components)
     {

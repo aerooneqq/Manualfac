@@ -4,17 +4,17 @@ namespace Manualfac.Generators.Components.Dependencies;
 
 internal class ConcreteComponentDependency : IComponentDependency
 {
-  private readonly IConcreteComponent myConcreteComponent;
+  private readonly IComponent myComponent;
 
   
-  public INamedTypeSymbol DependencyTypeSymbol => myConcreteComponent.ComponentSymbol;
+  public INamedTypeSymbol DependencyTypeSymbol => myComponent.ComponentSymbol;
 
   
-  public ConcreteComponentDependency(IConcreteComponent concreteComponent)
+  public ConcreteComponentDependency(IComponent component)
   {
-    myConcreteComponent = concreteComponent;
+    myComponent = component;
   }
   
   
-  public IReadOnlyList<IConcreteComponent> ResolveUnderlyingConcreteComponents() => new[] { myConcreteComponent };
+  public IReadOnlyList<IComponent> ResolveUnderlyingConcreteComponents() => new[] { myComponent };
 }

@@ -27,7 +27,7 @@ internal class GeneratedComponentContainerModel : IGeneratedModel
   private readonly GeneratedComponentObjectCreationModel myComponentCreationModel;
 
 
-  public GeneratedComponentContainerModel(IConcreteComponent component)
+  public GeneratedComponentContainerModel(IComponent component)
   {
     myDependenciesUsingsModel = component.ToDependenciesUsingsModel();
     myComponentCreationModel = new GeneratedComponentObjectCreationModel(component, static c => c);
@@ -106,7 +106,7 @@ internal class GeneratedComponentContainerModel : IGeneratedModel
 internal static class DependencyAccessorUtil
 {
   public static string GenerateDependencyAccessor(
-    IComponentDependency dependency, Func<IConcreteComponent, IConcreteComponent> adjustComponentFunc)
+    IComponentDependency dependency, Func<IComponent, IComponent> adjustComponentFunc)
   {
     switch (dependency)
     {

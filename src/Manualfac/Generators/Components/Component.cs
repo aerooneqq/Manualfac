@@ -4,11 +4,11 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Components;
 
-internal class ConcreteComponent : IConcreteComponent
+internal class Component : IComponent
 {
   public INamedTypeSymbol ComponentSymbol { get; }
   public IComponentDependencies Dependencies { get; }
-  public IConcreteComponent? BaseComponent { get; }
+  public IComponent? BaseComponent { get; }
   
   public string TypeShortName => ComponentSymbol.Name;
   public string FullName => ComponentSymbol.GetFullName();
@@ -17,10 +17,10 @@ internal class ConcreteComponent : IConcreteComponent
   public string? Namespace => ComponentSymbol.ContainingNamespace.Name;
 
 
-  public ConcreteComponent(
+  public Component(
     INamedTypeSymbol componentSymbol, 
     IReadOnlyList<ComponentDependencyDescriptor> dependenciesByLevels,
-    IConcreteComponent? baseComponent)
+    IComponent? baseComponent)
   {
     BaseComponent = baseComponent;
     ComponentSymbol = componentSymbol;
@@ -28,9 +28,9 @@ internal class ConcreteComponent : IConcreteComponent
   }
   
   
-  public IReadOnlyList<IConcreteComponent> ResolveConcreteDependencies()
+  public IReadOnlyList<IComponent> ResolveConcreteDependencies()
   {
-    var concreteDependencies = new List<IConcreteComponent>();
+    var concreteDependencies = new List<IComponent>();
     foreach (var (component, _) in Dependencies.AllOrderedDependencies)
     {
       concreteDependencies.AddRange(component.ResolveUnderlyingConcreteComponents());

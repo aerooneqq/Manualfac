@@ -9,7 +9,7 @@ internal class NonCollectionInterfaceDependency : IComponentDependency
 
 
   private bool myIsInitialized;
-  private IReadOnlyList<IConcreteComponent> myResolveResult = null!;
+  private IReadOnlyList<IComponent> myResolveResult = null!;
 
 
   public INamedTypeSymbol DependencyTypeSymbol { get; }
@@ -22,7 +22,7 @@ internal class NonCollectionInterfaceDependency : IComponentDependency
   }
   
 
-  public IReadOnlyList<IConcreteComponent> ResolveUnderlyingConcreteComponents()
+  public IReadOnlyList<IComponent> ResolveUnderlyingConcreteComponents()
   {
     InitializeIfNeededOrThrow();
     return myResolveResult;

@@ -2,7 +2,7 @@ namespace Manualfac.Generators.Components.Dependencies;
 
 internal class ComponentDependenciesImpl : IComponentDependencies
 {
-  private readonly IConcreteComponent myComponent;
+  private readonly IComponent myComponent;
   
 
   public HashSet<IComponentDependency> AllDependenciesSet { get; }
@@ -10,7 +10,7 @@ internal class ComponentDependenciesImpl : IComponentDependencies
 
 
   public ComponentDependenciesImpl(
-    IConcreteComponent thisComponent, 
+    IComponent thisComponent, 
     IReadOnlyList<ComponentDependencyDescriptor> immediateDependencies)
   {
     myComponent = thisComponent;

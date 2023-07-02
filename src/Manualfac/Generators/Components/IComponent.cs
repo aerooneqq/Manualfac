@@ -3,15 +3,15 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Components;
 
-internal interface IConcreteComponent
+internal interface IComponent
 {
   INamedTypeSymbol ComponentSymbol { get; }
   IComponentDependencies Dependencies { get; }
-  IConcreteComponent? BaseComponent { get; }
+  IComponent? BaseComponent { get; }
   
   string TypeShortName { get; }
   string FullName { get; }
   string? Namespace { get; }
 
-  IReadOnlyList<IConcreteComponent> ResolveConcreteDependencies();
+  IReadOnlyList<IComponent> ResolveConcreteDependencies();
 }

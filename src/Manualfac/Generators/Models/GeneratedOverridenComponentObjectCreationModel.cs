@@ -8,7 +8,7 @@ internal class GeneratedOverridenComponentObjectCreationModel : IGeneratedModel
 {
   private readonly string myContainerResolveExpression;
 
-  public GeneratedOverridenComponentObjectCreationModel(IConcreteComponent overrideComponent)
+  public GeneratedOverridenComponentObjectCreationModel(IComponent overrideComponent)
   {
     myContainerResolveExpression = overrideComponent.CreateContainerResolveExpression();
   }
