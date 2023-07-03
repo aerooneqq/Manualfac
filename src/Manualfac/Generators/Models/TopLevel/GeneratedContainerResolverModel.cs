@@ -25,6 +25,10 @@ internal class GeneratedContainerResolverModel : IGeneratedModel
       {
         new GeneratedMethodModel(
           "ResolveOrThrow", new[] { GenericType }, GenericType, GenerateResolveMethod,
+          ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Internal, isStatic: true),
+        
+        new GeneratedMethodModel(
+          "ResolveComponentsOrThrow", new[] { GenericType }, $"IEnumerable<{GenericType}>", GenerateResolveComponentsMethods,
           ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Internal, isStatic: true)
       });
   }
@@ -32,12 +36,6 @@ internal class GeneratedContainerResolverModel : IGeneratedModel
 
   private void GenerateResolveMethod(StringBuilder sb, int indent)
   {
-    static string CreateCondition(INamedTypeSymbol symbol) =>
-      $"typeof({GenericType}) == typeof({symbol.GetFullName()})";
-
-    static string CreateResolveExpr(IComponent component) =>
-      $"({GenericType})((object){component.CreateContainerResolveExpression()})";
-
     foreach (var component in myStorage.AllComponents)
     {
       var condition = CreateCondition(component.ComponentSymbol);
@@ -61,21 +59,39 @@ internal class GeneratedContainerResolverModel : IGeneratedModel
           var resolveExpression = CreateResolveExpr(impls[0]);
           builder.AppendIndent(newIndent).Append("return ").Append(resolveExpression).AppendSemicolon();
         });
+        
+        sb.AppendNewLine();
       }
-      else
+    }
+
+    sb.AppendIndent(indent).Append("throw new ArgumentOutOfRangeException();");
+  }
+  
+  private static string CreateCondition(INamedTypeSymbol symbol) =>
+    $"typeof({GenericType}) == typeof({symbol.GetFullName()})";
+
+  private static string CreateResolveExpr(IComponent component) =>
+    $"({GenericType})((object){component.CreateContainerResolveExpression()})";
+
+  private void GenerateResolveComponentsMethods(StringBuilder sb, int indent)
+  {
+    foreach (var pair in myStorage.InterfacesToComponents)
+    {
+      var impls = pair.Value;
+      if (impls.Count > 1)
       {
         var condition = CreateCondition(pair.Key);
         StringBuilderCookies.If(sb, indent, condition, (builder, newIndent) =>
         {
           var initializers = string.Join(",", impls.Select(CreateResolveExpr));
-          var array = $"new {pair.Key.GetFullName()}[] {{{initializers}}}";
+          var array = $"new {GenericType}[] {{{initializers}}}";
           builder.AppendIndent(newIndent).Append("return ").Append(array).AppendSemicolon();
         });
+        
+        sb.AppendNewLine();
       }
-
-      sb.AppendNewLine();
     }
-
+    
     sb.AppendIndent(indent).Append("throw new ArgumentOutOfRangeException();");
   }
   
