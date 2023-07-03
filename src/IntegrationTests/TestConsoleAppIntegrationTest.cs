@@ -29,6 +29,7 @@ public class Tests
     }
 
     var output = process.StandardOutput.ReadToEnd();
-    Assert.That(output.Replace("\r\n", " ").Replace("\n", " "), Is.EqualTo("True True True True True True "));
+    var expected = string.Join(string.Empty, Enumerable.Range(0, 16).Select(_ => "True "));
+    Assert.That(output.Replace("\r\n", " ").Replace("\n", " "), Is.EqualTo(expected));
   }
 }
