@@ -55,6 +55,8 @@ internal class ComponentsStorage
         }
       }
     }
+    
+    myCache.AdjustInterfaceImplementations(this.AdjustComponent);
   }
   
   private IComponent ToComponentInfo(

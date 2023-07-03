@@ -45,4 +45,13 @@ internal class ComponentsCache
       myInterfacesToComponents[@interface] = new List<IComponent> { component };
     }
   }
+
+  public void AdjustInterfaceImplementations(Func<IComponent, IComponent> adjustComponent)
+  {
+    foreach (var @interface in myInterfacesToComponents.Keys)
+    {
+      var list = myInterfacesToComponents[@interface];
+      myInterfacesToComponents[@interface] = list.Select(adjustComponent).Distinct().ToList();
+    }
+  }
 }
