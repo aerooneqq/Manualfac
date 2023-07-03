@@ -4,9 +4,9 @@ public partial class compilationResolver
 
   )
   {
-    if (TComponent is asd.Class1)
+    if (typeof(TComponent) == typeof(asd.Class1))
     {
-      return asd.Class1Container.Resolve();
+      return (TComponent)((object)asd.Class1Container.Resolve());
     }
 
   }

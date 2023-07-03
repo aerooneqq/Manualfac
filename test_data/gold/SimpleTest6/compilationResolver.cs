@@ -4,29 +4,29 @@ public partial class compilationResolver
 
   )
   {
-    if (TComponent is DefaultNamespace.Class1)
+    if (typeof(TComponent) == typeof(DefaultNamespace.Class1))
     {
-      return DefaultNamespace.Class1Container.Resolve();
+      return (TComponent)((object)DefaultNamespace.Class1Container.Resolve());
     }
-    if (TComponent is DefaultNamespace.Class11)
+    if (typeof(TComponent) == typeof(DefaultNamespace.Class11))
     {
-      return DefaultNamespace.Class11Container.Resolve();
+      return (TComponent)((object)DefaultNamespace.Class11Container.Resolve());
     }
-    if (TComponent is DefaultNamespace.Class111)
+    if (typeof(TComponent) == typeof(DefaultNamespace.Class111))
     {
-      return DefaultNamespace.Class111Container.Resolve();
+      return (TComponent)((object)DefaultNamespace.Class111Container.Resolve());
     }
-    if (TComponent is DefaultNamespace.Class1111)
+    if (typeof(TComponent) == typeof(DefaultNamespace.Class1111))
     {
-      return DefaultNamespace.Class1111Container.Resolve();
+      return (TComponent)((object)DefaultNamespace.Class1111Container.Resolve());
     }
-    if (TComponent is DefaultNamespace.Class3)
+    if (typeof(TComponent) == typeof(DefaultNamespace.Class3))
     {
-      return DefaultNamespace.Class3Container.Resolve();
+      return (TComponent)((object)DefaultNamespace.Class3Container.Resolve());
     }
-    if (TComponent is IEnumerable<DefaultNamespace.IClass1>)
+    if (typeof(TComponent) == typeof(DefaultNamespace.IClass1))
     {
-      return new DefaultNamespace.IClass1[] {DefaultNamespace.Class1Container.Resolve(),DefaultNamespace.Class11Container.Resolve(),DefaultNamespace.Class111Container.Resolve(),DefaultNamespace.Class1111Container.Resolve()};
+      return new DefaultNamespace.IClass1[] {(TComponent)((object)DefaultNamespace.Class1Container.Resolve()),(TComponent)((object)DefaultNamespace.Class11Container.Resolve()),(TComponent)((object)DefaultNamespace.Class111Container.Resolve()),(TComponent)((object)DefaultNamespace.Class1111Container.Resolve())};
     }
 
   }

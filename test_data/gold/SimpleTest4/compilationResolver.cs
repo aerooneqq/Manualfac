@@ -4,25 +4,25 @@ public partial class compilationResolver
 
   )
   {
-    if (TComponent is DefaultNamespace.Class1)
+    if (typeof(TComponent) == typeof(DefaultNamespace.Class1))
     {
-      return DefaultNamespace.Class1Container.Resolve();
+      return (TComponent)((object)DefaultNamespace.Class1Container.Resolve());
     }
-    if (TComponent is DefaultNamespace.Class2)
+    if (typeof(TComponent) == typeof(DefaultNamespace.Class2))
     {
-      return DefaultNamespace.Class2Container.Resolve();
+      return (TComponent)((object)DefaultNamespace.Class2Container.Resolve());
     }
-    if (TComponent is DefaultNamespace.Class3)
+    if (typeof(TComponent) == typeof(DefaultNamespace.Class3))
     {
-      return DefaultNamespace.Class3Container.Resolve();
+      return (TComponent)((object)DefaultNamespace.Class3Container.Resolve());
     }
-    if (TComponent is DefaultNamespace.IClass1)
+    if (typeof(TComponent) == typeof(DefaultNamespace.IClass1))
     {
-      return DefaultNamespace.Class1Container.Resolve();
+      return (TComponent)((object)DefaultNamespace.Class1Container.Resolve());
     }
-    if (TComponent is DefaultNamespace.IClass11)
+    if (typeof(TComponent) == typeof(DefaultNamespace.IClass11))
     {
-      return DefaultNamespace.Class1Container.Resolve();
+      return (TComponent)((object)DefaultNamespace.Class1Container.Resolve());
     }
 
   }
