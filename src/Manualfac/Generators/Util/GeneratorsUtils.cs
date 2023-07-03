@@ -69,4 +69,11 @@ internal static class StringBuilderCookies
     sb.AppendIndent(indent).Append("lock (").Append(objectName).Append(")").AppendNewLine();
     return CurlyBraces(sb, indent);
   }
+
+  public static void If(StringBuilder sb, int indent, string condition, Action<StringBuilder, int> ifBodyGenerator)
+  {
+    sb.AppendIndent(indent).Append("if (").Append(condition).Append(')').AppendNewLine();
+    using var cookie = CurlyBraces(sb, indent);
+    ifBodyGenerator(sb, cookie.Indent);
+  }
 }

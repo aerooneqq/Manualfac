@@ -9,6 +9,7 @@ internal class GeneratedMethodModel : IGeneratedModel
   private readonly string myReturnTypeName;
   private readonly Action<StringBuilder, int> myBodyGenerator;
   private readonly IReadOnlyList<GeneratedParameterModel> myParameters;
+  private readonly IReadOnlyList<string> myGenericParameters;
   private readonly AccessModifier myModifier;
   private readonly bool myIsStatic;
   private readonly bool myIsPartial;
@@ -16,6 +17,7 @@ internal class GeneratedMethodModel : IGeneratedModel
   
   public GeneratedMethodModel(
     string name,
+    IReadOnlyList<string> genericParameters,
     string returnTypeName,
     Action<StringBuilder, int> bodyGenerator,
     IReadOnlyList<GeneratedParameterModel> parameters,
@@ -27,6 +29,7 @@ internal class GeneratedMethodModel : IGeneratedModel
     myReturnTypeName = returnTypeName;
     myBodyGenerator = bodyGenerator;
     myParameters = parameters;
+    myGenericParameters = genericParameters;
     myModifier = modifier;
     myIsStatic = isStatic;
     myIsPartial = isPartial;
@@ -41,6 +44,23 @@ internal class GeneratedMethodModel : IGeneratedModel
     if (myIsPartial) sb.Append("partial").AppendSpace();
 
     sb.Append(myReturnTypeName).AppendSpace().Append(myName);
+
+    if (myGenericParameters is { Count: > 0 })
+    {
+      sb.Append('<');
+      foreach (var genericParameter in myGenericParameters)
+      {
+        sb.Append(genericParameter).AppendComma();
+      }
+
+      if (myGenericParameters.Count > 0)
+      {
+        //remove last comma
+        sb.Remove(sb.Length - 1, 1);
+      }
+
+      sb.Append('>');
+    }
 
     using (var bracesCookie = StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true))
     {

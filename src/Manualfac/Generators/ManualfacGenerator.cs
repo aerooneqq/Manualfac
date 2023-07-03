@@ -1,12 +1,13 @@
 using System.Text;
 using Manualfac.Generators.Components;
 using Manualfac.Generators.Models;
+using Manualfac.Generators.Models.TopLevel;
 using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators;
 
 [Generator]
-public class ServiceInjectionGenerator : ISourceGenerator
+public class ManualfacGenerator : ISourceGenerator
 {
   public void Initialize(GeneratorInitializationContext context)
   {
@@ -20,6 +21,7 @@ public class ServiceInjectionGenerator : ISourceGenerator
     GenerateDependenciesPart(storage.AllComponents, context);
     GenerateContainerBuilder(storage, context);
     GenerateContainerInitialization(storage, context);
+    GenerateContainerGenericResolver(storage, context);
   }
 
   private static void GenerateDependenciesPart(
@@ -60,5 +62,13 @@ public class ServiceInjectionGenerator : ISourceGenerator
     new GeneratedContainerInitializerModel(storage, context.Compilation.Assembly).GenerateInto(sb, 0);
     
     context.AddSource($"{context.Compilation.Assembly.Name}", sb.ToString());
+  }
+
+  private static void GenerateContainerGenericResolver(ComponentsStorage storage, GeneratorExecutionContext context)
+  {
+    var sb = new StringBuilder();
+    new GeneratedContainerResolverModel(storage, context.Compilation.Assembly).GenerateInto(sb, 0);
+    
+    context.AddSource($"{context.Compilation.Assembly.Name}Resolver", sb.ToString());
   }
 }

@@ -4,7 +4,7 @@ using Manualfac.Generators.Components;
 using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
-namespace Manualfac.Generators.Models;
+namespace Manualfac.Generators.Models.TopLevel;
 
 internal class GeneratedContainerInitializerModel : IGeneratedModel
 {
@@ -22,8 +22,8 @@ internal class GeneratedContainerInitializerModel : IGeneratedModel
       new[]
       {
         new GeneratedMethodModel(
-          "Initialize", "void", GenerateInitializeMethod, ImmutableList<GeneratedParameterModel>.Empty, 
-          AccessModifier.Internal, isStatic: true)
+          "Initialize", ImmutableList<string>.Empty, "void", GenerateInitializeMethod, 
+          ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Internal, isStatic: true)
       });
   }
 

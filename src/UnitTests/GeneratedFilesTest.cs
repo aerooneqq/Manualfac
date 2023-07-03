@@ -4,7 +4,7 @@ using Manualfac.Generators;
 namespace UnitTests;
 
 [TestFixture]
-public class GeneratedFilesTest : TestWithSourceFilesBase<ServiceInjectionGenerator>
+public class GeneratedFilesTest : TestWithSourceFilesBase<ManualfacGenerator>
 {
   [Test] public void SimpleTest() => DoTest();
   [Test] public void SimpleTest2() => DoTest();

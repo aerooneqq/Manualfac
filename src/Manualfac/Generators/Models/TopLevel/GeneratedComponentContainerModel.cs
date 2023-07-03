@@ -4,7 +4,7 @@ using Manualfac.Generators.Components;
 using Manualfac.Generators.Components.Dependencies;
 using Manualfac.Generators.Util;
 
-namespace Manualfac.Generators.Models;
+namespace Manualfac.Generators.Models.TopLevel;
 
 internal class GeneratedComponentContainerModel : IGeneratedModel
 {
@@ -45,16 +45,17 @@ internal class GeneratedComponentContainerModel : IGeneratedModel
       new[]
       {
         new GeneratedMethodModel(
-          Constants.ResolveMethod, component.FullName, GenerateFactoryMethod, 
+          Constants.ResolveMethod, ImmutableList<string>.Empty, component.FullName, GenerateFactoryMethod, 
           ImmutableList<GeneratedParameterModel>.Empty, isStatic: true),
-        
-        new GeneratedMethodModel(Constants.InitializeMethod, Void, GenerateInitializeMethod, new []
-        {
-          new GeneratedParameterModel($"Func<{component.FullName}>", InitializeFuncParamName)
-        }, isStatic: true),
+
+        new GeneratedMethodModel(Constants.InitializeMethod, ImmutableList<string>.Empty, Void,
+          GenerateInitializeMethod, new[]
+          {
+            new GeneratedParameterModel($"Func<{component.FullName}>", InitializeFuncParamName)
+          }, isStatic: true),
         
         new GeneratedMethodModel(
-          DefaultInitializeMethodName, component.FullName, GenerateDefaultInitializeMethod, 
+          DefaultInitializeMethodName, ImmutableList<string>.Empty, component.FullName, GenerateDefaultInitializeMethod, 
           ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Private, isStatic: true)
       });
     
