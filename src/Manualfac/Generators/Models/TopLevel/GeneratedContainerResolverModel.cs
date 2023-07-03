@@ -24,20 +24,26 @@ internal class GeneratedContainerResolverModel : IGeneratedModel
       new[]
       {
         new GeneratedMethodModel(
-          "Resolve", new[] { GenericType }, GenericType, GenerateResolveMethod,
-          ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Internal)
+          "ResolveOrThrow", new[] { GenericType }, GenericType, GenerateResolveMethod,
+          ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Internal, isStatic: true)
       });
   }
 
 
   private void GenerateResolveMethod(StringBuilder sb, int indent)
   {
+    static string CreateCondition(INamedTypeSymbol symbol) =>
+      $"typeof({GenericType}) == typeof({symbol.GetFullName()})";
+
+    static string CreateResolveExpr(IComponent component) =>
+      $"({GenericType})((object){component.CreateContainerResolveExpression()})";
+
     foreach (var component in myStorage.AllComponents)
     {
-      var condition = $"{GenericType} is {component.ComponentSymbol.GetFullName()}";
+      var condition = CreateCondition(component.ComponentSymbol);
       StringBuilderCookies.If(sb, indent, condition, (builder, newIndent) =>
       {
-        var resolveExpr = component.CreateContainerResolveExpression();
+        var resolveExpr = CreateResolveExpr(component);
         builder.AppendIndent(newIndent).Append("return ").Append(resolveExpr).AppendSemicolon();
       });
 
@@ -47,29 +53,30 @@ internal class GeneratedContainerResolverModel : IGeneratedModel
     foreach (var pair in myStorage.InterfacesToComponents)
     {
       var impls = pair.Value;
-      var interfaceName = pair.Key.GetFullName();
       if (impls.Count == 1)
       {
-        var condition = $"{GenericType} is {interfaceName}";
+        var condition = CreateCondition(pair.Key);
         StringBuilderCookies.If(sb, indent, condition, (builder, newIndent) =>
         {
-          var resolveExpression = impls[0].CreateContainerResolveExpression();
+          var resolveExpression = CreateResolveExpr(impls[0]);
           builder.AppendIndent(newIndent).Append("return ").Append(resolveExpression).AppendSemicolon();
         });
       }
       else
       {
-        var condition = $"{GenericType} is IEnumerable<{interfaceName}>";
+        var condition = CreateCondition(pair.Key);
         StringBuilderCookies.If(sb, indent, condition, (builder, newIndent) =>
         {
-          var initializers = string.Join(",", impls.Select(impl => impl.CreateContainerResolveExpression()));
-          var array = $"new {interfaceName}[] {{{initializers}}}";
+          var initializers = string.Join(",", impls.Select(CreateResolveExpr));
+          var array = $"new {pair.Key.GetFullName()}[] {{{initializers}}}";
           builder.AppendIndent(newIndent).Append("return ").Append(array).AppendSemicolon();
         });
       }
 
       sb.AppendNewLine();
     }
+
+    sb.AppendIndent(indent).Append("throw new ArgumentOutOfRangeException();");
   }
   
   
