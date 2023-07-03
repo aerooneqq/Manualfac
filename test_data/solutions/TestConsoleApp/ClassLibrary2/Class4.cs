@@ -3,7 +3,6 @@
 namespace ClassLibrary2;
 
 [Component]
-public partial class Class4
+public partial class Class4 : IInterface
 {
-  
 }

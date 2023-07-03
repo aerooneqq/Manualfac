@@ -5,6 +5,6 @@ namespace ClassLibrary1;
 
 [Component]
 [DependsOn<Private, Class4, Class5>]
-public partial class Class3
+public partial class Class3 : IInterface
 {
 }
