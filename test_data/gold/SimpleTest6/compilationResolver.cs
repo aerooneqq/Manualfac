@@ -1,6 +1,6 @@
 public partial class compilationResolver
 {
-  internal TComponent Resolve<TComponent>(
+  internal static TComponent ResolveOrThrow<TComponent>(
 
   )
   {
@@ -24,11 +24,18 @@ public partial class compilationResolver
     {
       return (TComponent)((object)DefaultNamespace.Class3Container.Resolve());
     }
+    throw new ArgumentOutOfRangeException();
+  }
+
+  internal static IEnumerable<TComponent> ResolveComponentsOrThrow<TComponent>(
+
+  )
+  {
     if (typeof(TComponent) == typeof(DefaultNamespace.IClass1))
     {
-      return new DefaultNamespace.IClass1[] {(TComponent)((object)DefaultNamespace.Class1Container.Resolve()),(TComponent)((object)DefaultNamespace.Class11Container.Resolve()),(TComponent)((object)DefaultNamespace.Class111Container.Resolve()),(TComponent)((object)DefaultNamespace.Class1111Container.Resolve())};
+      return new TComponent[] {(TComponent)((object)DefaultNamespace.Class1Container.Resolve()),(TComponent)((object)DefaultNamespace.Class11Container.Resolve()),(TComponent)((object)DefaultNamespace.Class111Container.Resolve()),(TComponent)((object)DefaultNamespace.Class1111Container.Resolve())};
     }
-
+    throw new ArgumentOutOfRangeException();
   }
 
 

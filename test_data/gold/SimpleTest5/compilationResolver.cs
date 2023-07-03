@@ -1,6 +1,6 @@
 public partial class compilationResolver
 {
-  internal TComponent Resolve<TComponent>(
+  internal static TComponent ResolveOrThrow<TComponent>(
 
   )
   {
@@ -16,7 +16,14 @@ public partial class compilationResolver
     {
       return (TComponent)((object)DefaultNamespace.Class1Container.Resolve());
     }
+    throw new ArgumentOutOfRangeException();
+  }
 
+  internal static IEnumerable<TComponent> ResolveComponentsOrThrow<TComponent>(
+
+  )
+  {
+    throw new ArgumentOutOfRangeException();
   }
 
 
