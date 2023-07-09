@@ -17,9 +17,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../../../../src/Manualfac/Manualfac.csproj" 
-                          OutputItemType="Analyzer" 
-                          ReferenceOutputAssembly="false" />
+        <ProjectReference Include="../../../../src/Manualfac/Manualfac.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>

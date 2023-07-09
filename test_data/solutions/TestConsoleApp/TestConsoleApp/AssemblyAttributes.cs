@@ -1,0 +1,4 @@
+
+using ManualfacAttributes;
+
+[assembly: GenerateResolver]
