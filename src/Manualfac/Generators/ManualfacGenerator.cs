@@ -20,9 +20,16 @@ public class ManualfacGenerator : ISourceGenerator
     
     GenerateDependenciesPart(storage.AllComponents, context);
     GenerateContainerBuilder(storage, context);
-    GenerateContainerInitialization(storage, context);
-    GenerateContainerGenericResolver(storage, context);
+
+    if (ShouldGenerateResolverFor(context.Compilation.Assembly))
+    {
+      GenerateContainerInitialization(storage, context);
+      GenerateContainerGenericResolver(storage, context); 
+    }
   }
+
+  private static bool ShouldGenerateResolverFor(IAssemblySymbol symbol) => 
+    symbol.GetAttributes().Any(attr => attr.AttributeClass?.Name == "GenerateResolverAttribute");
 
   private static void GenerateDependenciesPart(
     IReadOnlyList<IComponent> components, GeneratorExecutionContext context)
