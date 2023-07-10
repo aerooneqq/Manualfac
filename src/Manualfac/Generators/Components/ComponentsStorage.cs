@@ -27,12 +27,12 @@ internal class ComponentsStorage
   }
   
   
-  public void FillComponents(GeneratorExecutionContext context)
+  public void FillComponents(Compilation compilation)
   {
     var modulesQueue = new Queue<IModuleSymbol>();
     var visited = new HashSet<IModuleSymbol>(SymbolEqualityComparer.Default);
     
-    modulesQueue.Enqueue(context.Compilation.SourceModule);
+    modulesQueue.Enqueue(compilation.SourceModule);
 
     while (modulesQueue.Count != 0)
     {
@@ -41,7 +41,7 @@ internal class ComponentsStorage
 
       foreach (var componentType in GetComponentTypesFrom(module))
       {
-        ToComponentInfo(componentType, new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default), context);
+        ToComponentInfo(componentType, new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default), compilation);
       }
 
       foreach (var refAsm in module.ReferencedAssemblySymbols)
@@ -60,7 +60,7 @@ internal class ComponentsStorage
   }
   
   private IComponent ToComponentInfo(
-    INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
+    INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited, Compilation compilation)
   {
     if (myCache.TryGetExistingComponent(componentSymbol) is { } existingComponent) return existingComponent;
     if (visited.Contains(componentSymbol)) throw new CyclicDependencyException();
@@ -72,11 +72,11 @@ internal class ComponentsStorage
 
     visited.Add(componentSymbol);
 
-    var componentsDepsByLevels = ExtractComponentsDependencies(componentSymbol, visited, context);
-    var baseComponent = TryFindBaseComponent(componentSymbol, visited, context);
+    var componentsDepsByLevels = ExtractComponentsDependencies(componentSymbol, visited, compilation);
+    var baseComponent = TryFindBaseComponent(componentSymbol, visited, compilation);
     var createdComponent = new Component(componentSymbol, componentsDepsByLevels, baseComponent);
 
-    if (TryFindOverridenComponent(componentSymbol, visited, context) is { } overridenComponent)
+    if (TryFindOverridenComponent(componentSymbol, visited, compilation) is { } overridenComponent)
     {
       myOverridesCache.AddOverride(createdComponent, overridenComponent);
     }
@@ -91,7 +91,7 @@ internal class ComponentsStorage
   private IReadOnlyList<ComponentDependencyDescriptor> ExtractComponentsDependencies(
     INamedTypeSymbol componentSymbol, 
     ISet<INamedTypeSymbol> visited,
-    GeneratorExecutionContext context)
+    Compilation compilation)
   {
     var alreadyAddedDependencySymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
@@ -107,7 +107,7 @@ internal class ComponentsStorage
           throw new DuplicatedDependencyException(componentSymbol, dependencySymbol);
         }
 
-        if (TryGetDependency(dependencySymbol, visited, context) is { } dependency)
+        if (TryGetDependency(dependencySymbol, visited, compilation) is { } dependency)
         {
           dependencies.Add(new ComponentDependencyDescriptor(dependency, modifier));
         }
@@ -120,11 +120,11 @@ internal class ComponentsStorage
   }
 
   private IComponentDependency? TryGetDependency(
-    INamedTypeSymbol dependencySymbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
+    INamedTypeSymbol dependencySymbol, ISet<INamedTypeSymbol> visited, Compilation compilation)
   {
     if (dependencySymbol.TypeKind == TypeKind.Class)
     {
-      var dependencyComponent = ToComponentInfo(dependencySymbol, visited, context);
+      var dependencyComponent = ToComponentInfo(dependencySymbol, visited, compilation);
       return new ConcreteComponentDependency(dependencyComponent);
     }
 
@@ -155,7 +155,7 @@ internal class ComponentsStorage
   }
 
   private IComponent? TryFindBaseComponent(
-    INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
+    INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, Compilation context)
   {
     if (symbol.BaseType is not { } baseType ||
         !mySymbolsCache.CheckIfManualfacComponent(baseType))
@@ -167,7 +167,7 @@ internal class ComponentsStorage
   }
 
   private IComponent? TryFindOverridenComponent(
-    INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, GeneratorExecutionContext context)
+    INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, Compilation context)
   {
     var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.OverridesAttribute);
     var baseSymbols = overridesAttributes.SelectMany(pair => pair).ToList();

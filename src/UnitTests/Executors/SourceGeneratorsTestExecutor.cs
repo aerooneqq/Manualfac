@@ -6,7 +6,7 @@ namespace UnitTests.Executors;
 
 
 internal class SourceGeneratorsTestExecutor<TGenerator> : SourceGeneratorTestExecutorBase<TGenerator> 
-  where TGenerator : ISourceGenerator, new()
+  where TGenerator : IIncrementalGenerator, new()
 {
   private readonly HashSet<string> myDifferences;
   private readonly string myPathToGoldDirFor;

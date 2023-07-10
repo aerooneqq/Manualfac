@@ -5,7 +5,8 @@ using TestCore;
 
 namespace UnitTests.Executors;
 
-internal abstract class SourceGeneratorTestExecutorBase<TGenerator> where TGenerator : ISourceGenerator, new()
+internal abstract class SourceGeneratorTestExecutorBase<TGenerator> 
+  where TGenerator : IIncrementalGenerator, new()
 {
   private readonly string myTestName;
 

@@ -1,30 +1,30 @@
 using System.Text;
 using Manualfac.Generators.Components;
-using Manualfac.Generators.Models;
 using Manualfac.Generators.Models.TopLevel;
 using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators;
 
 [Generator]
-public class ManualfacGenerator : ISourceGenerator
+public class ManualfacGenerator : IIncrementalGenerator
 {
-  public void Initialize(GeneratorInitializationContext context)
+  public void Initialize(IncrementalGeneratorInitializationContext context)
   {
+    context.RegisterSourceOutput(context.CompilationProvider, DoGeneration);
   }
 
-  public void Execute(GeneratorExecutionContext context)
+  private void DoGeneration(SourceProductionContext productionContext, Compilation compilation)
   {
     var storage = new ComponentsStorage();
-    storage.FillComponents(context);
+    storage.FillComponents(compilation);
     
-    GenerateDependenciesPart(storage.AllComponents, context);
-    GenerateContainerBuilder(storage, context);
+    GenerateDependenciesPart(storage.AllComponents, compilation, productionContext);
+    GenerateContainerBuilder(storage, compilation, productionContext);
 
-    if (ShouldGenerateResolverFor(context.Compilation.Assembly))
+    if (ShouldGenerateResolverFor(compilation.Assembly))
     {
-      GenerateContainerInitialization(storage, context);
-      GenerateContainerGenericResolver(storage, context); 
+      GenerateContainerInitialization(storage, compilation, productionContext);
+      GenerateContainerGenericResolver(storage, compilation, productionContext); 
     }
   }
 
@@ -32,12 +32,12 @@ public class ManualfacGenerator : ISourceGenerator
     symbol.GetAttributes().Any(attr => attr.AttributeClass?.Name == "GenerateResolverAttribute");
 
   private static void GenerateDependenciesPart(
-    IReadOnlyList<IComponent> components, GeneratorExecutionContext context)
+    IReadOnlyList<IComponent> components, Compilation compilation, SourceProductionContext context)
   {
     foreach (var componentInfo in components)
     {
       var assembly = componentInfo.ComponentSymbol.ContainingAssembly;
-      if (!SymbolEqualityComparer.Default.Equals(assembly, context.Compilation.Assembly)) continue;
+      if (!SymbolEqualityComparer.Default.Equals(assembly, compilation.Assembly)) continue;
       
       var sb = new StringBuilder();
       componentInfo.ToGeneratedFileModel().GenerateInto(sb, 0);
@@ -46,9 +46,10 @@ public class ManualfacGenerator : ISourceGenerator
     }
   }
 
-  private static void GenerateContainerBuilder(ComponentsStorage storage, GeneratorExecutionContext context)
+  private static void GenerateContainerBuilder(
+    ComponentsStorage storage, Compilation compilation, SourceProductionContext context)
   {
-    var compilationAssembly = context.Compilation.Assembly;
+    var compilationAssembly = compilation.Assembly;
     foreach (var componentInfo in ComponentsTopologicalSorter.Sort(storage.AllComponents))
     {
       var componentAssembly = componentInfo.ComponentSymbol.ContainingAssembly;
@@ -61,21 +62,23 @@ public class ManualfacGenerator : ISourceGenerator
     }
   }
 
-  private static void GenerateContainerInitialization(ComponentsStorage storage, GeneratorExecutionContext context)
+  private static void GenerateContainerInitialization(
+    ComponentsStorage storage, Compilation compilation, SourceProductionContext context)
   {
     if (storage.BaseToOverrides.Count == 0) return;
     
     var sb = new StringBuilder();
-    new GeneratedContainerInitializerModel(storage, context.Compilation.Assembly).GenerateInto(sb, 0);
+    new GeneratedContainerInitializerModel(storage, compilation.Assembly).GenerateInto(sb, 0);
     
-    context.AddSource($"{context.Compilation.Assembly.Name}", sb.ToString());
+    context.AddSource($"{compilation.Assembly.Name}", sb.ToString());
   }
 
-  private static void GenerateContainerGenericResolver(ComponentsStorage storage, GeneratorExecutionContext context)
+  private static void GenerateContainerGenericResolver(
+    ComponentsStorage storage, Compilation compilation, SourceProductionContext context)
   {
     var sb = new StringBuilder();
-    new GeneratedContainerResolverModel(storage, context.Compilation.Assembly).GenerateInto(sb, 0);
+    new GeneratedContainerResolverModel(storage, compilation.Assembly).GenerateInto(sb, 0);
     
-    context.AddSource($"{context.Compilation.Assembly.Name}Resolver", sb.ToString());
+    context.AddSource($"{compilation.Assembly.Name}Resolver", sb.ToString());
   }
 }
