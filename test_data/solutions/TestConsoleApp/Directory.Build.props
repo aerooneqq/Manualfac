@@ -1,0 +1,9 @@
+<Project>
+    <ItemGroup>
+        <CompilerVisibleProperty Include="DependenciesNamingStyle" />
+    </ItemGroup>
+    
+    <PropertyGroup>
+        <DependenciesNamingStyle>asdad</DependenciesNamingStyle>
+    </PropertyGroup>
+</Project>
