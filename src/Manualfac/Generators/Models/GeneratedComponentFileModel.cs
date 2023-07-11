@@ -10,9 +10,9 @@ internal class GeneratedComponentFileModel : IGeneratedModel
   private readonly GeneratedNamespaceModel myGeneratedNamespaceModel;
 
 
-  public GeneratedComponentFileModel(IComponent component)
+  public GeneratedComponentFileModel(IComponent component, NamingStyle namingStyle)
   {
-    var generatedClassModel = component.ToGeneratedClassModel();
+    var generatedClassModel = component.ToGeneratedClassModel(namingStyle);
     myGeneratedUsingsModel = component.ToDependenciesUsingsModel();
     myGeneratedNamespaceModel = new GeneratedNamespaceModel(component.Namespace, generatedClassModel.GenerateInto);
   }

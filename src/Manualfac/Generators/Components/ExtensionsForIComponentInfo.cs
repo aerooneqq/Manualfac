@@ -23,10 +23,10 @@ internal static class ExtensionsForIComponentInfo
       .Distinct()
       .ToList()!);
   
-  public static GeneratedComponentFileModel ToGeneratedFileModel(this IComponent component) => 
-    new(component);
+  public static GeneratedComponentFileModel ToGeneratedFileModel(this IComponent component, NamingStyle style) => 
+    new(component, style);
 
-  public static GeneratedClassModel ToGeneratedClassModel(this IComponent component)
+  public static GeneratedClassModel ToGeneratedClassModel(this IComponent component, NamingStyle namingStyle)
   {
     GeneratedBaseConstructorModel? baseConstructorModel = null;
     if (component.BaseComponent is { })
@@ -44,35 +44,35 @@ internal static class ExtensionsForIComponentInfo
       baseConstructorModel = new GeneratedBaseConstructorModel(paramNames);
     }
 
-    var constructorParams = component.ExtractFieldsForConstructor();
-    var fields = component.ExtractFields();
+    var constructorParams = component.ExtractFieldsForConstructor(namingStyle);
+    var fields = component.ExtractFields(namingStyle);
     var className = component.TypeShortName;
     var constructorModel = new GeneratedConstructorModel(className, constructorParams, fields, baseConstructorModel);
     
     return new GeneratedClassModel(
       className,
       new[] { constructorModel },
-      component.ExtractFields(),
+      component.ExtractFields(namingStyle),
       ImmutableList<GeneratedMethodModel>.Empty);
   }
 
-  public static IReadOnlyList<GeneratedFieldModel> ExtractFields(
-    this IComponent component) =>
-    ExtractGeneratedFieldModelsInternal(component.Dependencies.ImmediateDependencies);
+  public static IReadOnlyList<GeneratedFieldModel> ExtractFields(this IComponent component, NamingStyle namingStyle) =>
+    ExtractGeneratedFieldModelsInternal(component.Dependencies.ImmediateDependencies, namingStyle);
   
   private static IReadOnlyList<GeneratedFieldModel> ExtractGeneratedFieldModelsInternal(
-    IEnumerable<ComponentDependencyDescriptor> descriptors)
+    IEnumerable<ComponentDependencyDescriptor> descriptors, NamingStyle namingStyle)
   {
-    return descriptors.Select(ToGeneratedFieldModel).ToList();
+    return descriptors.Select(desc => ToGeneratedFieldModel(desc, namingStyle)).ToList();
   }
 
-  private static GeneratedFieldModel ToGeneratedFieldModel(ComponentDependencyDescriptor descriptor)
+  private static GeneratedFieldModel ToGeneratedFieldModel(
+    ComponentDependencyDescriptor descriptor, NamingStyle namingStyle)
   {
     var symbol = descriptor.Dependency.DependencyTypeSymbol; 
-    return new GeneratedFieldModel(symbol.GetFullName(), $"my{symbol.Name}", descriptor.Modifier);
+    return new GeneratedFieldModel(symbol.GetFullName(), symbol.Name, namingStyle, descriptor.Modifier);
   }
 
   public static IReadOnlyList<GeneratedFieldModel> ExtractFieldsForConstructor(
-    this IComponent component) =>
-    ExtractGeneratedFieldModelsInternal(component.Dependencies.AllOrderedDependencies);
+    this IComponent component, NamingStyle namingStyle) =>
+    ExtractGeneratedFieldModelsInternal(component.Dependencies.AllOrderedDependencies, namingStyle);
 }

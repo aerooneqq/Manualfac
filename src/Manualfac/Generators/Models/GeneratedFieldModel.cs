@@ -18,13 +18,15 @@ internal class GeneratedFieldModel : IGeneratedModel
   public GeneratedFieldModel(
     string typeName,
     string name,
+    NamingStyle namingStyle,
     AccessModifier accessModifier = AccessModifier.Private,
     bool @readonly = true,
     bool isStatic = false,
     string? defaultValue = null)
   {
     TypeName = typeName;
-    Name = name;
+    Name = namingStyle.CreateFieldName(name);
+    
     myAccessModifier = accessModifier;
     myReadonly = @readonly;
     myIsStatic = isStatic;

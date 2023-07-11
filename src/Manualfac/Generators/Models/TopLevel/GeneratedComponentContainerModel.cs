@@ -37,10 +37,12 @@ internal class GeneratedComponentContainerModel : IGeneratedModel
       ImmutableArray<GeneratedConstructorModel>.Empty,
       new[]
       {
-        new GeneratedFieldModel(component.FullName, InstanceFieldName, AccessModifier.Private, false, true),
-        new GeneratedFieldModel("object", SyncFieldName, AccessModifier.Private, false, true, "new object()"),
-        new GeneratedFieldModel($"Func<{component.FullName}>", InitializationFuncFieldName, AccessModifier.Private, 
-          false, true, defaultValue: DefaultInitializeMethodName)
+        new GeneratedFieldModel(component.FullName, InstanceFieldName, DefaultNamingStyle.Instance,
+          AccessModifier.Private, false, true),
+        new GeneratedFieldModel("object", SyncFieldName, DefaultNamingStyle.Instance,
+          AccessModifier.Private, false, true, "new object()"),
+        new GeneratedFieldModel($"Func<{component.FullName}>", InitializationFuncFieldName, DefaultNamingStyle.Instance, 
+          AccessModifier.Private, false, true, defaultValue: DefaultInitializeMethodName)
       },
       new[]
       {

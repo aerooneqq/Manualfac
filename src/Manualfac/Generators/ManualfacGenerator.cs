@@ -5,26 +5,36 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators;
 
+
 [Generator]
 public class ManualfacGenerator : IIncrementalGenerator
 {
+  private const string BuildProperty = "build_property";
+  private const string NamingStyleProperty = $"{BuildProperty}.DependenciesNamingStyle";
+
+
   public void Initialize(IncrementalGeneratorInitializationContext context)
   {
-    context.RegisterSourceOutput(context.CompilationProvider, DoGeneration);
+    var combined = context.AnalyzerConfigOptionsProvider.Combine(context.CompilationProvider);
+    context.RegisterSourceOutput(combined, (productionContext, tuple) =>
+    {
+      var manualfacContext = new ManualfacContext(productionContext, tuple.Left, tuple.Right);
+      DoGeneration(manualfacContext);
+    });
   }
 
-  private void DoGeneration(SourceProductionContext productionContext, Compilation compilation)
+  private void DoGeneration(ManualfacContext context)
   {
     var storage = new ComponentsStorage();
-    storage.FillComponents(compilation);
+    storage.FillComponents(context.Compilation);
     
-    GenerateDependenciesPart(storage.AllComponents, compilation, productionContext);
-    GenerateContainerBuilder(storage, compilation, productionContext);
+    GenerateDependenciesPart(storage.AllComponents, context);
+    GenerateContainerBuilder(storage, context.Compilation, context.ProductionContext);
 
-    if (ShouldGenerateResolverFor(compilation.Assembly))
+    if (ShouldGenerateResolverFor(context.Compilation.Assembly))
     {
-      GenerateContainerInitialization(storage, compilation, productionContext);
-      GenerateContainerGenericResolver(storage, compilation, productionContext); 
+      GenerateContainerInitialization(storage, context.Compilation, context.ProductionContext);
+      GenerateContainerGenericResolver(storage, context.Compilation, context.ProductionContext); 
     }
   }
 
@@ -32,17 +42,23 @@ public class ManualfacGenerator : IIncrementalGenerator
     symbol.GetAttributes().Any(attr => attr.AttributeClass?.Name == "GenerateResolverAttribute");
 
   private static void GenerateDependenciesPart(
-    IReadOnlyList<IComponent> components, Compilation compilation, SourceProductionContext context)
+    IReadOnlyList<IComponent> components, ManualfacContext context)
   {
+    NamingStyle namingStyle = DefaultNamingStyle.Instance;
+    if (context.Provider.GlobalOptions.TryGetValue(NamingStyleProperty, out var explicitlySetStyle))
+    {
+      namingStyle = NamingStyle.ParseOrDefault(explicitlySetStyle);
+    }
+    
     foreach (var componentInfo in components)
     {
       var assembly = componentInfo.ComponentSymbol.ContainingAssembly;
-      if (!SymbolEqualityComparer.Default.Equals(assembly, compilation.Assembly)) continue;
+      if (!SymbolEqualityComparer.Default.Equals(assembly, context.Compilation.Assembly)) continue;
       
       var sb = new StringBuilder();
-      componentInfo.ToGeneratedFileModel().GenerateInto(sb, 0);
-    
-      context.AddSource($"{componentInfo.TypeShortName}.g", sb.ToString());
+      componentInfo.ToGeneratedFileModel(namingStyle).GenerateInto(sb, 0);
+
+      context.ProductionContext.AddSource($"{componentInfo.TypeShortName}.g", sb.ToString());
     }
   }
 
