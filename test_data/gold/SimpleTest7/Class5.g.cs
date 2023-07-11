@@ -4,7 +4,7 @@ namespace DefaultNamespace
 {
   public partial class Class5
   {
-    private protected readonly DefaultNamespace.Class4 myClass4;
+    private protected readonly DefaultNamespace.Class4 Class4;
 
     public Class5(
       DefaultNamespace.Class4 c0,
@@ -17,7 +17,7 @@ namespace DefaultNamespace
       c3
     )
     {
-      myClass4 = c0;
+      Class4 = c0;
     }
 
   }
