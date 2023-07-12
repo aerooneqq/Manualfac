@@ -1,10 +1,10 @@
 using Microsoft.CodeAnalysis;
 
-namespace UnitTests.Executors;
+namespace TestCore;
 
-internal readonly record struct GeneratedFile(string Name, string Text);
+public readonly record struct GeneratedFile(string Name, string Text);
 
-internal static class SyntaxTreeExtensions
+public static class SyntaxTreeExtensions
 {
   public static GeneratedFile ToGeneratedFile(this SyntaxTree tree) =>
     new(
@@ -13,7 +13,7 @@ internal static class SyntaxTreeExtensions
     );
 }
 
-internal static class StringExtensions
+public static class StringExtensions
 {
   public static string ReplaceRn(this string text) => text.Replace("\r\n", "\n");
 }

@@ -4,10 +4,10 @@ namespace TestCore;
 
 public static class TestPaths
 {
-  public static string GetPathToTestConsoleApp()
+  public static string GetPathToTestConsoleAppSolutionFolder()
   {
-    var path = Path.Combine(GetTestDataPath(), "solutions", "TestConsoleApp", "TestConsoleApp", "TestConsoleApp.csproj");
-    Assert.That(File.Exists(path), Is.True);
+    var path = Path.Combine(GetTestDataPath(), "solutions", "TestConsoleApp");
+    Assert.That(Directory.Exists(path), Is.True);
 
     return path;
   }
@@ -29,10 +29,29 @@ public static class TestPaths
     return path;
   }
 
+  public static string GetPathToGoldDir()
+  {
+    var path = Path.Combine(GetTestDataPath(), "gold");
+    Assert.That(Directory.Exists(path), Is.True);
+
+    return path;
+  }
+  
   public static string GetPathToGoldDirFor(string sourceName)
   {
     var path = Path.Combine(GetTestDataPath(), "gold", sourceName);
     Assert.That(Directory.Exists(path), Is.True);
+
+    return path;
+  }
+
+  public static string GetPathToIntegrationTestFolder(string solutionName, string projectName)
+  {
+    var path = Path.Combine(GetPathToGoldDir(), solutionName, projectName);
+    if (!Directory.Exists(path))
+    {
+      Directory.CreateDirectory(path);
+    }
 
     return path;
   }
