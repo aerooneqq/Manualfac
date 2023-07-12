@@ -18,6 +18,7 @@ public class IntegrationTestWithSolutionExecutor
   
   public void Execute()
   {
+    DeleteGeneratedFolder();
     DotnetClean();
     DotnetRebuild();
 
@@ -50,6 +51,21 @@ public class IntegrationTestWithSolutionExecutor
     const string GeneratorFolderName = $"Manualfac.Generators.{GeneratorName}";
     
     return Path.Combine(objFolderPath, "obj", "Debug", "net7.0", "generated", Manualfac, GeneratorFolderName);
+  }
+
+  private void DeleteGeneratedFolder()
+  {
+    foreach (var (_, genSourcesFolderPath) in FindObjPaths())
+    {
+      try
+      {
+        Directory.Delete(genSourcesFolderPath, true);
+      }
+      catch (Exception ex)
+      {
+        Assert.Fail($"Failed to delete folder {genSourcesFolderPath}, exception: {ex}");
+      }
+    }
   }
 
   private void DotnetClean() => LaunchDotnetProcess(mySolutionDirectory, "clean");
