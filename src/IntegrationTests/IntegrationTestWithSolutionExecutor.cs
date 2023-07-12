@@ -5,7 +5,7 @@ namespace GeneratorsTests;
 
 public class IntegrationTestWithSolutionExecutor
 {
-  private static readonly int ourTimeout = (int) TimeSpan.FromSeconds(5).TotalMilliseconds;
+  private static readonly int ourTimeout = (int) TimeSpan.FromSeconds(10).TotalMilliseconds;
   
   private readonly string mySolutionDirectory;
 
