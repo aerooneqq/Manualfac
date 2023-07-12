@@ -1,6 +1,8 @@
 using System.Text;
 using Manualfac.Generators.Components;
 using Manualfac.Generators.Models.TopLevel;
+using Manualfac.Generators.Util;
+using Manualfac.Generators.Util.Naming;
 using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators;

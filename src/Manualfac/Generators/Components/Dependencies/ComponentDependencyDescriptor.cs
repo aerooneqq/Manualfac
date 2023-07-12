@@ -1,3 +1,5 @@
+using Manualfac.Generators.Util;
+
 namespace Manualfac.Generators.Components.Dependencies;
 
 internal class ComponentDependencyDescriptor

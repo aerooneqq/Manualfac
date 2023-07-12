@@ -1,7 +1,7 @@
 ﻿using Manualfac.Exceptions;
 using Manualfac.Generators.Components;
 
-namespace Manualfac.Generators;
+namespace Manualfac.Generators.Util;
 
 internal static class ComponentsTopologicalSorter
 {

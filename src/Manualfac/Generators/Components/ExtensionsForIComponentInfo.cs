@@ -2,6 +2,7 @@
 using Manualfac.Generators.Components.Dependencies;
 using Manualfac.Generators.Models;
 using Manualfac.Generators.Util;
+using Manualfac.Generators.Util.Naming;
 
 namespace Manualfac.Generators.Components;
 

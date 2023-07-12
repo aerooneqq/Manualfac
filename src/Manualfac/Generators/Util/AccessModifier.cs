@@ -1,4 +1,4 @@
-﻿namespace Manualfac.Generators;
+﻿namespace Manualfac.Generators.Util;
 
 public enum AccessModifier
 {

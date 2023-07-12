@@ -21,7 +21,11 @@ public class IntegrationTestWithSolutionExecutor
     DeleteGeneratedFolder();
     DotnetClean();
     DotnetRebuild();
+    CompareGoldAndTestValue();
+  }
 
+  private void CompareGoldAndTestValue()
+  {
     var solutionName = Path.GetFileNameWithoutExtension(mySolutionDirectory);
     foreach (var (projectName, genSourcesFolderPath) in FindObjPaths())
     {
