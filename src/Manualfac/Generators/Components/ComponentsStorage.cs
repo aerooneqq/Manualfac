@@ -130,7 +130,7 @@ internal class ComponentsStorage
 
     if (dependencySymbol.TypeKind == TypeKind.Interface)
     {
-      if (dependencySymbol.MetadataName == Constants.GenericIEnumerable)
+      if (dependencySymbol.IsGenericEnumerable())
       {
         return new CollectionDependency(dependencySymbol, this);
       }
