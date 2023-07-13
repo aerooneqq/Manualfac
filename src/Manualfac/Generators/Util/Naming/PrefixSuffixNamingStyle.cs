@@ -13,7 +13,7 @@ public class PrefixSuffixNamingStyle : NamingStyle
   }
 
 
-  public override string CreateFieldName(string originalFieldName)
+  public override string ApplyNamingStyleTo(string originalFieldName)
   {
     return myPrefix + originalFieldName + mySuffix;
   }

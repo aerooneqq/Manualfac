@@ -26,7 +26,7 @@ internal class GeneratedFieldModel : IGeneratedModel
     string? defaultValue = null)
   {
     TypeName = typeName;
-    Name = namingStyle.CreateFieldName(baseName);
+    Name = namingStyle.ApplyNamingStyleTo(baseName);
     
     myAccessModifier = accessModifier;
     myReadonly = @readonly;

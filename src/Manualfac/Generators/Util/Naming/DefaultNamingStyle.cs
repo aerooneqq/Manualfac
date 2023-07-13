@@ -10,5 +10,5 @@ public class DefaultNamingStyle : NamingStyle
   }
 
 
-  public override string CreateFieldName(string originalFieldName) => originalFieldName;
+  public override string ApplyNamingStyleTo(string originalFieldName) => originalFieldName;
 }
