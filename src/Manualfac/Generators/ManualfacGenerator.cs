@@ -12,7 +12,8 @@ namespace Manualfac.Generators;
 public class ManualfacGenerator : IIncrementalGenerator
 {
   private const string BuildProperty = "build_property";
-  private const string NamingStyleProperty = $"{BuildProperty}.DependenciesNamingStyle";
+  private const string DependencySuffixProperty = $"{BuildProperty}.{Constants.Manualfac}DependencySuffix";
+  private const string DependencyPrefixProperty = $"{BuildProperty}.{Constants.Manualfac}DependencyPrefix";
 
 
   public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -46,12 +47,7 @@ public class ManualfacGenerator : IIncrementalGenerator
   private static void GenerateDependenciesPart(
     IReadOnlyList<IComponent> components, ManualfacContext context)
   {
-    NamingStyle namingStyle = DefaultNamingStyle.Instance;
-    if (context.Provider.GlobalOptions.TryGetValue(NamingStyleProperty, out var explicitlySetStyle))
-    {
-      namingStyle = NamingStyle.ParseOrDefault(explicitlySetStyle);
-    }
-    
+    var namingStyle = ParseNamingStyle(context);
     foreach (var componentInfo in components)
     {
       var assembly = componentInfo.ComponentSymbol.ContainingAssembly;
@@ -62,6 +58,25 @@ public class ManualfacGenerator : IIncrementalGenerator
 
       context.ProductionContext.AddSource($"{componentInfo.TypeShortName}.g", sb.ToString());
     }
+  }
+
+  private static NamingStyle ParseNamingStyle(ManualfacContext context)
+  {
+    var prefix = string.Empty;
+    var suffix = string.Empty;
+    var options = context.Provider.GlobalOptions;
+
+    if (options.TryGetValue(DependencyPrefixProperty, out var setPrefix))
+    {
+      prefix = setPrefix;
+    }
+
+    if (options.TryGetValue(DependencySuffixProperty, out var setSuffix))
+    {
+      suffix = setSuffix;
+    }
+
+    return new PrefixSuffixNamingStyle(prefix, suffix);
   }
 
   private static void GenerateContainerBuilder(

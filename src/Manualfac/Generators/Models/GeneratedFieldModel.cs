@@ -18,7 +18,7 @@ internal class GeneratedFieldModel : IGeneratedModel
 
   public GeneratedFieldModel(
     string typeName,
-    string name,
+    string baseName,
     NamingStyle namingStyle,
     AccessModifier accessModifier = AccessModifier.Private,
     bool @readonly = true,
@@ -26,7 +26,7 @@ internal class GeneratedFieldModel : IGeneratedModel
     string? defaultValue = null)
   {
     TypeName = typeName;
-    Name = namingStyle.CreateFieldName(name);
+    Name = namingStyle.CreateFieldName(baseName);
     
     myAccessModifier = accessModifier;
     myReadonly = @readonly;

@@ -69,8 +69,10 @@ internal static class ExtensionsForIComponentInfo
   private static GeneratedFieldModel ToGeneratedFieldModel(
     ComponentDependencyDescriptor descriptor, NamingStyle namingStyle)
   {
-    var symbol = descriptor.Dependency.DependencyTypeSymbol; 
-    return new GeneratedFieldModel(symbol.GetFullName(), symbol.Name, namingStyle, descriptor.Modifier);
+    var symbol = descriptor.Dependency.DependencyTypeSymbol;
+    var fullName = symbol.GetFullName();
+    var fieldBaseName = symbol.GetAssociatedFieldNameBase();
+    return new GeneratedFieldModel(fullName, fieldBaseName, namingStyle, descriptor.Modifier);
   }
 
   public static IReadOnlyList<GeneratedFieldModel> ExtractFieldsForConstructor(
