@@ -5,8 +5,8 @@ namespace ClassLibrary1
 {
   public partial class Class1
   {
-    private readonly ClassLibrary1.Class2 asdadClass2;
-    private readonly ClassLibrary1.Class3 asdadClass3;
+    private readonly ClassLibrary1.Class2 prefixClass2suffix;
+    private readonly ClassLibrary1.Class3 prefixClass3suffix;
 
     public Class1(
       ClassLibrary1.Class2 c0,
@@ -16,8 +16,8 @@ namespace ClassLibrary1
       c2
     )
     {
-      asdadClass2 = c0;
-      asdadClass3 = c1;
+      prefixClass2suffix = c0;
+      prefixClass3suffix = c1;
     }
 
   }
