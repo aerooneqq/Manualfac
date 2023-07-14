@@ -29,32 +29,16 @@ internal class ComponentsStorage
   
   public void FillComponents(Compilation compilation)
   {
-    var modulesQueue = new Queue<IModuleSymbol>();
-    var visited = new HashSet<IModuleSymbol>(SymbolEqualityComparer.Default);
-    
-    modulesQueue.Enqueue(compilation.SourceModule);
-
-    while (modulesQueue.Count != 0)
+    AllModulesVisitor.Visit(compilation, module =>
     {
-      var module = modulesQueue.Dequeue();
-      visited.Add(module);
-
-      foreach (var componentType in GetComponentTypesFrom(module))
+      foreach (var componentType in module.GetTypes().Where(mySymbolsCache.CheckIfManualfacComponent))
       {
-        ToComponentInfo(componentType, new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default), compilation);
+        var visited = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+        ToComponentInfo(componentType, visited, compilation);
       }
 
-      foreach (var refAsm in module.ReferencedAssemblySymbols)
-      {
-        foreach (var refAsmModule in refAsm.Modules)
-        {
-          if (!visited.Contains(refAsmModule))
-          {
-            modulesQueue.Enqueue(refAsmModule);
-          }
-        }
-      }
-    }
+      return false;
+    });
     
     myCache.AdjustInterfaceImplementations(this.AdjustComponent);
   }
@@ -232,25 +216,6 @@ internal class ComponentsStorage
       nameof(AccessModifier.ProtectedInternal) => AccessModifier.ProtectedInternal,
       _ => throw new ArgumentOutOfRangeException(first.Name)
     };
-  }
-  
-  private IEnumerable<INamedTypeSymbol> GetComponentTypesFrom(IModuleSymbol module)
-  {
-    return GetAllNamespacesFrom(module.GlobalNamespace)
-      .SelectMany(ns => ns.GetTypeMembers())
-      .Where(mySymbolsCache.CheckIfManualfacComponent);
-  }
-
-  private static IEnumerable<INamespaceSymbol> GetAllNamespacesFrom(INamespaceSymbol namespaceSymbol)
-  {
-    yield return namespaceSymbol;
-    foreach (var childNamespace in namespaceSymbol.GetNamespaceMembers())
-    {
-      foreach (var nextNamespace in GetAllNamespacesFrom(childNamespace))
-      {
-        yield return nextNamespace;
-      }
-    }
   }
 }
 
