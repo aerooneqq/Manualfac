@@ -1,5 +1,6 @@
 using System.Text;
 using Manualfac.Generators.Components;
+using Manualfac.Generators.Components.Caches;
 using Manualfac.Generators.Models.TopLevel;
 using Manualfac.Generators.Util;
 using Manualfac.Generators.Util.Naming;
@@ -28,21 +29,24 @@ public class ManualfacGenerator : IIncrementalGenerator
 
   private void DoGeneration(ManualfacContext context)
   {
-    var storage = new ComponentsStorage();
-    storage.FillComponents(context.Compilation);
+    var symbols = ManualfacSymbols.CreateManualfacSymbolsFrom(context.Compilation);
+    var storage = new ComponentsStorage(symbols, context.Compilation);
+    
+    storage.FillComponents();
     
     GenerateDependenciesPart(storage.AllComponents, context);
     GenerateContainerBuilder(storage, context.Compilation, context.ProductionContext);
 
-    if (ShouldGenerateResolverFor(context.Compilation.Assembly))
+    if (ShouldGenerateResolverFor(context.Compilation.Assembly, symbols))
     {
       GenerateContainerInitialization(storage, context.Compilation, context.ProductionContext);
       GenerateContainerGenericResolver(storage, context.Compilation, context.ProductionContext); 
     }
   }
 
-  private static bool ShouldGenerateResolverFor(IAssemblySymbol symbol) => 
-    symbol.GetAttributes().Any(attr => attr.AttributeClass?.Name == "GenerateResolverAttribute");
+  private static bool ShouldGenerateResolverFor(IAssemblySymbol symbol, ManualfacSymbols symbols) => 
+    symbol.GetAttributes()
+      .Any(attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, symbols.GenerateResolverAttribute));
 
   private static void GenerateDependenciesPart(
     IReadOnlyList<IComponent> components, ManualfacContext context)

@@ -9,32 +9,36 @@ namespace Manualfac.Generators.Components;
 
 internal class ComponentsStorage
 {
+  private readonly Compilation myCompilation;
   private readonly ComponentAndNonComponentSymbols mySymbolsCache;
   private readonly ComponentsCache myCache;
   private readonly OverridesCache myOverridesCache;
+  private readonly ManualfacSymbols myManualfacSymbols;
 
-  
+
   public IReadOnlyDictionary<IComponent, IComponent> BaseToOverrides => myOverridesCache.BaseToOverrides;
   public IReadOnlyList<IComponent> AllComponents => myCache.AllComponents;
   public IReadOnlyDictionary<INamedTypeSymbol, List<IComponent>> InterfacesToComponents => myCache.InterfacesToComponents;
 
 
-  public ComponentsStorage()
+  public ComponentsStorage(ManualfacSymbols symbols, Compilation compilation)
   {
-    mySymbolsCache = new ComponentAndNonComponentSymbols();
+    myManualfacSymbols = symbols;
+    myCompilation = compilation;
+    mySymbolsCache = new ComponentAndNonComponentSymbols(myManualfacSymbols);
     myCache = new ComponentsCache();
     myOverridesCache = new OverridesCache();
   }
   
   
-  public void FillComponents(Compilation compilation)
+  public void FillComponents()
   {
-    AllModulesVisitor.Visit(compilation, module =>
+    AllModulesVisitor.Visit(myCompilation, module =>
     {
       foreach (var componentType in module.GetTypes().Where(mySymbolsCache.CheckIfManualfacComponent))
       {
         var visited = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-        ToComponentInfo(componentType, visited, compilation);
+        ToComponentInfo(componentType, visited);
       }
 
       return false;
@@ -44,7 +48,7 @@ internal class ComponentsStorage
   }
   
   private IComponent ToComponentInfo(
-    INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited, Compilation compilation)
+    INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited)
   {
     if (myCache.TryGetExistingComponent(componentSymbol) is { } existingComponent) return existingComponent;
     if (visited.Contains(componentSymbol)) throw new CyclicDependencyException();
@@ -56,11 +60,11 @@ internal class ComponentsStorage
 
     visited.Add(componentSymbol);
 
-    var componentsDepsByLevels = ExtractComponentsDependencies(componentSymbol, visited, compilation);
-    var baseComponent = TryFindBaseComponent(componentSymbol, visited, compilation);
+    var componentsDepsByLevels = ExtractComponentsDependencies(componentSymbol, visited);
+    var baseComponent = TryFindBaseComponent(componentSymbol, visited);
     var createdComponent = new Component(componentSymbol, componentsDepsByLevels, baseComponent);
 
-    if (TryFindOverridenComponent(componentSymbol, visited, compilation) is { } overridenComponent)
+    if (TryFindOverridenComponent(componentSymbol, visited) is { } overridenComponent)
     {
       myOverridesCache.AddOverride(createdComponent, overridenComponent);
     }
@@ -74,8 +78,7 @@ internal class ComponentsStorage
 
   private IReadOnlyList<ComponentDependencyDescriptor> ExtractComponentsDependencies(
     INamedTypeSymbol componentSymbol, 
-    ISet<INamedTypeSymbol> visited,
-    Compilation compilation)
+    ISet<INamedTypeSymbol> visited)
   {
     var alreadyAddedDependencySymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
@@ -91,7 +94,7 @@ internal class ComponentsStorage
           throw new DuplicatedDependencyException(componentSymbol, dependencySymbol);
         }
 
-        if (TryGetDependency(dependencySymbol, visited, compilation) is { } dependency)
+        if (TryGetDependency(dependencySymbol, visited) is { } dependency)
         {
           dependencies.Add(new ComponentDependencyDescriptor(dependency, modifier));
         }
@@ -104,11 +107,11 @@ internal class ComponentsStorage
   }
 
   private IComponentDependency? TryGetDependency(
-    INamedTypeSymbol dependencySymbol, ISet<INamedTypeSymbol> visited, Compilation compilation)
+    INamedTypeSymbol dependencySymbol, ISet<INamedTypeSymbol> visited)
   {
     if (dependencySymbol.TypeKind == TypeKind.Class)
     {
-      var dependencyComponent = ToComponentInfo(dependencySymbol, visited, compilation);
+      var dependencyComponent = ToComponentInfo(dependencySymbol, visited);
       return new ConcreteComponentDependency(dependencyComponent);
     }
 
@@ -138,8 +141,7 @@ internal class ComponentsStorage
     }
   }
 
-  private IComponent? TryFindBaseComponent(
-    INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, Compilation context)
+  private IComponent? TryFindBaseComponent(INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited)
   {
     if (symbol.BaseType is not { } baseType ||
         !mySymbolsCache.CheckIfManualfacComponent(baseType))
@@ -147,13 +149,12 @@ internal class ComponentsStorage
       return null;
     }
 
-    return ToComponentInfo(baseType, visited, context);
+    return ToComponentInfo(baseType, visited);
   }
 
-  private IComponent? TryFindOverridenComponent(
-    INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited, Compilation context)
+  private IComponent? TryFindOverridenComponent(INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited)
   {
-    var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.OverridesAttribute);
+    var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, myManualfacSymbols.OverridesAttribute);
     var baseSymbols = overridesAttributes.SelectMany(pair => pair).ToList();
     if (baseSymbols.Count == 0) return null;
     
@@ -173,13 +174,13 @@ internal class ComponentsStorage
       throw new CanNotOverrideNonComponentException(symbol, baseSymbol);
     }
 
-    var baseComponent = ToComponentInfo(baseSymbol, visited, context);
+    var baseComponent = ToComponentInfo(baseSymbol, visited);
     return baseComponent;
   }
 
   private IReadOnlyList<INamedTypeSymbol> ExtractInterfaces(INamedTypeSymbol symbol)
   {
-    var asAttributes = ExtractAttributeByNameWithTypeArgs(symbol, Constants.AsAttribute).ToList();
+    var asAttributes = ExtractAttributeByNameWithTypeArgs(symbol, myManualfacSymbols.AsAttributeBase).ToList();
     if (asAttributes.Count == 0)
     {
       return symbol.AllInterfaces;
@@ -188,16 +189,16 @@ internal class ComponentsStorage
     return asAttributes.SelectMany(pair => pair).ToList();
   }
 
-  private static IReadOnlyList<IReadOnlyList<INamedTypeSymbol>> ExtractDependenciesByLevels(INamedTypeSymbol symbol)
+  private IReadOnlyList<IReadOnlyList<INamedTypeSymbol>> ExtractDependenciesByLevels(INamedTypeSymbol symbol)
   {
-    return ExtractAttributeByNameWithTypeArgs(symbol, Constants.DependsOnAttribute).ToList();
+    return ExtractAttributeByNameWithTypeArgs(symbol, myManualfacSymbols.DependsOnAttributeBase).ToList();
   }
 
   private static IReadOnlyList<IReadOnlyList<INamedTypeSymbol>> ExtractAttributeByNameWithTypeArgs(
-    ISymbol symbol, string attributeName)
+    ISymbol symbol, INamedTypeSymbol attributeSymbol)
   {
     return symbol.GetAttributes()
-      .Where(attr => attr.AttributeClass?.Name == attributeName)
+      .Where(attr => attr.AttributeClass?.ConstructedFrom.IsSubTypeOf(attributeSymbol) ?? false)
       .Select(attr => attr.AttributeClass!.TypeArguments.OfType<INamedTypeSymbol>().ToList())
       .ToList();
   }

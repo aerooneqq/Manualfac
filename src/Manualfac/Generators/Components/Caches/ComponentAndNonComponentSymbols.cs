@@ -5,12 +5,14 @@ namespace Manualfac.Generators.Components.Caches;
 
 internal class ComponentAndNonComponentSymbols
 {
+  private readonly ManualfacSymbols myManualfacSymbols;
   private readonly HashSet<INamedTypeSymbol> myComponentsSymbols;
   private readonly HashSet<INamedTypeSymbol> myNotComponentsSymbols;
 
 
-  public ComponentAndNonComponentSymbols()
+  public ComponentAndNonComponentSymbols(ManualfacSymbols manualfacSymbols)
   {
+    myManualfacSymbols = manualfacSymbols;
     myComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
     myNotComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
   }
@@ -31,12 +33,12 @@ internal class ComponentAndNonComponentSymbols
     return false;
   }
 
-  private static bool IsManualfacAttribute(AttributeData attribute)
+  private bool IsManualfacAttribute(AttributeData attribute)
   {
     var attributeClass = attribute.AttributeClass;
     if (attributeClass is { })
     {
-      return attributeClass.Name == Constants.ComponentAttribute;
+      return SymbolEqualityComparer.Default.Equals(attributeClass, myManualfacSymbols.ComponentAttribute);
     }
 
     return false;
