@@ -63,7 +63,10 @@ public class IntegrationTestWithSolutionExecutor
     {
       try
       {
-        Directory.Delete(genSourcesFolderPath, true);
+        if (Directory.Exists(genSourcesFolderPath))
+        {
+          Directory.Delete(genSourcesFolderPath, true);
+        }
       }
       catch (Exception ex)
       {
@@ -87,7 +90,8 @@ public class IntegrationTestWithSolutionExecutor
         FileName = Dotnet,
         Arguments = args,
         CreateNoWindow = true,
-        UseShellExecute = false
+        UseShellExecute = false,
+        RedirectStandardOutput = true
       }
     };
 
@@ -108,7 +112,7 @@ public class IntegrationTestWithSolutionExecutor
       }
       catch (Exception ex)
       {
-        Assert.Fail($"Failed to raed output with exception: {ex}");
+        Assert.Fail($"Failed to read output with exception: {ex}");
         return;
       }
       
