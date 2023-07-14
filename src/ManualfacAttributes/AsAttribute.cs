@@ -4,24 +4,24 @@ public class AsAttributeBase : Attribute
 {
 }
 
-public class AsAttribute<TInterface> : AsAttributeBase where TInterface : class
+public sealed class AsAttribute<TInterface> : AsAttributeBase where TInterface : class
 {
 }
 
-public class AsAttribute<T1, T2> : AsAttributeBase
+public sealed class AsAttribute<T1, T2> : AsAttributeBase
   where T1 : class
   where T2 : class
 {
 }
 
-public class AsAttribute<T1, T2, T3> : AsAttributeBase
+public sealed class AsAttribute<T1, T2, T3> : AsAttributeBase
   where T1 : class
   where T2 : class
   where T3 : class
 {
 }
 
-public class AsAttribute<T1, T2, T3, T4> : AsAttributeBase
+public sealed class AsAttribute<T1, T2, T3, T4> : AsAttributeBase
   where T1 : class
   where T2 : class
   where T3 : class
@@ -29,7 +29,7 @@ public class AsAttribute<T1, T2, T3, T4> : AsAttributeBase
 {
 }
 
-public class AsAttribute<T1, T2, T3, T4, T5> : AsAttributeBase
+public sealed class AsAttribute<T1, T2, T3, T4, T5> : AsAttributeBase
   where T1 : class
   where T2 : class
   where T3 : class
@@ -38,7 +38,7 @@ public class AsAttribute<T1, T2, T3, T4, T5> : AsAttributeBase
 {
 }
 
-public class AsAttribute<T1, T2, T3, T4, T5, T6> : AsAttributeBase
+public sealed class AsAttribute<T1, T2, T3, T4, T5, T6> : AsAttributeBase
   where T1 : class
   where T2 : class
   where T3 : class
