@@ -1,7 +1,6 @@
-﻿using Manualfac.Generators.Util;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
-namespace Manualfac.Generators.Components.Caches;
+namespace Manualfac.Generators.Util;
 
 public class ModuleTypesCache
 {
