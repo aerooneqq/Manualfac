@@ -1,5 +1,4 @@
-﻿using System.Reflection.Metadata;
-using Manualfac.Exceptions;
+﻿using Manualfac.Exceptions;
 using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
@@ -27,31 +26,30 @@ public class ManualfacSymbols
   }
   
 
-  private readonly IModuleSymbol myManualfacModule;
+  private readonly ModuleTypesCache myTypesCache;
 
 
-  public INamedTypeSymbol ManualfacAttribute => FindTypeOrThrow(Constants.ManualfacAttribute);
-  public INamedTypeSymbol ComponentAttribute => FindTypeOrThrow(Constants.ComponentAttribute);
-  public INamedTypeSymbol DependsOnAttributeBase => FindTypeOrThrow(Constants.DependsOnAttributeBase);
-  public INamedTypeSymbol GenerateResolverAttribute => FindTypeOrThrow(Constants.GenerateResolverAttribute);
-  public INamedTypeSymbol OverridesAttribute => FindTypeOrThrow(Constants.OverridesAttribute);
-  public INamedTypeSymbol AsAttributeBase => FindTypeOrThrow(Constants.AsAttributeBase);
+  public INamedTypeSymbol ManualfacAttribute => FindTypeOrThrow(Constants.ManualfacAttributeFullName);
+  public INamedTypeSymbol ComponentAttribute => FindTypeOrThrow(Constants.ComponentAttributeFullName);
+  public INamedTypeSymbol DependsOnAttributeBase => FindTypeOrThrow(Constants.DependsOnAttributeBaseFullName);
+  public INamedTypeSymbol GenerateResolverAttribute => FindTypeOrThrow(Constants.GenerateResolverAttributeFullName);
+  public INamedTypeSymbol OverridesAttribute => FindTypeOrThrow(Constants.OverridesAttributeFullName);
+  public INamedTypeSymbol AsAttributeBase => FindTypeOrThrow(Constants.AsAttributeBaseFullName);
 
 
   private ManualfacSymbols(IModuleSymbol manualfacModule)
   {
-    myManualfacModule = manualfacModule;
+    myTypesCache = new ModuleTypesCache(manualfacModule);
   }
 
 
-  public INamedTypeSymbol FindTypeOrThrow(string name)
+  private INamedTypeSymbol FindTypeOrThrow(string name)
   {
-    var foundSymbol = myManualfacModule.GetTypes().FirstOrDefault(type => type.Name == name);
-    if (foundSymbol is null)
+    if (myTypesCache.TryGet(name) is not { } type)
     {
-      throw new ArgumentOutOfRangeException(name);
+      throw new KeyNotFoundException(name);
     }
 
-    return foundSymbol;
+    return type;
   }
 }

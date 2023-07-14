@@ -1,5 +1,4 @@
-﻿using Manualfac.Generators.Util;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Components.Caches;
 
