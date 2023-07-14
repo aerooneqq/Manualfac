@@ -91,24 +91,25 @@ public class IntegrationTestWithSolutionExecutor
         Arguments = args,
         CreateNoWindow = true,
         UseShellExecute = false,
-        RedirectStandardOutput = true
+        RedirectStandardError = true,
       }
     };
-
+    
     process.Start();
     if (!process.WaitForExit(ourTimeout))
     {
+      process.Kill();
       Assert.Fail($"Process {CreateProcessName()} timeoutted");
       return;
     }
 
     if (process.ExitCode != 0)
     {
-      string output;
+      string error;
       
       try
       {
-        output = process.StandardOutput.ReadToEnd();
+        error = process.StandardError.ReadToEnd();
       }
       catch (Exception ex)
       {
@@ -116,7 +117,7 @@ public class IntegrationTestWithSolutionExecutor
         return;
       }
       
-      Assert.Fail($"Process {CreateProcessName()} exited with exit code {process.ExitCode}, output: {output}");
+      Assert.Fail($"Process {CreateProcessName()} exited with exit code {process.ExitCode}, output: {error}");
     }
 
     string CreateProcessName() => $"{Dotnet} {args}";
