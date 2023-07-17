@@ -71,8 +71,9 @@ internal static class ExtensionsForIComponentInfo
   {
     var symbol = descriptor.Dependency.DependencyTypeSymbol;
     var fullName = symbol.GetFullName();
-    var fieldBaseName = symbol.GetAssociatedFieldNameBase();
-    return new GeneratedFieldModel(fullName, fieldBaseName, namingStyle, descriptor.Modifier);
+    var name = namingStyle.ApplyNamingStyleTo(symbol.GetAssociatedFieldNameBase());
+    
+    return new GeneratedFieldModel(fullName, name, descriptor.Modifier);
   }
 
   public static IReadOnlyList<GeneratedFieldModel> ExtractFieldsForConstructor(
