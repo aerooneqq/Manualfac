@@ -12,9 +12,7 @@ internal class Component : IComponent
   
   public string TypeShortName => ComponentSymbol.Name;
   public string FullName => ComponentSymbol.GetFullName();
-  
-  // ReSharper disable once ReturnTypeCanBeNotNullable
-  public string? Namespace => ComponentSymbol.ContainingNamespace.Name;
+  public string Namespace => ComponentSymbol.ContainingNamespace.Name;
 
 
   public Component(
