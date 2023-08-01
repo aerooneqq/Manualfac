@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using TestCore;
 
 namespace GeneratorsTests;
@@ -96,6 +97,13 @@ public class IntegrationTestWithSolutionExecutor
     };
     
     process.Start();
+
+    var output = new StringBuilder();
+    process.OutputDataReceived += (_, eventArgs) =>
+    {
+      output.Append(eventArgs.Data);
+    };
+    
     process.BeginOutputReadLine();
     
     if (!process.WaitForExit(ourTimeout))
@@ -107,18 +115,6 @@ public class IntegrationTestWithSolutionExecutor
 
     if (process.ExitCode != 0)
     {
-      string output;
-      
-      try
-      {
-        output = process.StandardOutput.ReadToEnd();
-      }
-      catch (Exception ex)
-      {
-        Assert.Fail($"Failed to read output with exception: {ex}");
-        return;
-      }
-      
       Assert.Fail($"Process {CreateProcessName()} exited with exit code {process.ExitCode}, output: {output}");
     }
 
