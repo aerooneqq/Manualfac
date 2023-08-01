@@ -15,6 +15,10 @@ public class GeneratedFilesTest : TestWithSourceFilesBase<ManualfacGenerator>
   [Test] public void SimpleTest7() => DoTest();
   [Test] public void SimpleTest8() => DoTest();
   [Test] public void SimpleTestWithoutResolver() => DoTest();
+  [Test] public void BeforeAfterTest1() => DoTest();
+  [Test] public void BeforeAfterTest2() => DoTest();
+  [Test] public void BeforeAfterTest3() => DoTest();
+  [Test] public void BeforeAfterTest4() => DoTest();
 
   [Test] public void DuplicatedDepsTest() => DoTestWithException<DuplicatedDependencyException>();
   [Test] public void CyclicDepsTest() => DoTestWithException<CyclicDependencyException>();
