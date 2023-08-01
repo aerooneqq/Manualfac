@@ -3,13 +3,13 @@ using System.Threading;
 
 namespace DefaultNamespace 
 {
-  public partial class Class3Container
+  public partial class Class5Container
   {
-    private static DefaultNamespace.Class3 ourInstance;
+    private static DefaultNamespace.Class5 ourInstance;
     private static object ourSync = new object();
-    private static Func<DefaultNamespace.Class3> ourF = DefaultInitialize;
+    private static Func<DefaultNamespace.Class5> ourF = DefaultInitialize;
 
-    public static DefaultNamespace.Class3 Resolve(
+    public static DefaultNamespace.Class5 Resolve(
 
     )
     {
@@ -24,7 +24,7 @@ namespace DefaultNamespace
     }
 
     public static void Initialize(
-      Func<DefaultNamespace.Class3> f
+      Func<DefaultNamespace.Class5> f
     )
     {
       lock (ourSync)
@@ -33,12 +33,12 @@ namespace DefaultNamespace
       }
     }
 
-    private static DefaultNamespace.Class3 DefaultInitialize(
+    private static DefaultNamespace.Class5 DefaultInitialize(
 
     )
     {
-      var created = new DefaultNamespace.Class3(
-        new DefaultNamespace.IClass1[] {DefaultNamespace.Class1Container.Resolve(),DefaultNamespace.Class11Container.Resolve(),DefaultNamespace.Class111Container.Resolve(),DefaultNamespace.Class1111Container.Resolve()}
+      var created = new DefaultNamespace.Class5(
+        new DefaultNamespace.IClass1[] {DefaultNamespace.Class1Container.Resolve(),DefaultNamespace.Class2Container.Resolve(),DefaultNamespace.Class3Container.Resolve(),DefaultNamespace.Class4Container.Resolve()}
       );
       return created;
     }
