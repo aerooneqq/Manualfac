@@ -4,6 +4,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MISC", "MISC", "{1C6A3FC4-9
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		Readme.md = Readme.md
+		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{372AEED5-DD23-4399-8E95-9C5C7201938D}"
