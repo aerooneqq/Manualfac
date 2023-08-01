@@ -40,6 +40,12 @@ public static class TestPaths
   public static string GetPathToGoldDirFor(string sourceName)
   {
     var path = Path.Combine(GetTestDataPath(), "gold", sourceName);
+    
+    if (!Directory.Exists(path))
+    {
+      Directory.CreateDirectory(path);
+    }
+
     Assert.That(Directory.Exists(path), Is.True);
 
     return path;
