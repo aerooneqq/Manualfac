@@ -1,6 +1,7 @@
 ﻿namespace ManualfacAttributes;
 
-public class AsAttributeBase : Attribute
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public abstract class AsAttributeBase : Attribute
 {
 }
 

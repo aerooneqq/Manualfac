@@ -9,18 +9,17 @@ public sealed class PrivateProtected : AccessModifier {}
 public sealed class ProtectedInternal : AccessModifier {}
 
 
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public abstract class DependsOnAttributeBase : ManualfacAttribute
 {
 }
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class DependsOnAttribute<TAccess, T1> : DependsOnAttributeBase
   where TAccess : AccessModifier
   where T1 : class
 {
 }
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class DependsOnAttribute<TAccess, T1, T2> : DependsOnAttributeBase
   where TAccess : AccessModifier
   where T1 : class
@@ -28,7 +27,6 @@ public sealed class DependsOnAttribute<TAccess, T1, T2> : DependsOnAttributeBase
 {
 }
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class DependsOnAttribute<TAccess, T1, T2, T3> : DependsOnAttributeBase
   where TAccess : AccessModifier
   where T1 : class
@@ -37,7 +35,6 @@ public sealed class DependsOnAttribute<TAccess, T1, T2, T3> : DependsOnAttribute
 {
 }
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class DependsOnAttribute<TAccess, T1, T2, T3, T4> : DependsOnAttributeBase
   where TAccess : AccessModifier
   where T1 : class
@@ -47,7 +44,6 @@ public sealed class DependsOnAttribute<TAccess, T1, T2, T3, T4> : DependsOnAttri
 {
 }
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class DependsOnAttribute<TAccess, T1, T2, T3, T4, T5> : DependsOnAttributeBase
   where TAccess : AccessModifier
   where T1 : class
@@ -58,7 +54,6 @@ public sealed class DependsOnAttribute<TAccess, T1, T2, T3, T4, T5> : DependsOnA
 {
 }
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class DependsOnAttribute<TAccess, T1, T2, T3, T4, T5, T6> : DependsOnAttributeBase
   where TAccess : AccessModifier
   where T1 : class
