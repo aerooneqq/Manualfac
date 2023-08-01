@@ -35,6 +35,8 @@ public class ManualfacSymbols
   public INamedTypeSymbol GenerateResolverAttribute => FindTypeOrThrow(Constants.GenerateResolverAttributeFullName);
   public INamedTypeSymbol OverridesAttribute => FindTypeOrThrow(Constants.OverridesAttributeFullName);
   public INamedTypeSymbol AsAttributeBase => FindTypeOrThrow(Constants.AsAttributeBaseFullName);
+  public INamedTypeSymbol AfterAttributeBase => FindTypeOrThrow(Constants.AfterAttributeBaseFullName);
+  public INamedTypeSymbol BeforeAttributeBase => FindTypeOrThrow(Constants.BeforeAttributeBaseFullName);
 
 
   private ManualfacSymbols(IModuleSymbol manualfacModule)

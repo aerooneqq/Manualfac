@@ -25,8 +25,9 @@ internal class ComponentsStorage
   {
     myManualfacSymbols = symbols;
     myCompilation = compilation;
+    
     mySymbolsCache = new ComponentAndNonComponentSymbols(myManualfacSymbols);
-    myCache = new ComponentsCache();
+    myCache = new ComponentsCache(myManualfacSymbols);
     myOverridesCache = new OverridesCache();
   }
   
@@ -45,6 +46,7 @@ internal class ComponentsStorage
     });
     
     myCache.AdjustInterfaceImplementations(this.AdjustComponent);
+    myCache.SortByBeforeAfterRelation();
   }
   
   private IComponent ToComponentInfo(
@@ -154,8 +156,7 @@ internal class ComponentsStorage
 
   private IComponent? TryFindOverridenComponent(INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited)
   {
-    var overridesAttributes = ExtractAttributeByNameWithTypeArgs(symbol, myManualfacSymbols.OverridesAttribute);
-    var baseSymbols = overridesAttributes.SelectMany(pair => pair).ToList();
+    var baseSymbols = symbol.GetAttributesTypeArguments(myManualfacSymbols.OverridesAttribute);
     if (baseSymbols.Count == 0) return null;
     
     if (baseSymbols.Count != 1)
@@ -180,29 +181,15 @@ internal class ComponentsStorage
 
   private IReadOnlyList<INamedTypeSymbol> ExtractInterfaces(INamedTypeSymbol symbol)
   {
-    var asAttributes = ExtractAttributeByNameWithTypeArgs(symbol, myManualfacSymbols.AsAttributeBase).ToList();
-    if (asAttributes.Count == 0)
-    {
-      return symbol.AllInterfaces;
-    }
-
-    return asAttributes.SelectMany(pair => pair).ToList();
+    var asAttributes = symbol.GetAttributesTypeArguments(myManualfacSymbols.AsAttributeBase);
+    return asAttributes.Count == 0 ? symbol.AllInterfaces : asAttributes;
   }
 
   private IReadOnlyList<IReadOnlyList<INamedTypeSymbol>> ExtractDependenciesByLevels(INamedTypeSymbol symbol)
   {
-    return ExtractAttributeByNameWithTypeArgs(symbol, myManualfacSymbols.DependsOnAttributeBase).ToList();
+    return symbol.GetAttributesTypeArgumentsByLevels(myManualfacSymbols.DependsOnAttributeBase);
   }
-
-  private static IReadOnlyList<IReadOnlyList<INamedTypeSymbol>> ExtractAttributeByNameWithTypeArgs(
-    ISymbol symbol, INamedTypeSymbol attributeSymbol)
-  {
-    return symbol.GetAttributes()
-      .Where(attr => attr.AttributeClass?.ConstructedFrom.IsSubTypeOf(attributeSymbol) ?? false)
-      .Select(attr => attr.AttributeClass!.TypeArguments.OfType<INamedTypeSymbol>().ToList())
-      .ToList();
-  }
-
+  
   private AccessModifier ExtractAccessModifierOrDefault(IReadOnlyList<ITypeSymbol> dependencyAttributeTypeArgs)
   {
     Debug.Assert(dependencyAttributeTypeArgs.Count > 1);

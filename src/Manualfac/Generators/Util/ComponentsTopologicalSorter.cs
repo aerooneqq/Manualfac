@@ -12,7 +12,9 @@ internal static class ComponentsTopologicalSorter
     Gray
   }
   
-  public static IReadOnlyList<IComponent> Sort(IReadOnlyList<IComponent> components)
+  public static List<IComponent> Sort(
+    IReadOnlyList<IComponent> components, 
+    Func<IComponent, IEnumerable<IComponent>> childrenProvider)
   {
     var visited = components.ToDictionary(static c => c, static _ => ComponentState.NotVisited);
     var result = new List<IComponent>();
@@ -21,7 +23,7 @@ internal static class ComponentsTopologicalSorter
     {
       if (visited[component] == ComponentState.NotVisited)
       {
-        if (Dfs(component, visited, result))
+        if (Dfs(component, visited, result, childrenProvider))
         {
           throw new CyclicDependencyException();
         }
@@ -33,10 +35,13 @@ internal static class ComponentsTopologicalSorter
   }
 
   private static bool Dfs(
-    IComponent current, Dictionary<IComponent, ComponentState> visited, List<IComponent> result)
+    IComponent current, 
+    Dictionary<IComponent, ComponentState> visited, 
+    List<IComponent> result,
+    Func<IComponent, IEnumerable<IComponent>> childrenProvider)
   {
     visited[current] = ComponentState.Gray;
-    foreach (var dependency in current.ResolveConcreteDependencies())
+    foreach (var dependency in childrenProvider(current))
     {
       if (visited[dependency] == ComponentState.Gray)
       {
@@ -45,7 +50,7 @@ internal static class ComponentsTopologicalSorter
 
       if (visited[dependency] == ComponentState.NotVisited)
       {
-        if (Dfs(dependency, visited, result)) return true;
+        if (Dfs(dependency, visited, result, childrenProvider)) return true;
       }
     }
 

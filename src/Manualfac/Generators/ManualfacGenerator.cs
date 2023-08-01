@@ -87,7 +87,10 @@ public class ManualfacGenerator : IIncrementalGenerator
     ComponentsStorage storage, Compilation compilation, SourceProductionContext context)
   {
     var compilationAssembly = compilation.Assembly;
-    foreach (var componentInfo in ComponentsTopologicalSorter.Sort(storage.AllComponents))
+    var sortedComponents = ComponentsTopologicalSorter.Sort(
+      storage.AllComponents, static component => component.ResolveConcreteDependencies());
+    
+    foreach (var componentInfo in sortedComponents) 
     {
       var componentAssembly = componentInfo.ComponentSymbol.ContainingAssembly;
       if (!SymbolEqualityComparer.Default.Equals(compilationAssembly, componentAssembly)) continue;
