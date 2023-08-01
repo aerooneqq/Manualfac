@@ -33,7 +33,7 @@ public partial class compilationResolver
   {
     if (typeof(TComponent) == typeof(DefaultNamespace.IClass1))
     {
-      return new TComponent[] {(TComponent)((object)DefaultNamespace.Class1Container.Resolve()),(TComponent)((object)DefaultNamespace.Class11Container.Resolve()),(TComponent)((object)DefaultNamespace.Class111Container.Resolve()),(TComponent)((object)DefaultNamespace.Class1111Container.Resolve())};
+      return new TComponent[] {(TComponent)((object)DefaultNamespace.Class1111Container.Resolve()),(TComponent)((object)DefaultNamespace.Class111Container.Resolve()),(TComponent)((object)DefaultNamespace.Class11Container.Resolve()),(TComponent)((object)DefaultNamespace.Class1Container.Resolve())};
     }
     throw new ArgumentOutOfRangeException();
   }
