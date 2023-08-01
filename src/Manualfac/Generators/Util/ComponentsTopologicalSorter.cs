@@ -30,7 +30,6 @@ internal static class ComponentsTopologicalSorter
       }
     }
 
-    result.Reverse();
     return result;
   }
 
