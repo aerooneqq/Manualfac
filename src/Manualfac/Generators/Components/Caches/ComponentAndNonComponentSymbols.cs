@@ -35,9 +35,14 @@ internal class ComponentAndNonComponentSymbols
   private bool IsManualfacAttribute(AttributeData attribute)
   {
     var attributeClass = attribute.AttributeClass;
-    if (attributeClass is { })
+    while (attributeClass is { })
     {
-      return SymbolEqualityComparer.Default.Equals(attributeClass, myManualfacSymbols.ComponentAttribute);
+      if (SymbolEqualityComparer.Default.Equals(attributeClass, myManualfacSymbols.ComponentAttribute))
+      {
+        return true;
+      }
+
+      attributeClass = attributeClass.BaseType;
     }
 
     return false;
