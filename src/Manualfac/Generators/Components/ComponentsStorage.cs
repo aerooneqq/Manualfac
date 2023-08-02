@@ -49,8 +49,7 @@ internal class ComponentsStorage
     myCache.SortByBeforeAfterRelation();
   }
   
-  private IComponent ToComponentInfo(
-    INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited)
+  private IComponent ToComponentInfo(INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited)
   {
     if (myCache.TryGetExistingComponent(componentSymbol) is { } existingComponent) return existingComponent;
     if (visited.Contains(componentSymbol)) throw new CyclicDependencyException();
@@ -108,26 +107,22 @@ internal class ComponentsStorage
     return dependencies;
   }
 
-  private IComponentDependency? TryGetDependency(
-    INamedTypeSymbol dependencySymbol, ISet<INamedTypeSymbol> visited)
+  private IComponentDependency? TryGetDependency(INamedTypeSymbol dependencySymbol, ISet<INamedTypeSymbol> visited)
   {
-    if (dependencySymbol.TypeKind == TypeKind.Class)
+    switch (dependencySymbol.TypeKind)
     {
-      var dependencyComponent = ToComponentInfo(dependencySymbol, visited);
-      return new ConcreteComponentDependency(dependencyComponent);
-    }
-
-    if (dependencySymbol.TypeKind == TypeKind.Interface)
-    {
-      if (dependencySymbol.IsGenericEnumerable())
+      case TypeKind.Class:
       {
-        return new CollectionDependency(dependencySymbol, this);
+        var dependencyComponent = ToComponentInfo(dependencySymbol, visited);
+        return new ConcreteComponentDependency(dependencyComponent);
       }
-
-      return new NonCollectionInterfaceDependency(dependencySymbol, this);
+      case TypeKind.Interface when dependencySymbol.IsGenericEnumerable():
+        return new CollectionDependency(dependencySymbol, this);
+      case TypeKind.Interface:
+        return new NonCollectionInterfaceDependency(dependencySymbol, this);
+      default:
+        return null;
     }
-
-    return null;
   }
 
   private void AddToInterfacesToImplementationsMap(IComponent component)

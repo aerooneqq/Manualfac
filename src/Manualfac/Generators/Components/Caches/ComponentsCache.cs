@@ -78,7 +78,7 @@ internal class ComponentsCache
           var afterComponent = myCache[afterType];
           if (afterComponent == component)
           {
-            throw new CanNotReferenceMyselfInBeforeAfterRelationException(component.ComponentSymbol);
+            throw new SelfReferenceInBeforeAfterRelationException(component.ComponentSymbol);
           }
           
           parentToChildren.AddToList(component, afterComponent);
@@ -89,7 +89,7 @@ internal class ComponentsCache
           var beforeComponent = myCache[beforeType];
           if (beforeComponent == component)
           {
-            throw new CanNotReferenceMyselfInBeforeAfterRelationException(component.ComponentSymbol);
+            throw new SelfReferenceInBeforeAfterRelationException(component.ComponentSymbol);
           }
           
           parentToChildren.AddToList(myCache[beforeType], component);

@@ -29,12 +29,10 @@ public class GeneratedFilesTest : TestWithSourceFilesBase<ManualfacGenerator>
   [Test] public void CantResolveImplTest() => DoTestWithException<CantResolveConcreteImplementationException>();
 
   [Test]
-  public void BeforeAfterTestSelfReferenceTest1() =>
-    DoTestWithException<CanNotReferenceMyselfInBeforeAfterRelationException>();
+  public void BeforeAfterTestSelfReferenceTest1() => DoTestWithException<SelfReferenceInBeforeAfterRelationException>();
   
   [Test]
-  public void BeforeAfterTestSelfReferenceTest2() =>
-    DoTestWithException<CanNotReferenceMyselfInBeforeAfterRelationException>();
+  public void BeforeAfterTestSelfReferenceTest2() => DoTestWithException<SelfReferenceInBeforeAfterRelationException>();
   
   [Test] public void BeforeAfterRelationCycleTest1() => DoTestWithException<CyclicDependencyException>();
   [Test] public void BeforeAfterRelationCycleTest2() => DoTestWithException<CyclicDependencyException>();
