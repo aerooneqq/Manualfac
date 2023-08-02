@@ -13,6 +13,6 @@ interface IClass5
 }
 
 [Component]
-public class Class5
+public partial class Class5
 {
 }
