@@ -51,11 +51,17 @@ internal class ComponentsStorage
     myCache.SortByBeforeAfterRelation();
   }
 
-  private IComponent ToComponentInfo(INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited)
+  private IComponent? ToComponentInfo(INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited)
   {
     if (myCache.TryGetExistingComponent(componentSymbol) is { } existingComponent) return existingComponent;
     if (visited.Contains(componentSymbol)) throw new CyclicDependencyException();
-
+    
+    if (SymbolEqualityComparer.Default.Equals(componentSymbol.ContainingAssembly, myCompilation.Assembly) &&
+        !componentSymbol.CheckIfPartialClass())
+    {
+      return null;
+    }
+    
     if (!mySymbolsCache.CheckIfManualfacComponent(componentSymbol))
     {
       throw new TypeSymbolIsNotManualfacComponentException(componentSymbol);
@@ -115,8 +121,11 @@ internal class ComponentsStorage
     {
       case TypeKind.Class:
       {
-        var dependencyComponent = ToComponentInfo(dependencySymbol, visited);
-        return new ConcreteComponentDependency(dependencyComponent);
+        return ToComponentInfo(dependencySymbol, visited) switch
+        {
+          { } dependencyComponent => new ConcreteComponentDependency(dependencyComponent),
+          _ => null
+        };
       }
       case TypeKind.Interface when dependencySymbol.IsGenericEnumerable():
         return new CollectionDependency(dependencySymbol, this);

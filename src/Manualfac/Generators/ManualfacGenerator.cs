@@ -5,8 +5,6 @@ using Manualfac.Generators.Models.TopLevel;
 using Manualfac.Generators.Util;
 using Manualfac.Generators.Util.Naming;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Manualfac.Generators;
 
@@ -36,7 +34,7 @@ public class ManualfacGenerator : IIncrementalGenerator
     storage.FillComponents();
 
     GenerateDependenciesPart(storage.AllComponents, context);
-    GenerateContainerBuilder(storage, context.Compilation, context);
+    GenerateContainerBuilder(storage, context);
 
     if (ShouldGenerateResolverFor(context.Compilation.Assembly, symbols))
     {
@@ -56,7 +54,7 @@ public class ManualfacGenerator : IIncrementalGenerator
     foreach (var component in components)
     {
       var componentAssembly = component.Symbol.ContainingAssembly;
-      if (!ShouldGenerateContainerOrDepsParts(componentAssembly, context, component))
+      if (!ShouldGenerateContainerOrDepsParts(componentAssembly, context))
       {
         continue;
       }
@@ -68,20 +66,9 @@ public class ManualfacGenerator : IIncrementalGenerator
     }
   }
   
-  private static bool ShouldGenerateContainerOrDepsParts(
-    IAssemblySymbol assembly, ManualfacContext context, IComponent component)
+  private static bool ShouldGenerateContainerOrDepsParts(IAssemblySymbol assembly, ManualfacContext context)
   {
-    return SymbolEqualityComparer.Default.Equals(assembly, context.Compilation.Assembly) &&
-           CheckIfPartialClass(component.Symbol);
-  }
-
-  private static bool CheckIfPartialClass(INamedTypeSymbol typeSymbol)
-  {
-    if (typeSymbol.DeclaringSyntaxReferences.Length > 1) return true;
-
-    var classDeclaration = (ClassDeclarationSyntax)typeSymbol.DeclaringSyntaxReferences[0].GetSyntax();
-
-    return classDeclaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword));
+    return SymbolEqualityComparer.Default.Equals(assembly, context.Compilation.Assembly);
   }
 
   private static NamingStyle ParseNamingStyle(ManualfacContext context)
@@ -103,8 +90,7 @@ public class ManualfacGenerator : IIncrementalGenerator
     return new PrefixSuffixNamingStyle(prefix, suffix);
   }
 
-  private static void GenerateContainerBuilder(
-    ComponentsStorage storage, Compilation compilation, ManualfacContext context)
+  private static void GenerateContainerBuilder(ComponentsStorage storage, ManualfacContext context)
   {
     var sortedComponents = ComponentsTopologicalSorter.Sort(
       storage.AllComponents, static component => component.ResolveConcreteDependencies());
@@ -112,7 +98,7 @@ public class ManualfacGenerator : IIncrementalGenerator
     foreach (var componentInfo in sortedComponents)
     {
       var componentAssembly = componentInfo.Symbol.ContainingAssembly;
-      if (!ShouldGenerateContainerOrDepsParts(componentAssembly, context, componentInfo))
+      if (!ShouldGenerateContainerOrDepsParts(componentAssembly, context))
       {
         continue;
       }

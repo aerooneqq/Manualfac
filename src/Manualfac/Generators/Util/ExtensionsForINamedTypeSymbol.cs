@@ -1,5 +1,7 @@
 ﻿using Humanizer;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Manualfac.Generators.Util;
 
@@ -51,5 +53,14 @@ internal static class ExtensionsForINamedTypeSymbol
     }
 
     return false;
+  }
+  
+  public static bool CheckIfPartialClass(this INamedTypeSymbol typeSymbol)
+  {
+    if (typeSymbol.DeclaringSyntaxReferences.Length > 1) return true;
+
+    var classDeclaration = (ClassDeclarationSyntax)typeSymbol.DeclaringSyntaxReferences[0].GetSyntax();
+
+    return classDeclaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword));
   }
 }
