@@ -1,6 +1,8 @@
 ﻿using System.Collections.Immutable;
 using Manualfac.Generators.Components.Dependencies;
 using Manualfac.Generators.Models;
+using Manualfac.Generators.Models.Fields;
+using Manualfac.Generators.Models.Methods;
 using Manualfac.Generators.Util;
 using Manualfac.Generators.Util.Naming;
 

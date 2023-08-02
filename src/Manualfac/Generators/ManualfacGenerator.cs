@@ -95,7 +95,7 @@ public class ManualfacGenerator : IIncrementalGenerator
       if (!SymbolEqualityComparer.Default.Equals(compilationAssembly, componentAssembly)) continue;
 
       var sb = new StringBuilder();
-      new GeneratedComponentContainerModel(componentInfo).GenerateInto(sb, 0);
+      new GeneratedContainerModel(componentInfo).GenerateInto(sb, 0);
 
       context.AddSource($"{componentInfo.CreateContainerName()}.g", sb.ToString());
     }

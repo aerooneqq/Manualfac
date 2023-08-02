@@ -1,6 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
 using Manualfac.Generators.Components;
+using Manualfac.Generators.Models.Fields;
+using Manualfac.Generators.Models.Methods;
 using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
@@ -21,9 +23,7 @@ internal class GeneratedContainerInitializerModel : IGeneratedModel
       ImmutableList<GeneratedFieldModel>.Empty,
       new[]
       {
-        new GeneratedMethodModel(
-          "Initialize", ImmutableList<string>.Empty, "void", GenerateInitializeMethod,
-          ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Internal, isStatic: true)
+        MethodFactory.InternalStatic("Initialize", "void", GenerateInitializeMethod)
       });
   }
 

@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Manualfac.Generators.Util;
 
-namespace Manualfac.Generators.Models;
+namespace Manualfac.Generators.Models.Fields;
 
 internal class GeneratedFieldModel : IGeneratedModel
 {

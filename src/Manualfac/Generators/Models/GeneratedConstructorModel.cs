@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Manualfac.Generators.Models.Fields;
 using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Models;

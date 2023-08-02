@@ -1,6 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
 using Manualfac.Generators.Components;
+using Manualfac.Generators.Models.Fields;
+using Manualfac.Generators.Models.Methods;
 using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
@@ -17,20 +19,17 @@ internal class GeneratedContainerResolverModel : IGeneratedModel
   public GeneratedContainerResolverModel(ComponentsStorage storage, IAssemblySymbol assemblySymbol)
   {
     myStorage = storage;
+    var typeParam = new[] { GenericType };
+    
     myGeneratedClassModel = new GeneratedClassModel(
       $"{assemblySymbol.Name}Resolver",
       ImmutableList<GeneratedConstructorModel>.Empty,
       ImmutableList<GeneratedFieldModel>.Empty,
       new[]
       {
-        new GeneratedMethodModel(
-          "ResolveOrThrow", new[] { GenericType }, GenericType, GenerateResolveMethod,
-          ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Internal, isStatic: true),
-
-        new GeneratedMethodModel(
-          "ResolveComponentsOrThrow", new[] { GenericType }, $"IEnumerable<{GenericType}>",
-          GenerateResolveComponentsMethods,
-          ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Internal, isStatic: true)
+        MethodFactory.InternalStaticGeneric("ResolveOrThrow", GenericType, typeParam, GenerateResolveMethod),
+        MethodFactory.InternalStaticGeneric(
+          "ResolveComponentsOrThrow", $"IEnumerable<{GenericType}>", typeParam, GenerateResolveComponentsMethods),
       });
   }
 
