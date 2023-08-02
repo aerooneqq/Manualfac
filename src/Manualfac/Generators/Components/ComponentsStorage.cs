@@ -129,9 +129,9 @@ internal class ComponentsStorage
 
   private void AddToInterfacesToImplementationsMap(IComponent component)
   {
-    if (component.ComponentSymbol.TypeKind is not TypeKind.Class) return;
+    if (component.Symbol.TypeKind is not TypeKind.Class) return;
 
-    var allInterfaces = ExtractInterfaces(component.ComponentSymbol);
+    var allInterfaces = ExtractInterfaces(component.Symbol);
     if (allInterfaces.Count == 0) return;
 
     foreach (var @interface in allInterfaces)

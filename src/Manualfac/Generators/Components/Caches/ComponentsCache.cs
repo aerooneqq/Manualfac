@@ -70,8 +70,8 @@ internal class ComponentsCache
 
       foreach (var component in originalImpls)
       {
-        var afterTypes = component.ComponentSymbol.GetAttributesTypeArguments(myManualfacSymbols.AfterAttributeBase);
-        var beforeTypes = component.ComponentSymbol.GetAttributesTypeArguments(myManualfacSymbols.BeforeAttributeBase);
+        var afterTypes = component.Symbol.GetAttributesTypeArguments(myManualfacSymbols.AfterAttributeBase);
+        var beforeTypes = component.Symbol.GetAttributesTypeArguments(myManualfacSymbols.BeforeAttributeBase);
 
         foreach (var afterType in afterTypes)
         {
@@ -107,12 +107,12 @@ internal class ComponentsCache
   {
     if (!originalImpls.Contains(reference))
     {
-      throw new ReferenceToOtherInterfaceComponentException(@interface, component.ComponentSymbol, reference.ComponentSymbol);
+      throw new ReferenceToOtherInterfaceComponentException(@interface, component.Symbol, reference.Symbol);
     }
 
     if (reference == component)
     {
-      throw new SelfReferenceInBeforeAfterRelationException(component.ComponentSymbol);
+      throw new SelfReferenceInBeforeAfterRelationException(component.Symbol);
     }
   }
 }

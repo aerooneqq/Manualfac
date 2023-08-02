@@ -6,13 +6,13 @@ namespace Manualfac.Generators.Components;
 
 internal class Component : IComponent
 {
-  public INamedTypeSymbol ComponentSymbol { get; }
+  public INamedTypeSymbol Symbol { get; }
   public IComponentDependencies Dependencies { get; }
   public IComponent? BaseComponent { get; }
 
-  public string TypeShortName => ComponentSymbol.Name;
-  public string FullName => ComponentSymbol.GetFullName();
-  public string Namespace => ComponentSymbol.ContainingNamespace.Name;
+  public string TypeShortName => Symbol.Name;
+  public string FullName => Symbol.GetFullName();
+  public string Namespace => Symbol.ContainingNamespace.Name;
 
 
   public Component(
@@ -21,7 +21,7 @@ internal class Component : IComponent
     IComponent? baseComponent)
   {
     BaseComponent = baseComponent;
-    ComponentSymbol = componentSymbol;
+    Symbol = componentSymbol;
     Dependencies = new ComponentDependenciesImpl(this, dependenciesByLevels);
   }
 

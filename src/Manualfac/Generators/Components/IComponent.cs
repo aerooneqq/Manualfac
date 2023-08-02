@@ -5,7 +5,7 @@ namespace Manualfac.Generators.Components;
 
 internal interface IComponent
 {
-  INamedTypeSymbol ComponentSymbol { get; }
+  INamedTypeSymbol Symbol { get; }
   IComponentDependencies Dependencies { get; }
   IComponent? BaseComponent { get; }
 

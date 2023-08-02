@@ -53,7 +53,7 @@ public class ManualfacGenerator : IIncrementalGenerator
     var namingStyle = ParseNamingStyle(context);
     foreach (var componentInfo in components)
     {
-      var assembly = componentInfo.ComponentSymbol.ContainingAssembly;
+      var assembly = componentInfo.Symbol.ContainingAssembly;
       if (!SymbolEqualityComparer.Default.Equals(assembly, context.Compilation.Assembly)) continue;
 
       var sb = new StringBuilder();
@@ -91,7 +91,7 @@ public class ManualfacGenerator : IIncrementalGenerator
 
     foreach (var componentInfo in sortedComponents)
     {
-      var componentAssembly = componentInfo.ComponentSymbol.ContainingAssembly;
+      var componentAssembly = componentInfo.Symbol.ContainingAssembly;
       if (!SymbolEqualityComparer.Default.Equals(compilationAssembly, componentAssembly)) continue;
 
       var sb = new StringBuilder();

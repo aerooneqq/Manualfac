@@ -39,7 +39,7 @@ internal class GeneratedContainerResolverModel : IGeneratedModel
   {
     foreach (var component in myStorage.AllComponents)
     {
-      var condition = CreateCondition(component.ComponentSymbol);
+      var condition = CreateCondition(component.Symbol);
       StringBuilderCookies.If(sb, indent, condition, (builder, newIndent) =>
       {
         var resolveExpr = CreateResolveExpr(component);

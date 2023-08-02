@@ -7,7 +7,7 @@ internal class ConcreteComponentDependency : IComponentDependency
   private readonly IComponent myComponent;
 
 
-  public INamedTypeSymbol DependencyTypeSymbol => myComponent.ComponentSymbol;
+  public INamedTypeSymbol DependencyTypeSymbol => myComponent.Symbol;
 
 
   public ConcreteComponentDependency(IComponent component)
