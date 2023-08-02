@@ -27,4 +27,16 @@ public class GeneratedFilesTest : TestWithSourceFilesBase<ManualfacGenerator>
   [Test] public void NoImplementationForInterfaceTest() => DoTestWithException<NoImplementationForInterfaceException>();
   [Test] public void TooManyOverridesTest() => DoTestWithException<TooManyOverridesException>();
   [Test] public void CantResolveImplTest() => DoTestWithException<CantResolveConcreteImplementationException>();
+
+  [Test]
+  public void BeforeAfterTestSelfReferenceTest1() =>
+    DoTestWithException<CanNotReferenceMyselfInBeforeAfterRelationException>();
+  
+  [Test]
+  public void BeforeAfterTestSelfReferenceTest2() =>
+    DoTestWithException<CanNotReferenceMyselfInBeforeAfterRelationException>();
+  
+  [Test] public void BeforeAfterRelationCycleTest1() => DoTestWithException<CyclicDependencyException>();
+  [Test] public void BeforeAfterRelationCycleTest2() => DoTestWithException<CyclicDependencyException>();
+  [Test] public void BeforeAfterRelationCycleTest3() => DoTestWithException<CyclicDependencyException>();
 }
