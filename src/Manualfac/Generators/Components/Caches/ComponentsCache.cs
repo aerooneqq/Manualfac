@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
-using Manualfac.Exceptions;
+using Manualfac.Exceptions.BeforeAfterRelation;
 using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
@@ -76,22 +76,16 @@ internal class ComponentsCache
         foreach (var afterType in afterTypes)
         {
           var afterComponent = myCache[afterType];
-          if (afterComponent == component)
-          {
-            throw new SelfReferenceInBeforeAfterRelationException(component.ComponentSymbol);
-          }
-
+          AssertBeforeAfterRelationInvariants(originalImpls, key, component, afterComponent);
+          
           parentToChildren.AddToList(component, afterComponent);
         }
 
         foreach (var beforeType in beforeTypes)
         {
           var beforeComponent = myCache[beforeType];
-          if (beforeComponent == component)
-          {
-            throw new SelfReferenceInBeforeAfterRelationException(component.ComponentSymbol);
-          }
-
+          AssertBeforeAfterRelationInvariants(originalImpls, key, component, beforeComponent);
+          
           parentToChildren.AddToList(myCache[beforeType], component);
         }
       }
@@ -105,6 +99,20 @@ internal class ComponentsCache
         });
 
       myInterfacesToComponents[key] = sorted;
+    }
+  }
+
+  private static void AssertBeforeAfterRelationInvariants(
+    ICollection<IComponent> originalImpls, INamedTypeSymbol @interface, IComponent component, IComponent reference)
+  {
+    if (!originalImpls.Contains(reference))
+    {
+      throw new ReferenceToOtherInterfaceComponentException(@interface, component.ComponentSymbol, reference.ComponentSymbol);
+    }
+
+    if (reference == component)
+    {
+      throw new SelfReferenceInBeforeAfterRelationException(component.ComponentSymbol);
     }
   }
 }

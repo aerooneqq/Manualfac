@@ -1,7 +1,7 @@
 ﻿using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
-namespace Manualfac.Exceptions;
+namespace Manualfac.Exceptions.BeforeAfterRelation;
 
 public class SelfReferenceInBeforeAfterRelationException : ManualfacGeneratorException
 {
