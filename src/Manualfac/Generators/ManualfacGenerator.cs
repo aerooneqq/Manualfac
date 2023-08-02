@@ -5,6 +5,8 @@ using Manualfac.Generators.Models.TopLevel;
 using Manualfac.Generators.Util;
 using Manualfac.Generators.Util.Naming;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Manualfac.Generators;
 
@@ -34,7 +36,7 @@ public class ManualfacGenerator : IIncrementalGenerator
     storage.FillComponents();
 
     GenerateDependenciesPart(storage.AllComponents, context);
-    GenerateContainerBuilder(storage, context.Compilation, context.ProductionContext);
+    GenerateContainerBuilder(storage, context.Compilation, context);
 
     if (ShouldGenerateResolverFor(context.Compilation.Assembly, symbols))
     {
@@ -51,16 +53,35 @@ public class ManualfacGenerator : IIncrementalGenerator
     IReadOnlyList<IComponent> components, ManualfacContext context)
   {
     var namingStyle = ParseNamingStyle(context);
-    foreach (var componentInfo in components)
+    foreach (var component in components)
     {
-      var assembly = componentInfo.Symbol.ContainingAssembly;
-      if (!SymbolEqualityComparer.Default.Equals(assembly, context.Compilation.Assembly)) continue;
-
+      var componentAssembly = component.Symbol.ContainingAssembly;
+      if (!ShouldGenerateContainerOrDepsParts(componentAssembly, context, component))
+      {
+        continue;
+      }
+      
       var sb = new StringBuilder();
-      componentInfo.ToGeneratedFileModel(namingStyle).GenerateInto(sb, 0);
+      component.ToGeneratedFileModel(namingStyle).GenerateInto(sb, 0);
 
-      context.ProductionContext.AddSource($"{componentInfo.TypeShortName}.g", sb.ToString());
+      context.ProductionContext.AddSource($"{component.TypeShortName}.g", sb.ToString());
     }
+  }
+  
+  private static bool ShouldGenerateContainerOrDepsParts(
+    IAssemblySymbol assembly, ManualfacContext context, IComponent component)
+  {
+    return SymbolEqualityComparer.Default.Equals(assembly, context.Compilation.Assembly) &&
+           CheckIfPartialClass(component.Symbol);
+  }
+
+  private static bool CheckIfPartialClass(INamedTypeSymbol typeSymbol)
+  {
+    if (typeSymbol.DeclaringSyntaxReferences.Length > 1) return true;
+
+    var classDeclaration = (ClassDeclarationSyntax)typeSymbol.DeclaringSyntaxReferences[0].GetSyntax();
+
+    return classDeclaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword));
   }
 
   private static NamingStyle ParseNamingStyle(ManualfacContext context)
@@ -83,21 +104,23 @@ public class ManualfacGenerator : IIncrementalGenerator
   }
 
   private static void GenerateContainerBuilder(
-    ComponentsStorage storage, Compilation compilation, SourceProductionContext context)
+    ComponentsStorage storage, Compilation compilation, ManualfacContext context)
   {
-    var compilationAssembly = compilation.Assembly;
     var sortedComponents = ComponentsTopologicalSorter.Sort(
       storage.AllComponents, static component => component.ResolveConcreteDependencies());
 
     foreach (var componentInfo in sortedComponents)
     {
       var componentAssembly = componentInfo.Symbol.ContainingAssembly;
-      if (!SymbolEqualityComparer.Default.Equals(compilationAssembly, componentAssembly)) continue;
+      if (!ShouldGenerateContainerOrDepsParts(componentAssembly, context, componentInfo))
+      {
+        continue;
+      }
 
       var sb = new StringBuilder();
       new GeneratedContainerModel(componentInfo).GenerateInto(sb, 0);
 
-      context.AddSource($"{componentInfo.CreateContainerName()}.g", sb.ToString());
+      context.ProductionContext.AddSource($"{componentInfo.CreateContainerName()}.g", sb.ToString());
     }
   }
 
