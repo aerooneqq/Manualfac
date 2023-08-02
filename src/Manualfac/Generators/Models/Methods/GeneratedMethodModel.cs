@@ -9,7 +9,7 @@ internal class GeneratedMethodModel : IGeneratedModel
   private readonly string myReturnTypeName;
   private readonly Action<StringBuilder, int> myBodyGenerator;
   private readonly IReadOnlyList<GeneratedParameterModel> myParameters;
-  private readonly IReadOnlyList<string> myGenericParameters;
+  private readonly IReadOnlyList<string> myTypeParameters;
   private readonly AccessModifier myModifier;
   private readonly bool myIsStatic;
   private readonly bool myIsPartial;
@@ -17,7 +17,7 @@ internal class GeneratedMethodModel : IGeneratedModel
 
   public GeneratedMethodModel(
     string name,
-    IReadOnlyList<string> genericParameters,
+    IReadOnlyList<string> typeParameters,
     string returnTypeName,
     Action<StringBuilder, int> bodyGenerator,
     IReadOnlyList<GeneratedParameterModel> parameters,
@@ -29,7 +29,7 @@ internal class GeneratedMethodModel : IGeneratedModel
     myReturnTypeName = returnTypeName;
     myBodyGenerator = bodyGenerator;
     myParameters = parameters;
-    myGenericParameters = genericParameters;
+    myTypeParameters = typeParameters;
     myModifier = modifier;
     myIsStatic = isStatic;
     myIsPartial = isPartial;
@@ -45,15 +45,15 @@ internal class GeneratedMethodModel : IGeneratedModel
 
     sb.Append(myReturnTypeName).AppendSpace().Append(myName);
 
-    if (myGenericParameters is { Count: > 0 })
+    if (myTypeParameters is { Count: > 0 })
     {
       sb.Append('<');
-      foreach (var genericParameter in myGenericParameters)
+      foreach (var genericParameter in myTypeParameters)
       {
         sb.Append(genericParameter).AppendComma();
       }
 
-      if (myGenericParameters.Count > 0)
+      if (myTypeParameters.Count > 0)
       {
         //remove last comma
         sb.Remove(sb.Length - 1, 1);
