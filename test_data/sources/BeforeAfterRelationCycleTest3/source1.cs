@@ -8,16 +8,16 @@ interface IClass1
 }
 
 [Component, Before<Class2>]
-public class Class1 : IClass1
+public partial class Class1 : IClass1
 {
 }
 
 [Component, Before<Class1>]
-public class Class2 : IClass1
+public partial class Class2 : IClass1
 {
 }
 
 [Component, DependsOn<Internal, IEnumerable<IClass1>>()]
-public class Class5
+public partial class Class5
 {
 }

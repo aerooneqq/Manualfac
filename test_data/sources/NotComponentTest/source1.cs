@@ -7,6 +7,6 @@ public partial class Class1
 {
 }
 
-public class Class5
+public partial class Class5
 {
 }
