@@ -29,10 +29,19 @@ Features:
 - Query several dependencies implementing same interface:
   ```csharp
   [Component, DependsOn<Internal, IEnumerable<IClass1>>()]
-  public class Class3
+  public partial class Class3
   {
   }
   ```
+  
+- Specify ordering of dependencies with Before and After attributes:
+  ```csharp
+  [Component, Before<Class6, Class7>, After<Class8>]
+  public partial class Class5
+  {
+  }
+  ```
+
 - Specify end-projects for which the resolver will be generated:
   ```csharp
   [assembly: GenerateResolver]  
@@ -62,7 +71,5 @@ Todos:
 - Different lifetimes of components?
 - Integration with other containers, like ASP NET Core default one, autofac...
 - Test it against nuget packages
-- Ordering of dependencies in case of `IEnumerable<IComponent>`
-  dependency, e.g. with `Before<T1, T2, ....>` and `After<T1, T2, ...>` attributes
 - Feature flags? Zones?
 - More configurable naming
