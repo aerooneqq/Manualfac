@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
+using Manualfac.Exceptions;
 using Manualfac.Generators.Util;
 using Microsoft.CodeAnalysis;
 
@@ -74,11 +75,23 @@ internal class ComponentsCache
         
         foreach (var afterType in afterTypes)
         {
-          parentToChildren.AddToList(component, myCache[afterType]);
+          var afterComponent = myCache[afterType];
+          if (afterComponent == component)
+          {
+            throw new CanNotReferenceMyselfInBeforeAfterRelationException(component.ComponentSymbol);
+          }
+          
+          parentToChildren.AddToList(component, afterComponent);
         }
         
         foreach (var beforeType in beforeTypes)
         {
+          var beforeComponent = myCache[beforeType];
+          if (beforeComponent == component)
+          {
+            throw new CanNotReferenceMyselfInBeforeAfterRelationException(component.ComponentSymbol);
+          }
+          
           parentToChildren.AddToList(myCache[beforeType], component);
         }
       }
