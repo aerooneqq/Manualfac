@@ -3,6 +3,7 @@
 Proof-of-concept DI container based on source generators.
 
 Features:
+
 - Specify dependencies and their access modifiers with generic attributes:
   ```csharp
   [Component, DependsOn<PrivateProtected, Class1, Class2, Class3, Class4>]
@@ -57,10 +58,11 @@ Features:
   ```
 
 Todos:
+
 - Different lifetimes of components?
 - Integration with other containers, like ASP NET Core default one, autofac...
 - Test it against nuget packages
-- Ordering of dependencies in case of `IEnumerable<IComponent>` 
+- Ordering of dependencies in case of `IEnumerable<IComponent>`
   dependency, e.g. with `Before<T1, T2, ....>` and `After<T1, T2, ...>` attributes
 - Feature flags? Zones?
 - More configurable naming

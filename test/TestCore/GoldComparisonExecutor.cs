@@ -16,7 +16,7 @@ public class GoldComparisonExecutor
     myDifferences = new HashSet<string>();
     myGoldDirectory = goldDirectory;
     myGeneratedFiles = generatedFiles;
-    
+
     myGoldFileNames = Directory.EnumerateFiles(goldDirectory)
       .Select(Path.GetFileName)
       .Where(name => name.EndsWith(".cs"))
@@ -30,12 +30,12 @@ public class GoldComparisonExecutor
     AssertAllGoldInGeneratedFiles();
     AssertGeneratedFilesAndGoldSameContent();
   }
-  
+
   private void AssertAllGeneratedFilesInGold()
   {
     Debug.Assert(myGeneratedFiles is { });
     Debug.Assert(myGoldFileNames is { });
-    
+
     foreach (var generatedFileName in myGeneratedFiles.Keys)
     {
       if (!myGoldFileNames.Contains(generatedFileName))
@@ -43,7 +43,7 @@ public class GoldComparisonExecutor
         myDifferences.Add(generatedFileName);
       }
     }
-    
+
     FailWithDifferencesIfNeeded($"Generated files: {string.Join(',', myDifferences)} were not in gold");
   }
 
@@ -51,7 +51,7 @@ public class GoldComparisonExecutor
   {
     Debug.Assert(myGeneratedFiles is { });
     Debug.Assert(myGoldFileNames is { });
-    
+
     foreach (var goldFileName in myGoldFileNames)
     {
       if (!myGeneratedFiles.ContainsKey(goldFileName))
@@ -65,7 +65,7 @@ public class GoldComparisonExecutor
   {
     Debug.Assert(myGeneratedFiles is { });
     Debug.Assert(myGoldFileNames is { });
-    
+
     foreach (var (generatedFileName, generatedText) in myGeneratedFiles)
     {
       var goldText = File.ReadAllText(Path.Join(myGoldDirectory, generatedFileName)).ReplaceRn();
@@ -74,10 +74,10 @@ public class GoldComparisonExecutor
         myDifferences.Add(generatedFileName);
       }
     }
-    
+
     FailWithDifferencesIfNeeded($"Following files have different generated content: {string.Join(',', myDifferences)}");
   }
-  
+
   private void FailWithDifferencesIfNeeded(string message)
   {
     Debug.Assert(myGeneratedFiles is { });
@@ -90,10 +90,10 @@ public class GoldComparisonExecutor
 
       Assert.Fail(message);
     }
-      
+
     myDifferences.Clear();
   }
-  
-  private static void WriteTmpFile(string goldDirectory, string originalFileName, string text) => 
+
+  private static void WriteTmpFile(string goldDirectory, string originalFileName, string text) =>
     File.WriteAllText(Path.Combine(goldDirectory, $"{originalFileName}.tmp"), text.ReplaceRn());
 }

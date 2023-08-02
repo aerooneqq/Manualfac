@@ -25,7 +25,7 @@ internal class GeneratedFieldModel : IGeneratedModel
   {
     TypeName = typeName;
     Name = fieldName;
-    
+
     myAccessModifier = accessModifier;
     myReadonly = @readonly;
     myIsStatic = isStatic;
@@ -41,7 +41,7 @@ internal class GeneratedFieldModel : IGeneratedModel
     {
       sb.Append("static").AppendSpace();
     }
-    
+
     if (myReadonly)
     {
       sb.Append("readonly").AppendSpace();
@@ -53,7 +53,7 @@ internal class GeneratedFieldModel : IGeneratedModel
     {
       sb.AppendSpace().AppendEq().AppendSpace().Append(myDefaultValue);
     }
-    
+
     sb.AppendSemicolon().AppendNewLine();
   }
 }

@@ -5,17 +5,17 @@ namespace Manualfac.Generators.Util;
 internal readonly struct OpenCloseStringBuilderOperation : IDisposable
 {
   private const int IndentDelta = 1;
-  
+
   private readonly StringBuilder myStringBuilder;
   private readonly Action<StringBuilder, int> myCloseAction;
-  
-  
+
+
   public int Indent { get; }
 
-  
+
   public OpenCloseStringBuilderOperation(
-    StringBuilder sb, 
-    Action<StringBuilder, int> openAction, 
+    StringBuilder sb,
+    Action<StringBuilder, int> openAction,
     Action<StringBuilder, int> closeAction,
     int indent)
   {
@@ -25,8 +25,8 @@ internal readonly struct OpenCloseStringBuilderOperation : IDisposable
     myStringBuilder.AppendNewLine();
     Indent = indent + IndentDelta;
   }
-  
-  
+
+
   public void Dispose()
   {
     myStringBuilder.AppendNewLine();

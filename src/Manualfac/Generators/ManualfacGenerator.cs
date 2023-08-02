@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators;
 
-
 [Generator]
 public class ManualfacGenerator : IIncrementalGenerator
 {
@@ -31,20 +30,20 @@ public class ManualfacGenerator : IIncrementalGenerator
   {
     var symbols = ManualfacSymbols.CreateManualfacSymbolsFrom(context.Compilation);
     var storage = new ComponentsStorage(symbols, context.Compilation);
-    
+
     storage.FillComponents();
-    
+
     GenerateDependenciesPart(storage.AllComponents, context);
     GenerateContainerBuilder(storage, context.Compilation, context.ProductionContext);
 
     if (ShouldGenerateResolverFor(context.Compilation.Assembly, symbols))
     {
       GenerateContainerInitialization(storage, context.Compilation, context.ProductionContext);
-      GenerateContainerGenericResolver(storage, context.Compilation, context.ProductionContext); 
+      GenerateContainerGenericResolver(storage, context.Compilation, context.ProductionContext);
     }
   }
 
-  private static bool ShouldGenerateResolverFor(IAssemblySymbol symbol, ManualfacSymbols symbols) => 
+  private static bool ShouldGenerateResolverFor(IAssemblySymbol symbol, ManualfacSymbols symbols) =>
     symbol.GetAttributes()
       .Any(attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, symbols.GenerateResolverAttribute));
 
@@ -56,7 +55,7 @@ public class ManualfacGenerator : IIncrementalGenerator
     {
       var assembly = componentInfo.ComponentSymbol.ContainingAssembly;
       if (!SymbolEqualityComparer.Default.Equals(assembly, context.Compilation.Assembly)) continue;
-      
+
       var sb = new StringBuilder();
       componentInfo.ToGeneratedFileModel(namingStyle).GenerateInto(sb, 0);
 
@@ -89,15 +88,15 @@ public class ManualfacGenerator : IIncrementalGenerator
     var compilationAssembly = compilation.Assembly;
     var sortedComponents = ComponentsTopologicalSorter.Sort(
       storage.AllComponents, static component => component.ResolveConcreteDependencies());
-    
-    foreach (var componentInfo in sortedComponents) 
+
+    foreach (var componentInfo in sortedComponents)
     {
       var componentAssembly = componentInfo.ComponentSymbol.ContainingAssembly;
       if (!SymbolEqualityComparer.Default.Equals(compilationAssembly, componentAssembly)) continue;
-      
+
       var sb = new StringBuilder();
       new GeneratedComponentContainerModel(componentInfo).GenerateInto(sb, 0);
-    
+
       context.AddSource($"{componentInfo.CreateContainerName()}.g", sb.ToString());
     }
   }
@@ -106,10 +105,10 @@ public class ManualfacGenerator : IIncrementalGenerator
     ComponentsStorage storage, Compilation compilation, SourceProductionContext context)
   {
     if (storage.BaseToOverrides.Count == 0) return;
-    
+
     var sb = new StringBuilder();
     new GeneratedContainerInitializerModel(storage, compilation.Assembly).GenerateInto(sb, 0);
-    
+
     context.AddSource($"{compilation.Assembly.Name}", sb.ToString());
   }
 
@@ -118,7 +117,7 @@ public class ManualfacGenerator : IIncrementalGenerator
   {
     var sb = new StringBuilder();
     new GeneratedContainerResolverModel(storage, compilation.Assembly).GenerateInto(sb, 0);
-    
+
     context.AddSource($"{compilation.Assembly.Name}Resolver", sb.ToString());
   }
 }

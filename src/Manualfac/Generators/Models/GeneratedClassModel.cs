@@ -3,7 +3,6 @@ using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Models;
 
-
 internal class GeneratedClassModel : IGeneratedModel
 {
   private readonly string myName;
@@ -13,7 +12,7 @@ internal class GeneratedClassModel : IGeneratedModel
   private readonly GeneratedClassAccessModifier myModifier;
   private readonly string? myBaseClass;
 
-  
+
   public GeneratedClassModel(
     string name,
     IReadOnlyList<GeneratedConstructorModel> constructors,
@@ -40,23 +39,23 @@ internal class GeneratedClassModel : IGeneratedModel
     {
       sb.Append(" : ").Append(myBaseClass);
     }
-    
+
     sb.AppendNewLine();
     using var cookie = StringBuilderCookies.CurlyBraces(sb, indent);
     foreach (var field in myFields)
     {
       field.GenerateInto(sb, cookie.Indent);
     }
-      
+
     if (myFields.Count > 0) sb.AppendNewLine();
-      
+
     foreach (var constructor in myConstructors)
     {
       constructor.GenerateInto(sb, cookie.Indent);
     }
-      
+
     if (myConstructors.Count > 0) sb.AppendNewLine();
-      
+
     foreach (var method in myMethods)
     {
       method.GenerateInto(sb, cookie.Indent);

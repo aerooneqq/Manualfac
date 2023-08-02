@@ -14,7 +14,7 @@ internal class GeneratedMethodModel : IGeneratedModel
   private readonly bool myIsStatic;
   private readonly bool myIsPartial;
 
-  
+
   public GeneratedMethodModel(
     string name,
     IReadOnlyList<string> genericParameters,
@@ -39,7 +39,7 @@ internal class GeneratedMethodModel : IGeneratedModel
   public void GenerateInto(StringBuilder sb, int indent)
   {
     sb.AppendIndent(indent).Append(myModifier.CreateModifierString()).AppendSpace();
-    
+
     if (myIsStatic) sb.Append("static").AppendSpace();
     if (myIsPartial) sb.Append("partial").AppendSpace();
 

@@ -12,7 +12,7 @@ public class ManualfacSymbols
     AllModulesVisitor.Visit(compilation, module =>
     {
       if (module.ContainingAssembly.Name != Constants.ManualfacAttributes) return false;
-      
+
       manualfacModule = module;
       return true;
     });
@@ -24,7 +24,7 @@ public class ManualfacSymbols
 
     return new ManualfacSymbols(manualfacModule);
   }
-  
+
 
   private readonly ModuleTypesCache myTypesCache;
 

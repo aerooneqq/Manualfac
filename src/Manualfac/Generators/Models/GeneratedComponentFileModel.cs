@@ -23,7 +23,7 @@ internal class GeneratedComponentFileModel : IGeneratedModel
   {
     myGeneratedUsingsModel.GenerateInto(sb, indent);
     sb.AppendNewLine();
-    
+
     myGeneratedNamespaceModel.GenerateInto(sb, indent);
   }
 }

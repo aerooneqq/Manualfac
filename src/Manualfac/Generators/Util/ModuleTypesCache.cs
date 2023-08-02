@@ -9,7 +9,7 @@ public class ModuleTypesCache
 
   private bool myIsInitialized;
 
-  
+
   public ModuleTypesCache(IModuleSymbol moduleSymbol)
   {
     myNamesToTypes = new Dictionary<string, INamedTypeSymbol>();
@@ -36,7 +36,7 @@ public class ModuleTypesCache
     {
       myNamesToTypes[type.GetFullName()] = type;
     }
-    
+
     myIsInitialized = true;
   }
 }

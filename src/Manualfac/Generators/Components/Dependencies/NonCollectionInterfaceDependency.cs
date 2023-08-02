@@ -20,7 +20,7 @@ internal class NonCollectionInterfaceDependency : IComponentDependency
     DependencyTypeSymbol = interfaceSymbol;
     myStorage = storage;
   }
-  
+
 
   public IReadOnlyList<IComponent> ResolveUnderlyingConcreteComponents()
   {
@@ -39,7 +39,8 @@ internal class NonCollectionInterfaceDependency : IComponentDependency
 
     if (impls.Count != 1)
     {
-      throw new CantResolveConcreteImplementationException(DependencyTypeSymbol, impls.Select(impl => impl.FullName).ToList());
+      throw new CantResolveConcreteImplementationException(DependencyTypeSymbol,
+        impls.Select(impl => impl.FullName).ToList());
     }
 
     myResolveResult = new[] { impls[0] };

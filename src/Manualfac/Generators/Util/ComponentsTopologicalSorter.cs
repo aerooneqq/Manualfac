@@ -11,14 +11,14 @@ internal static class ComponentsTopologicalSorter
     Black,
     Gray
   }
-  
+
   public static List<IComponent> Sort(
-    IReadOnlyList<IComponent> components, 
+    IReadOnlyList<IComponent> components,
     Func<IComponent, IEnumerable<IComponent>> childrenProvider)
   {
     var visited = components.ToDictionary(static c => c, static _ => ComponentState.NotVisited);
     var result = new List<IComponent>();
-    
+
     foreach (var component in components)
     {
       if (visited[component] == ComponentState.NotVisited)
@@ -34,8 +34,8 @@ internal static class ComponentsTopologicalSorter
   }
 
   private static bool Dfs(
-    IComponent current, 
-    Dictionary<IComponent, ComponentState> visited, 
+    IComponent current,
+    Dictionary<IComponent, ComponentState> visited,
     List<IComponent> result,
     Func<IComponent, IEnumerable<IComponent>> childrenProvider)
   {
@@ -54,7 +54,7 @@ internal static class ComponentsTopologicalSorter
     }
 
     visited[current] = ComponentState.Black;
-    
+
     result.Add(current);
     return false;
   }

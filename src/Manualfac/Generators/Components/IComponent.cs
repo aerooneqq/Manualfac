@@ -8,7 +8,7 @@ internal interface IComponent
   INamedTypeSymbol ComponentSymbol { get; }
   IComponentDependencies Dependencies { get; }
   IComponent? BaseComponent { get; }
-  
+
   string TypeShortName { get; }
   string FullName { get; }
   string? Namespace { get; }

@@ -22,7 +22,7 @@ internal class GeneratedContainerInitializerModel : IGeneratedModel
       new[]
       {
         new GeneratedMethodModel(
-          "Initialize", ImmutableList<string>.Empty, "void", GenerateInitializeMethod, 
+          "Initialize", ImmutableList<string>.Empty, "void", GenerateInitializeMethod,
           ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Internal, isStatic: true)
       });
   }
@@ -44,7 +44,7 @@ internal class GeneratedContainerInitializerModel : IGeneratedModel
             true => new GeneratedComponentObjectCreationModel(component, myStorage.AdjustComponent),
             false => new GeneratedOverridenComponentObjectCreationModel(adjustedComponent)
           };
-          
+
           model.GenerateInto(sb, methodCookie.Indent);
         }
       }
@@ -52,7 +52,7 @@ internal class GeneratedContainerInitializerModel : IGeneratedModel
       sb.AppendSemicolon().AppendNewLine().AppendNewLine();
     }
   }
-  
+
   public void GenerateInto(StringBuilder sb, int indent)
   {
     myGeneratedClassModel.GenerateInto(sb, indent);

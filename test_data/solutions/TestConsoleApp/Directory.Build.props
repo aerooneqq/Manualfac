@@ -1,9 +1,9 @@
 <Project>
     <ItemGroup>
-        <CompilerVisibleProperty Include="ManualfacDependencySuffix" />
-        <CompilerVisibleProperty Include="ManualfacDependencyPrefix" />
+        <CompilerVisibleProperty Include="ManualfacDependencySuffix"/>
+        <CompilerVisibleProperty Include="ManualfacDependencyPrefix"/>
     </ItemGroup>
-    
+
     <PropertyGroup>
         <ManualfacDependencySuffix>suffix</ManualfacDependencySuffix>
         <ManualfacDependencyPrefix>prefix</ManualfacDependencyPrefix>

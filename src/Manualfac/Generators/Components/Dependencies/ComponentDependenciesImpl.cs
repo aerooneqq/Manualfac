@@ -3,14 +3,14 @@ namespace Manualfac.Generators.Components.Dependencies;
 internal class ComponentDependenciesImpl : IComponentDependencies
 {
   private readonly IComponent myComponent;
-  
+
 
   public HashSet<IComponentDependency> AllDependenciesSet { get; }
   public IReadOnlyList<ComponentDependencyDescriptor> ImmediateDependencies { get; }
 
 
   public ComponentDependenciesImpl(
-    IComponent thisComponent, 
+    IComponent thisComponent,
     IReadOnlyList<ComponentDependencyDescriptor> immediateDependencies)
   {
     myComponent = thisComponent;
@@ -18,8 +18,8 @@ internal class ComponentDependenciesImpl : IComponentDependencies
     var allDependencies = DependenciesByLevels.SelectMany(deps => deps.Select(dep => dep.Dependency));
     AllDependenciesSet = new HashSet<IComponentDependency>(allDependencies);
   }
-  
-  
+
+
   public IEnumerable<IReadOnlyList<ComponentDependencyDescriptor>> DependenciesByLevels
   {
     get
@@ -33,7 +33,7 @@ internal class ComponentDependenciesImpl : IComponentDependencies
       }
     }
   }
-  
+
   public IEnumerable<ComponentDependencyDescriptor> AllOrderedDependencies
   {
     get

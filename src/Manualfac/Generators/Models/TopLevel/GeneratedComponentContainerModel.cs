@@ -9,7 +9,7 @@ namespace Manualfac.Generators.Models.TopLevel;
 internal class GeneratedComponentContainerModel : IGeneratedModel
 {
   private const string DefaultInitializeMethodName = "DefaultInitialize";
-  
+
   private const string InstanceFieldName = "ourInstance";
   private const string SyncFieldName = "ourSync";
   private const string InitializationFuncFieldName = "ourF";
@@ -20,7 +20,7 @@ internal class GeneratedComponentContainerModel : IGeneratedModel
   private const string Existing2 = "exiting2";
 
   private const string Void = "void";
-  
+
   private readonly GeneratedUsingsModel myDependenciesUsingsModel;
   private readonly GeneratedNamespaceModel myGeneratedNamespaceModel;
   private readonly GeneratedUsingsModel myDefaultUsingsModel;
@@ -39,13 +39,13 @@ internal class GeneratedComponentContainerModel : IGeneratedModel
       {
         new GeneratedFieldModel(component.FullName, InstanceFieldName, AccessModifier.Private, false, true),
         new GeneratedFieldModel("object", SyncFieldName, AccessModifier.Private, false, true, "new object()"),
-        new GeneratedFieldModel($"Func<{component.FullName}>", InitializationFuncFieldName, 
+        new GeneratedFieldModel($"Func<{component.FullName}>", InitializationFuncFieldName,
           AccessModifier.Private, false, true, defaultValue: DefaultInitializeMethodName)
       },
       new[]
       {
         new GeneratedMethodModel(
-          Constants.ResolveMethod, ImmutableList<string>.Empty, component.FullName, GenerateFactoryMethod, 
+          Constants.ResolveMethod, ImmutableList<string>.Empty, component.FullName, GenerateFactoryMethod,
           ImmutableList<GeneratedParameterModel>.Empty, isStatic: true),
 
         new GeneratedMethodModel(Constants.InitializeMethod, ImmutableList<string>.Empty, Void,
@@ -53,27 +53,27 @@ internal class GeneratedComponentContainerModel : IGeneratedModel
           {
             new GeneratedParameterModel($"Func<{component.FullName}>", InitializeFuncParamName)
           }, isStatic: true),
-        
+
         new GeneratedMethodModel(
-          DefaultInitializeMethodName, ImmutableList<string>.Empty, component.FullName, GenerateDefaultInitializeMethod, 
+          DefaultInitializeMethodName, ImmutableList<string>.Empty, component.FullName, GenerateDefaultInitializeMethod,
           ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Private, isStatic: true)
       });
-    
+
     myGeneratedNamespaceModel = new GeneratedNamespaceModel(component.Namespace, generatedClassModel.GenerateInto);
     myDefaultUsingsModel = new GeneratedUsingsModel(new[] { "System.Threading" });
   }
 
-  
+
   public void GenerateInto(StringBuilder sb, int indent)
   {
     myDependenciesUsingsModel.GenerateInto(sb, indent);
     myDefaultUsingsModel.GenerateInto(sb, indent);
-    
+
     sb.AppendNewLine();
 
     myGeneratedNamespaceModel.GenerateInto(sb, indent);
   }
-  
+
   private void GenerateFactoryMethod(StringBuilder sb, int indent)
   {
     sb.AppendIndent(indent)
@@ -81,15 +81,16 @@ internal class GeneratedComponentContainerModel : IGeneratedModel
       .AppendNewLine();
 
     using var lockCookie = StringBuilderCookies.Lock(sb, SyncFieldName, indent);
-    
+
     sb.AppendIndent(lockCookie.Indent)
       .Append($"if (Volatile.Read(ref {InstanceFieldName}) is {{ }} {Existing2}) return {Existing2};")
       .AppendNewLine();
 
     sb.AppendIndent(lockCookie.Indent).Append($"var {CreatedVarName} = ").Append(InitializationFuncFieldName)
       .Append("()").AppendSemicolon().AppendNewLine();
-    
-    sb.AppendIndent(lockCookie.Indent).Append($"Volatile.Write(ref {InstanceFieldName}, {CreatedVarName});").AppendNewLine();
+
+    sb.AppendIndent(lockCookie.Indent).Append($"Volatile.Write(ref {InstanceFieldName}, {CreatedVarName});")
+      .AppendNewLine();
     sb.AppendIndent(lockCookie.Indent).Append($"return {CreatedVarName};");
   }
 
@@ -100,7 +101,7 @@ internal class GeneratedComponentContainerModel : IGeneratedModel
       .Append(InitializeFuncParamName).AppendSemicolon();
   }
 
-  private void GenerateDefaultInitializeMethod(StringBuilder sb, int indent) => 
+  private void GenerateDefaultInitializeMethod(StringBuilder sb, int indent) =>
     myComponentCreationModel.GenerateInto(sb, indent);
 }
 

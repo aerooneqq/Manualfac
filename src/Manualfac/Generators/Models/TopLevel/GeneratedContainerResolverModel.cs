@@ -9,7 +9,7 @@ namespace Manualfac.Generators.Models.TopLevel;
 internal class GeneratedContainerResolverModel : IGeneratedModel
 {
   private const string GenericType = "TComponent";
-  
+
   private readonly ComponentsStorage myStorage;
   private readonly GeneratedClassModel myGeneratedClassModel;
 
@@ -26,9 +26,10 @@ internal class GeneratedContainerResolverModel : IGeneratedModel
         new GeneratedMethodModel(
           "ResolveOrThrow", new[] { GenericType }, GenericType, GenerateResolveMethod,
           ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Internal, isStatic: true),
-        
+
         new GeneratedMethodModel(
-          "ResolveComponentsOrThrow", new[] { GenericType }, $"IEnumerable<{GenericType}>", GenerateResolveComponentsMethods,
+          "ResolveComponentsOrThrow", new[] { GenericType }, $"IEnumerable<{GenericType}>",
+          GenerateResolveComponentsMethods,
           ImmutableList<GeneratedParameterModel>.Empty, AccessModifier.Internal, isStatic: true)
       });
   }
@@ -59,14 +60,14 @@ internal class GeneratedContainerResolverModel : IGeneratedModel
           var resolveExpression = CreateResolveExpr(impls[0]);
           builder.AppendIndent(newIndent).Append("return ").Append(resolveExpression).AppendSemicolon();
         });
-        
+
         sb.AppendNewLine();
       }
     }
 
     sb.AppendIndent(indent).Append("throw new ArgumentOutOfRangeException();");
   }
-  
+
   private static string CreateCondition(INamedTypeSymbol symbol) =>
     $"typeof({GenericType}) == typeof({symbol.GetFullName()})";
 
@@ -87,14 +88,14 @@ internal class GeneratedContainerResolverModel : IGeneratedModel
           var array = $"new {GenericType}[] {{{initializers}}}";
           builder.AppendIndent(newIndent).Append("return ").Append(array).AppendSemicolon();
         });
-        
+
         sb.AppendNewLine();
       }
     }
-    
+
     sb.AppendIndent(indent).Append("throw new ArgumentOutOfRangeException();");
   }
-  
-  
+
+
   public void GenerateInto(StringBuilder sb, int indent) => myGeneratedClassModel.GenerateInto(sb, indent);
 }

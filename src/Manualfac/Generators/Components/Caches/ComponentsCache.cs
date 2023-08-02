@@ -13,15 +13,15 @@ internal class ComponentsCache
   private readonly Dictionary<INamedTypeSymbol, List<IComponent>> myInterfacesToComponents;
   private readonly ManualfacSymbols myManualfacSymbols;
 
-  
+
   public IReadOnlyList<IComponent> AllComponents => myAllComponents;
   public IReadOnlyDictionary<INamedTypeSymbol, List<IComponent>> InterfacesToComponents => myInterfacesToComponents;
-  
+
 
   public ComponentsCache(ManualfacSymbols manualfacSymbols)
   {
     myManualfacSymbols = manualfacSymbols;
-    
+
     myCache = new Dictionary<INamedTypeSymbol, IComponent>(SymbolEqualityComparer.Default);
     myAllComponents = new List<IComponent>();
     myInterfacesToComponents = new Dictionary<INamedTypeSymbol, List<IComponent>>(SymbolEqualityComparer.Default);
@@ -67,12 +67,12 @@ internal class ComponentsCache
     {
       var parentToChildren = new Dictionary<IComponent, List<IComponent>>();
       var originalImpls = myInterfacesToComponents[key];
-      
+
       foreach (var component in originalImpls)
       {
         var afterTypes = component.ComponentSymbol.GetAttributesTypeArguments(myManualfacSymbols.AfterAttributeBase);
         var beforeTypes = component.ComponentSymbol.GetAttributesTypeArguments(myManualfacSymbols.BeforeAttributeBase);
-        
+
         foreach (var afterType in afterTypes)
         {
           var afterComponent = myCache[afterType];
@@ -80,10 +80,10 @@ internal class ComponentsCache
           {
             throw new SelfReferenceInBeforeAfterRelationException(component.ComponentSymbol);
           }
-          
+
           parentToChildren.AddToList(component, afterComponent);
         }
-        
+
         foreach (var beforeType in beforeTypes)
         {
           var beforeComponent = myCache[beforeType];
@@ -91,19 +91,19 @@ internal class ComponentsCache
           {
             throw new SelfReferenceInBeforeAfterRelationException(component.ComponentSymbol);
           }
-          
+
           parentToChildren.AddToList(myCache[beforeType], component);
         }
       }
 
       var sorted = ComponentsTopologicalSorter.Sort(
-        originalImpls, 
+        originalImpls,
         component => parentToChildren.TryGetValue(component, out var children) switch
         {
           true => children,
           false => ImmutableArray<IComponent>.Empty
         });
-      
+
       myInterfacesToComponents[key] = sorted;
     }
   }

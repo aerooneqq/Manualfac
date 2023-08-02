@@ -10,7 +10,7 @@ internal class OverridesCache
 
   public OverridesCache()
   {
-    myBaseToOverrides = new Dictionary<IComponent,IComponent>();
+    myBaseToOverrides = new Dictionary<IComponent, IComponent>();
   }
 
 

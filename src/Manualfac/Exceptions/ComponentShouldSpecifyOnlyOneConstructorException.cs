@@ -6,9 +6,9 @@ public class ComponentShouldSpecifyOnlyOneConstructorException : ManualfacGenera
 {
   public override string Message { get; }
 
-  
-  public ComponentShouldSpecifyOnlyOneConstructorException(INamedTypeSymbol namedTypeSymbol)
+
+  public ComponentShouldSpecifyOnlyOneConstructorException(INamedTypeSymbol symbol)
   {
-    Message = $"Type {namedTypeSymbol.Name} declared {namedTypeSymbol.Constructors.Length} constructors, when only one is expected";
+    Message = $"Type {symbol.Name} declared {symbol.Constructors.Length} constructors, when only one is expected";
   }
 }

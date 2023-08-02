@@ -12,7 +12,7 @@ internal static class ExtensionsForIComponent
       .Select(attr => attr.AttributeClass!.TypeArguments.OfType<INamedTypeSymbol>().ToList())
       .ToList();
   }
-  
+
   public static IReadOnlyList<INamedTypeSymbol> GetAttributesTypeArguments(
     this ISymbol symbol, INamedTypeSymbol attributeSymbol)
   {

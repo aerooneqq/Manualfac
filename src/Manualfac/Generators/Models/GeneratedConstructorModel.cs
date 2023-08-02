@@ -12,7 +12,7 @@ internal class GeneratedConstructorModel : IGeneratedModel
 
 
   public GeneratedConstructorModel(
-    string containingTypeName, 
+    string containingTypeName,
     IReadOnlyList<GeneratedFieldModel> constructorParameters,
     IReadOnlyList<GeneratedFieldModel> fieldsToInitialize,
     GeneratedBaseConstructorModel? baseConstructorModel = null)
@@ -37,16 +37,16 @@ internal class GeneratedConstructorModel : IGeneratedModel
           .Append(GeneratedConstructorUtil.GetComponentParamName(index++))
           .AppendComma().AppendNewLine();
       }
-      
+
       if (index > 0)
       {
         //remove last space and comma
         sb.Remove(sb.Length - 2, 2);
       }
     }
-    
+
     myBaseConstructorModel?.GenerateInto(sb, indent);
-    
+
     using (var cookie = StringBuilderCookies.CurlyBraces(sb.AppendNewLine(), indent))
     {
       var index = 0;

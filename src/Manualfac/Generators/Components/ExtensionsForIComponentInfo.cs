@@ -8,23 +8,23 @@ namespace Manualfac.Generators.Components;
 
 internal static class ExtensionsForIComponentInfo
 {
-  public static string CreateContainerName(this IComponent component) => 
+  public static string CreateContainerName(this IComponent component) =>
     $"{component.TypeShortName}Container";
 
   public static string CreateContainerFullName(this IComponent component) =>
     $"{component.Namespace}{(string.IsNullOrWhiteSpace(component.Namespace) ? "" : ".")}{component.CreateContainerName()}";
-  
+
   public static string CreateContainerResolveExpression(this IComponent component) =>
     $"{component.CreateContainerFullName()}.{Constants.ResolveMethod}()";
-  
-  public static GeneratedUsingsModel ToDependenciesUsingsModel(this IComponent component) => 
+
+  public static GeneratedUsingsModel ToDependenciesUsingsModel(this IComponent component) =>
     new(component.Dependencies.AllDependenciesSet
       .SelectMany(dep => dep.ResolveUnderlyingConcreteComponents().Select(c => c.Namespace))
       .Where(ns => ns is { } && !string.IsNullOrWhiteSpace(ns))
       .Distinct()
       .ToList()!);
-  
-  public static GeneratedComponentFileModel ToGeneratedFileModel(this IComponent component, NamingStyle style) => 
+
+  public static GeneratedComponentFileModel ToGeneratedFileModel(this IComponent component, NamingStyle style) =>
     new(component, style);
 
   public static GeneratedClassModel ToGeneratedClassModel(this IComponent component, NamingStyle namingStyle)
@@ -41,7 +41,7 @@ internal static class ExtensionsForIComponentInfo
           paramNames.Add(GeneratedConstructorUtil.GetComponentParamName(index++));
         }
       }
-      
+
       baseConstructorModel = new GeneratedBaseConstructorModel(paramNames);
     }
 
@@ -49,7 +49,7 @@ internal static class ExtensionsForIComponentInfo
     var fields = component.ExtractFields(namingStyle);
     var className = component.TypeShortName;
     var constructorModel = new GeneratedConstructorModel(className, constructorParams, fields, baseConstructorModel);
-    
+
     return new GeneratedClassModel(
       className,
       new[] { constructorModel },
@@ -59,7 +59,7 @@ internal static class ExtensionsForIComponentInfo
 
   public static IReadOnlyList<GeneratedFieldModel> ExtractFields(this IComponent component, NamingStyle namingStyle) =>
     ExtractGeneratedFieldModelsInternal(component.Dependencies.ImmediateDependencies, namingStyle);
-  
+
   private static IReadOnlyList<GeneratedFieldModel> ExtractGeneratedFieldModelsInternal(
     IEnumerable<ComponentDependencyDescriptor> descriptors, NamingStyle namingStyle)
   {
@@ -72,7 +72,7 @@ internal static class ExtensionsForIComponentInfo
     var symbol = descriptor.Dependency.DependencyTypeSymbol;
     var fullName = symbol.GetFullName();
     var name = namingStyle.ApplyNamingStyleTo(symbol.GetAssociatedFieldNameBase());
-    
+
     return new GeneratedFieldModel(fullName, name, descriptor.Modifier);
   }
 

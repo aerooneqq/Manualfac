@@ -9,10 +9,10 @@ public readonly struct ManualfacContext
   public AnalyzerConfigOptionsProvider Provider { get; }
   public Compilation Compilation { get; }
 
-  
+
   public ManualfacContext(
-    SourceProductionContext productionContext, 
-    AnalyzerConfigOptionsProvider provider, 
+    SourceProductionContext productionContext,
+    AnalyzerConfigOptionsProvider provider,
     Compilation compilation)
   {
     ProductionContext = productionContext;

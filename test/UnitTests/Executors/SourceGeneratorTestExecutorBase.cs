@@ -5,7 +5,7 @@ using TestCore;
 
 namespace UnitTests.Executors;
 
-internal abstract class SourceGeneratorTestExecutorBase<TGenerator> 
+internal abstract class SourceGeneratorTestExecutorBase<TGenerator>
   where TGenerator : IIncrementalGenerator, new()
 {
   private readonly string myTestName;
@@ -19,25 +19,25 @@ internal abstract class SourceGeneratorTestExecutorBase<TGenerator>
     myTestName = testName;
   }
 
-  
+
   public virtual void ExecuteTest()
   {
     var pathToSources = TestPaths.GetPathToSources(myTestName);
     var files = Directory.EnumerateFiles(pathToSources).Where(path => path.EndsWith(".cs"));
-    
+
     GeneratorDriver driver = CSharpGeneratorDriver.Create(new TGenerator());
     driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(files), out _, out _);
-    
+
     RunResult = driver.GetRunResult();
-    
+
     GeneratedFiles = RunResult.GeneratedTrees
       .Select(tree => tree.ToGeneratedFile())
       .ToDictionary(static file => file.Name, static file => file.Text);
   }
-  
+
   private static Compilation CreateCompilation(IEnumerable<string> files) =>
     CSharpCompilation.Create(
-      "compilation", 
+      "compilation",
       files.Select(File.ReadAllText).Select(text => CSharpSyntaxTree.ParseText(text)).ToArray(),
       CreateMetadataReferences(),
       new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));

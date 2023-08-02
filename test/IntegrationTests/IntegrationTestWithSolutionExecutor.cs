@@ -6,8 +6,8 @@ namespace GeneratorsTests;
 
 public class IntegrationTestWithSolutionExecutor
 {
-  private static readonly int ourTimeout = (int) TimeSpan.FromSeconds(10).TotalMilliseconds;
-  
+  private static readonly int ourTimeout = (int)TimeSpan.FromSeconds(10).TotalMilliseconds;
+
   private readonly string mySolutionDirectory;
 
 
@@ -16,7 +16,7 @@ public class IntegrationTestWithSolutionExecutor
     mySolutionDirectory = solutionDirectory;
   }
 
-  
+
   public void Execute()
   {
     DeleteGeneratedFolder();
@@ -54,7 +54,7 @@ public class IntegrationTestWithSolutionExecutor
     const string Manualfac = "Manualfac";
     const string GeneratorName = "ManualfacGenerator";
     const string GeneratorFolderName = $"Manualfac.Generators.{GeneratorName}";
-    
+
     return Path.Combine(objFolderPath, "obj", "Debug", "net7.0", "generated", Manualfac, GeneratorFolderName);
   }
 
@@ -82,7 +82,7 @@ public class IntegrationTestWithSolutionExecutor
   private static void LaunchDotnetProcess(string workingDirectory, string args)
   {
     const string Dotnet = "dotnet";
-    
+
     var process = new Process
     {
       StartInfo = new ProcessStartInfo
@@ -95,17 +95,14 @@ public class IntegrationTestWithSolutionExecutor
         RedirectStandardOutput = true
       }
     };
-    
+
     process.Start();
 
     var output = new StringBuilder();
-    process.OutputDataReceived += (_, eventArgs) =>
-    {
-      output.Append(eventArgs.Data);
-    };
-    
+    process.OutputDataReceived += (_, eventArgs) => { output.Append(eventArgs.Data); };
+
     process.BeginOutputReadLine();
-    
+
     if (!process.WaitForExit(ourTimeout))
     {
       process.Kill();

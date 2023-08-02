@@ -15,10 +15,10 @@ internal static class ExtensionsForINamedTypeSymbol
     var isCollectionOfComponents = symbol.IsGenericEnumerable();
     if (isCollectionOfComponents)
     {
-      symbol = (INamedTypeSymbol) symbol.TypeArguments.First();
+      symbol = (INamedTypeSymbol)symbol.TypeArguments.First();
       name = symbol.Name;
     }
-    
+
     name = symbol.TypeKind switch
     {
       TypeKind.Interface => name.Substring(1),
@@ -31,7 +31,7 @@ internal static class ExtensionsForINamedTypeSymbol
       false => name
     };
   }
-  
+
   public static bool IsGenericEnumerable(this INamedTypeSymbol symbol)
   {
     return symbol is { TypeKind: TypeKind.Interface, MetadataName: Constants.GenericIEnumerable };

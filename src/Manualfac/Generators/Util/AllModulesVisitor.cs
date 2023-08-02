@@ -8,7 +8,7 @@ public static class AllModulesVisitor
   {
     var modulesQueue = new Queue<IModuleSymbol>();
     var visited = new HashSet<IModuleSymbol>(SymbolEqualityComparer.Default);
-    
+
     modulesQueue.Enqueue(compilation.SourceModule);
 
     while (modulesQueue.Count != 0)

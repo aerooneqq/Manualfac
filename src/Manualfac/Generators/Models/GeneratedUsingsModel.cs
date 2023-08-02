@@ -7,7 +7,7 @@ internal class GeneratedUsingsModel : IGeneratedModel
 {
   private readonly IReadOnlyList<string> myUsings;
 
-  
+
   public GeneratedUsingsModel(IReadOnlyList<string> usings)
   {
     myUsings = usings;

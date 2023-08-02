@@ -8,9 +8,9 @@ public class CantResolveConcreteImplementationException : ManualfacGeneratorExce
   public override string Message { get; }
 
 
-  public CantResolveConcreteImplementationException(INamedTypeSymbol interfaceSymbol, IReadOnlyList<string> impls)
+  public CantResolveConcreteImplementationException(INamedTypeSymbol symbol, IReadOnlyList<string> impls)
   {
-    Debug.Assert(interfaceSymbol.TypeKind == TypeKind.Interface);
-    Message = $"Expected that {interfaceSymbol.Name} has one implementation, instead it has [{string.Join(",", impls)}]";
+    Debug.Assert(symbol.TypeKind == TypeKind.Interface);
+    Message = $"Expected that {symbol.Name} has one implementation, instead it has [{string.Join(",", impls)}]";
   }
 }

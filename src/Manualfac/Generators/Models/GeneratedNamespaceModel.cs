@@ -8,14 +8,14 @@ internal class GeneratedNamespaceModel : IGeneratedModel
   private readonly string? myNamespaceName;
   private readonly Action<StringBuilder, int> myNamespaceBodyGenerator;
 
-  
+
   public GeneratedNamespaceModel(string? namespaceName, Action<StringBuilder, int> namespaceBodyGenerator)
   {
     myNamespaceName = namespaceName;
     myNamespaceBodyGenerator = namespaceBodyGenerator;
   }
 
-  
+
   public void GenerateInto(StringBuilder sb, int indent)
   {
     OpenCloseStringBuilderOperation? namespaceCookie = null;

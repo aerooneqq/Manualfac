@@ -15,8 +15,8 @@ internal class ComponentAndNonComponentSymbols
     myComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
     myNotComponentsSymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
   }
-  
-  
+
+
   public bool CheckIfManualfacComponent(INamedTypeSymbol symbol)
   {
     if (myNotComponentsSymbols.Contains(symbol)) return false;

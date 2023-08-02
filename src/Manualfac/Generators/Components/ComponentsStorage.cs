@@ -18,20 +18,22 @@ internal class ComponentsStorage
 
   public IReadOnlyDictionary<IComponent, IComponent> BaseToOverrides => myOverridesCache.BaseToOverrides;
   public IReadOnlyList<IComponent> AllComponents => myCache.AllComponents;
-  public IReadOnlyDictionary<INamedTypeSymbol, List<IComponent>> InterfacesToComponents => myCache.InterfacesToComponents;
+
+  public IReadOnlyDictionary<INamedTypeSymbol, List<IComponent>> InterfacesToComponents =>
+    myCache.InterfacesToComponents;
 
 
   public ComponentsStorage(ManualfacSymbols symbols, Compilation compilation)
   {
     myManualfacSymbols = symbols;
     myCompilation = compilation;
-    
+
     mySymbolsCache = new ComponentAndNonComponentSymbols(myManualfacSymbols);
     myCache = new ComponentsCache(myManualfacSymbols);
     myOverridesCache = new OverridesCache();
   }
-  
-  
+
+
   public void FillComponents()
   {
     AllModulesVisitor.Visit(myCompilation, module =>
@@ -44,11 +46,11 @@ internal class ComponentsStorage
 
       return false;
     });
-    
+
     myCache.AdjustInterfaceImplementations(this.AdjustComponent);
     myCache.SortByBeforeAfterRelation();
   }
-  
+
   private IComponent ToComponentInfo(INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited)
   {
     if (myCache.TryGetExistingComponent(componentSymbol) is { } existingComponent) return existingComponent;
@@ -69,16 +71,16 @@ internal class ComponentsStorage
     {
       myOverridesCache.AddOverride(createdComponent, overridenComponent);
     }
-    
+
     myCache.UpdateExistingComponent(componentSymbol, createdComponent);
-    
+
     AddToInterfacesToImplementationsMap(createdComponent);
-    
+
     return createdComponent;
   }
 
   private IReadOnlyList<ComponentDependencyDescriptor> ExtractComponentsDependencies(
-    INamedTypeSymbol componentSymbol, 
+    INamedTypeSymbol componentSymbol,
     ISet<INamedTypeSymbol> visited)
   {
     var alreadyAddedDependencySymbols = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
@@ -153,7 +155,7 @@ internal class ComponentsStorage
   {
     var baseSymbols = symbol.GetAttributesTypeArguments(myManualfacSymbols.OverridesAttribute);
     if (baseSymbols.Count == 0) return null;
-    
+
     if (baseSymbols.Count != 1)
     {
       throw new TooManyOverridesException(symbol, baseSymbols);
@@ -184,7 +186,7 @@ internal class ComponentsStorage
   {
     return symbol.GetAttributesTypeArgumentsByLevels(myManualfacSymbols.DependsOnAttributeBase);
   }
-  
+
   private AccessModifier ExtractAccessModifierOrDefault(IReadOnlyList<ITypeSymbol> dependencyAttributeTypeArgs)
   {
     Debug.Assert(dependencyAttributeTypeArgs.Count > 1);
@@ -211,7 +213,7 @@ internal static class ComponentsStorageExtensions
     {
       current = @override;
     }
-    
+
     return current;
   }
 }

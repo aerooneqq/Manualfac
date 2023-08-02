@@ -6,7 +6,7 @@ public class FailedToFindManualfacAttributesModuleException : ManualfacGenerator
 {
   public override string Message { get; }
 
-  
+
   public FailedToFindManualfacAttributesModuleException(Compilation compilation)
   {
     Message = $"Failed to find ManualfacAttributes in {compilation.AssemblyName}";

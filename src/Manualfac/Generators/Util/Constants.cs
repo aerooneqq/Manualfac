@@ -12,7 +12,7 @@ internal static class Constants
   public const string DependsOnAttributeBase = "DependsOnAttributeBase";
   public const string AfterAttributeBase = "AfterAttributeBase";
   public const string BeforeAttributeBase = "BeforeAttributeBase";
-  
+
   public const string ManualfacAttributeFullName = $"{ManualfacAttributes}.{ManualfacAttribute}";
   public const string GenerateResolverAttributeFullName = $"{ManualfacAttributes}.{GenerateResolverAttribute}";
   public const string ComponentAttributeFullName = $"{ManualfacAttributes}.{ComponentAttribute}";
@@ -23,7 +23,7 @@ internal static class Constants
   public const string BeforeAttributeBaseFullName = $"{ManualfacAttributes}.{BeforeAttributeBase}";
 
   public const string ManualfacAttributes = "ManualfacAttributes";
-  
+
   public const string GenericIEnumerable = "IEnumerable`1";
 
   public const string ResolveMethod = "Resolve";

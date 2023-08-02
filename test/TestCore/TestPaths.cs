@@ -36,11 +36,11 @@ public static class TestPaths
 
     return path;
   }
-  
+
   public static string GetPathToGoldDirFor(string sourceName)
   {
     var path = Path.Combine(GetTestDataPath(), "gold", sourceName);
-    
+
     if (!Directory.Exists(path))
     {
       Directory.CreateDirectory(path);
