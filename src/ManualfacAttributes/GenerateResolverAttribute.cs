@@ -1,5 +1,3 @@
 namespace ManualfacAttributes;
 
-public sealed class GenerateResolverAttribute : ManualfacAttribute
-{
-}
+public sealed class GenerateResolverAttribute : ManualfacAttribute;

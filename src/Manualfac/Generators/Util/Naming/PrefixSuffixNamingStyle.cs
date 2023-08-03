@@ -1,20 +1,9 @@
 namespace Manualfac.Generators.Util.Naming;
 
-public class PrefixSuffixNamingStyle : NamingStyle
+public class PrefixSuffixNamingStyle(string prefix, string suffix) : NamingStyle
 {
-  private readonly string myPrefix;
-  private readonly string mySuffix;
-
-
-  public PrefixSuffixNamingStyle(string prefix, string suffix)
-  {
-    myPrefix = prefix;
-    mySuffix = suffix;
-  }
-
-
   public override string ApplyNamingStyleTo(string originalFieldName)
   {
-    return myPrefix + originalFieldName + mySuffix;
+    return prefix + originalFieldName + suffix;
   }
 }

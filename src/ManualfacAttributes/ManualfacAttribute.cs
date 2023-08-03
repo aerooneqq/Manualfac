@@ -3,6 +3,4 @@
 namespace ManualfacAttributes;
 
 [MeansImplicitUse]
-public abstract class ManualfacAttribute : Attribute
-{
-}
+public abstract class ManualfacAttribute : Attribute;

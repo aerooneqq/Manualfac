@@ -3,16 +3,10 @@ using TestCore;
 
 namespace UnitTests.Executors;
 
-internal class SourceGeneratorsTestExecutor<TGenerator> : SourceGeneratorTestExecutorBase<TGenerator>
-  where TGenerator : IIncrementalGenerator, new()
+internal class SourceGeneratorsTestExecutor<TGenerator>(string testName) 
+  : SourceGeneratorTestExecutorBase<TGenerator>(testName) where TGenerator : IIncrementalGenerator, new()
 {
-  private readonly string myPathToGoldDirFor;
-
-
-  public SourceGeneratorsTestExecutor(string testName) : base(testName)
-  {
-    myPathToGoldDirFor = TestPaths.GetPathToGoldDirFor(testName);
-  }
+  private readonly string myPathToGoldDirFor = TestPaths.GetPathToGoldDirFor(testName);
 
 
   public override void ExecuteTest()

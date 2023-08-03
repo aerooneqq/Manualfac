@@ -3,15 +3,10 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Exceptions.BeforeAfterRelation;
 
-public class ReferenceToOtherInterfaceComponentException : ManualfacGeneratorException
-{
-  public override string Message { get; }
-
-  
-  public ReferenceToOtherInterfaceComponentException(
+public class ReferenceToOtherInterfaceComponentException(
     INamedTypeSymbol interfaceSymbol, INamedTypeSymbol component, INamedTypeSymbol reference)
-  {
-    Message = $"{component.GetFullName()} (impl of {interfaceSymbol.GetFullName()}) " +
-              $"can not reference {reference.GetFullName()} in before-after relation";
-  }
+  : ManualfacGeneratorException
+{
+  public override string Message { get; } = $"{ExtensionsForINamedTypeSymbol.GetFullName(component)} (impl of {ExtensionsForINamedTypeSymbol.GetFullName(interfaceSymbol)}) " +
+                                            $"can not reference {ExtensionsForINamedTypeSymbol.GetFullName(reference)} in before-after relation";
 }

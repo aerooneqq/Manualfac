@@ -2,17 +2,10 @@ using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Components.Dependencies;
 
-internal class ComponentDependencyDescriptor
+internal class ComponentDependencyDescriptor(IComponentDependency dependency, AccessModifier modifier)
 {
-  public IComponentDependency Dependency { get; }
-  public AccessModifier Modifier { get; }
-
-
-  public ComponentDependencyDescriptor(IComponentDependency dependency, AccessModifier modifier)
-  {
-    Dependency = dependency;
-    Modifier = modifier;
-  }
+  public IComponentDependency Dependency { get; } = dependency;
+  public AccessModifier Modifier { get; } = modifier;
 
 
   public void Deconstruct(out IComponentDependency dependency, out AccessModifier modifier)

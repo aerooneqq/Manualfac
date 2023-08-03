@@ -3,32 +3,22 @@ using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Models;
 
-internal class GeneratedNamespaceModel : IGeneratedModel
+internal class GeneratedNamespaceModel(string? namespaceName, Action<StringBuilder, int> namespaceBodyGenerator)
+  : IGeneratedModel
 {
-  private readonly string? myNamespaceName;
-  private readonly Action<StringBuilder, int> myNamespaceBodyGenerator;
-
-
-  public GeneratedNamespaceModel(string? namespaceName, Action<StringBuilder, int> namespaceBodyGenerator)
-  {
-    myNamespaceName = namespaceName;
-    myNamespaceBodyGenerator = namespaceBodyGenerator;
-  }
-
-
   public void GenerateInto(StringBuilder sb, int indent)
   {
     OpenCloseStringBuilderOperation? namespaceCookie = null;
 
     try
     {
-      if (myNamespaceName is { } && !string.IsNullOrWhiteSpace(myNamespaceName))
+      if (namespaceName is { } && !string.IsNullOrWhiteSpace(namespaceName))
       {
-        sb.Append("namespace").AppendSpace().Append(myNamespaceName).AppendSpace().AppendNewLine();
+        sb.Append("namespace").AppendSpace().Append(namespaceName).AppendSpace().AppendNewLine();
         namespaceCookie = StringBuilderCookies.CurlyBraces(sb, indent);
       }
 
-      myNamespaceBodyGenerator(sb, namespaceCookie?.Indent ?? indent);
+      namespaceBodyGenerator(sb, namespaceCookie?.Indent ?? indent);
     }
     finally
     {

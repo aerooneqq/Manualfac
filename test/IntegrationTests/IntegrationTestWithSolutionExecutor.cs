@@ -4,17 +4,9 @@ using TestCore;
 
 namespace GeneratorsTests;
 
-public class IntegrationTestWithSolutionExecutor
+public class IntegrationTestWithSolutionExecutor(string solutionDirectory)
 {
   private static readonly int ourTimeout = (int)TimeSpan.FromSeconds(10).TotalMilliseconds;
-
-  private readonly string mySolutionDirectory;
-
-
-  public IntegrationTestWithSolutionExecutor(string solutionDirectory)
-  {
-    mySolutionDirectory = solutionDirectory;
-  }
 
 
   public void Execute()
@@ -27,7 +19,7 @@ public class IntegrationTestWithSolutionExecutor
 
   private void CompareGoldAndTestValue()
   {
-    var solutionName = Path.GetFileNameWithoutExtension(mySolutionDirectory);
+    var solutionName = Path.GetFileNameWithoutExtension(solutionDirectory);
     foreach (var (projectName, genSourcesFolderPath) in FindObjPaths())
     {
       Assert.That(Directory.Exists(genSourcesFolderPath));
@@ -39,7 +31,7 @@ public class IntegrationTestWithSolutionExecutor
   }
 
   private IEnumerable<(string ProjectName, string GenSourcesFolderPath)> FindObjPaths() =>
-    Directory.EnumerateFiles(mySolutionDirectory, "*.csproj", SearchOption.AllDirectories)
+    Directory.EnumerateFiles(solutionDirectory, "*.csproj", SearchOption.AllDirectories)
       .Select(path =>
       {
         var projectName = Path.GetFileNameWithoutExtension(path);
@@ -76,8 +68,8 @@ public class IntegrationTestWithSolutionExecutor
     }
   }
 
-  private void DotnetClean() => LaunchDotnetProcess(mySolutionDirectory, "clean");
-  private void DotnetRebuild() => LaunchDotnetProcess(mySolutionDirectory, "build --no-incremental");
+  private void DotnetClean() => LaunchDotnetProcess(solutionDirectory, "clean");
+  private void DotnetRebuild() => LaunchDotnetProcess(solutionDirectory, "build --no-incremental");
 
   private static void LaunchDotnetProcess(string workingDirectory, string args)
   {

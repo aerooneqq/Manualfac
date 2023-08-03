@@ -1,5 +1,3 @@
 namespace ManualfacAttributes;
 
-public class ComponentAttribute : ManualfacAttribute
-{
-}
+public class ComponentAttribute : ManualfacAttribute;

@@ -2,19 +2,10 @@
 
 namespace Manualfac.Generators.Components.Dependencies;
 
-internal class ConcreteComponentDependency : IComponentDependency
+internal class ConcreteComponentDependency(IComponent component) : IComponentDependency
 {
-  private readonly IComponent myComponent;
+  public INamedTypeSymbol DependencyTypeSymbol => component.Symbol;
 
 
-  public INamedTypeSymbol DependencyTypeSymbol => myComponent.Symbol;
-
-
-  public ConcreteComponentDependency(IComponent component)
-  {
-    myComponent = component;
-  }
-
-
-  public IReadOnlyList<IComponent> ResolveUnderlyingConcreteComponents() => new[] { myComponent };
+  public IReadOnlyList<IComponent> ResolveUnderlyingConcreteComponents() => new[] { component };
 }

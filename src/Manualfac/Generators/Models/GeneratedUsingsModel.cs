@@ -3,20 +3,11 @@ using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Models;
 
-internal class GeneratedUsingsModel : IGeneratedModel
+internal class GeneratedUsingsModel(IReadOnlyList<string> usings) : IGeneratedModel
 {
-  private readonly IReadOnlyList<string> myUsings;
-
-
-  public GeneratedUsingsModel(IReadOnlyList<string> usings)
-  {
-    myUsings = usings;
-  }
-
-
   public void GenerateInto(StringBuilder sb, int indent)
   {
-    foreach (var usingToAdd in myUsings)
+    foreach (var usingToAdd in usings)
     {
       sb.Append("using ").Append(usingToAdd).AppendSemicolon().AppendNewLine();
     }

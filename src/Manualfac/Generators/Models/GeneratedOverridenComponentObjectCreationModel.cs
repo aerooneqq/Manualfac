@@ -4,14 +4,9 @@ using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Models;
 
-internal class GeneratedOverridenComponentObjectCreationModel : IGeneratedModel
+internal class GeneratedOverridenComponentObjectCreationModel(IComponent overrideComponent) : IGeneratedModel
 {
-  private readonly string myContainerResolveExpression;
-
-  public GeneratedOverridenComponentObjectCreationModel(IComponent overrideComponent)
-  {
-    myContainerResolveExpression = overrideComponent.CreateContainerResolveExpression();
-  }
+  private readonly string myContainerResolveExpression = overrideComponent.CreateContainerResolveExpression();
 
 
   public void GenerateInto(StringBuilder sb, int indent)

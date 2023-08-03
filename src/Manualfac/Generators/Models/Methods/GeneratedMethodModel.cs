@@ -3,19 +3,7 @@ using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Models.Methods;
 
-internal class GeneratedMethodModel : IGeneratedModel
-{
-  private readonly string myName;
-  private readonly string myReturnTypeName;
-  private readonly Action<StringBuilder, int> myBodyGenerator;
-  private readonly IReadOnlyList<GeneratedParameterModel> myParameters;
-  private readonly IReadOnlyList<string> myTypeParameters;
-  private readonly AccessModifier myModifier;
-  private readonly bool myIsStatic;
-  private readonly bool myIsPartial;
-
-
-  public GeneratedMethodModel(
+internal class GeneratedMethodModel(
     string name,
     IReadOnlyList<string> typeParameters,
     string returnTypeName,
@@ -23,37 +11,27 @@ internal class GeneratedMethodModel : IGeneratedModel
     IReadOnlyList<GeneratedParameterModel> parameters,
     AccessModifier modifier = AccessModifier.Public,
     bool isStatic = false,
-    bool isPartial = false)
-  {
-    myName = name;
-    myReturnTypeName = returnTypeName;
-    myBodyGenerator = bodyGenerator;
-    myParameters = parameters;
-    myTypeParameters = typeParameters;
-    myModifier = modifier;
-    myIsStatic = isStatic;
-    myIsPartial = isPartial;
-  }
-
-
+    bool isPartial = false
+) : IGeneratedModel
+{
   public void GenerateInto(StringBuilder sb, int indent)
   {
-    sb.AppendIndent(indent).Append(myModifier.CreateModifierString()).AppendSpace();
+    sb.AppendIndent(indent).Append(modifier.CreateModifierString()).AppendSpace();
 
-    if (myIsStatic) sb.Append("static").AppendSpace();
-    if (myIsPartial) sb.Append("partial").AppendSpace();
+    if (isStatic) sb.Append("static").AppendSpace();
+    if (isPartial) sb.Append("partial").AppendSpace();
 
-    sb.Append(myReturnTypeName).AppendSpace().Append(myName);
+    sb.Append(returnTypeName).AppendSpace().Append(name);
 
-    if (myTypeParameters is { Count: > 0 })
+    if (typeParameters is { Count: > 0 })
     {
       sb.Append('<');
-      foreach (var genericParameter in myTypeParameters)
+      foreach (var genericParameter in typeParameters)
       {
         sb.Append(genericParameter).AppendComma();
       }
 
-      if (myTypeParameters.Count > 0)
+      if (typeParameters.Count > 0)
       {
         //remove last comma
         sb.Remove(sb.Length - 1, 1);
@@ -64,13 +42,13 @@ internal class GeneratedMethodModel : IGeneratedModel
 
     using (var bracesCookie = StringBuilderCookies.DefaultBraces(sb, indent, appendEndIndent: true))
     {
-      foreach (var parameterModel in myParameters)
+      foreach (var parameterModel in parameters)
       {
         parameterModel.GenerateInto(sb, bracesCookie.Indent);
         sb.AppendComma().AppendSpace();
       }
 
-      if (myParameters.Count > 0)
+      if (parameters.Count > 0)
       {
         //remove last space and comma
         sb.Remove(sb.Length - 2, 2);
@@ -79,6 +57,6 @@ internal class GeneratedMethodModel : IGeneratedModel
 
     sb.AppendNewLine();
     using var cookie = StringBuilderCookies.CurlyBraces(sb, indent);
-    myBodyGenerator(sb, cookie.Indent);
+    bodyGenerator(sb, cookie.Indent);
   }
 }

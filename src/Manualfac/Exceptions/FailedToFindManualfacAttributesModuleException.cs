@@ -2,13 +2,7 @@
 
 namespace Manualfac.Exceptions;
 
-public class FailedToFindManualfacAttributesModuleException : ManualfacGeneratorException
+public class FailedToFindManualfacAttributesModuleException(Compilation compilation) : ManualfacGeneratorException
 {
-  public override string Message { get; }
-
-
-  public FailedToFindManualfacAttributesModuleException(Compilation compilation)
-  {
-    Message = $"Failed to find ManualfacAttributes in {compilation.AssemblyName}";
-  }
+  public override string Message { get; } = $"Failed to find ManualfacAttributes in {compilation.AssemblyName}";
 }

@@ -3,55 +3,38 @@ using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Models.Fields;
 
-internal class GeneratedFieldModel : IGeneratedModel
-{
-  private readonly AccessModifier myAccessModifier;
-  private readonly bool myReadonly;
-  private readonly bool myIsStatic;
-  private readonly string? myDefaultValue;
-
-
-  public string TypeName { get; }
-  public string Name { get; }
-
-
-  public GeneratedFieldModel(
+internal class GeneratedFieldModel(
     string typeName,
     string fieldName,
     AccessModifier accessModifier = AccessModifier.Private,
     bool @readonly = true,
     bool isStatic = false,
-    string? defaultValue = null)
-  {
-    TypeName = typeName;
-    Name = fieldName;
-
-    myAccessModifier = accessModifier;
-    myReadonly = @readonly;
-    myIsStatic = isStatic;
-    myDefaultValue = defaultValue;
-  }
+    string? defaultValue = null
+) : IGeneratedModel
+{
+  public string TypeName { get; } = typeName;
+  public string Name { get; } = fieldName;
 
 
   public void GenerateInto(StringBuilder sb, int indent)
   {
-    sb.AppendIndent(indent).Append(myAccessModifier.CreateModifierString()).AppendSpace();
+    sb.AppendIndent(indent).Append(accessModifier.CreateModifierString()).AppendSpace();
 
-    if (myIsStatic)
+    if (isStatic)
     {
       sb.Append("static").AppendSpace();
     }
 
-    if (myReadonly)
+    if (@readonly)
     {
       sb.Append("readonly").AppendSpace();
     }
 
     sb.Append(TypeName).AppendSpace().Append(Name);
 
-    if (myDefaultValue is { })
+    if (defaultValue is { })
     {
-      sb.AppendSpace().AppendEq().AppendSpace().Append(myDefaultValue);
+      sb.AppendSpace().AppendEq().AppendSpace().Append(defaultValue);
     }
 
     sb.AppendSemicolon().AppendNewLine();

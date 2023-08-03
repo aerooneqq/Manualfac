@@ -6,26 +6,15 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Generators.Components.Caches;
 
-internal class ComponentsCache
+internal class ComponentsCache(ManualfacSymbols manualfacSymbols)
 {
-  private readonly Dictionary<INamedTypeSymbol, IComponent> myCache;
-  private readonly List<IComponent> myAllComponents;
-  private readonly Dictionary<INamedTypeSymbol, List<IComponent>> myInterfacesToComponents;
-  private readonly ManualfacSymbols myManualfacSymbols;
+  private readonly Dictionary<INamedTypeSymbol, IComponent> myCache = new(SymbolEqualityComparer.Default);
+  private readonly List<IComponent> myAllComponents = new();
+  private readonly Dictionary<INamedTypeSymbol, List<IComponent>> myInterfacesToComponents = new(SymbolEqualityComparer.Default);
 
 
   public IReadOnlyList<IComponent> AllComponents => myAllComponents;
   public IReadOnlyDictionary<INamedTypeSymbol, List<IComponent>> InterfacesToComponents => myInterfacesToComponents;
-
-
-  public ComponentsCache(ManualfacSymbols manualfacSymbols)
-  {
-    myManualfacSymbols = manualfacSymbols;
-
-    myCache = new Dictionary<INamedTypeSymbol, IComponent>(SymbolEqualityComparer.Default);
-    myAllComponents = new List<IComponent>();
-    myInterfacesToComponents = new Dictionary<INamedTypeSymbol, List<IComponent>>(SymbolEqualityComparer.Default);
-  }
 
 
   public IComponent? TryGetExistingComponent(INamedTypeSymbol symbol)
@@ -70,8 +59,8 @@ internal class ComponentsCache
 
       foreach (var component in originalImpls)
       {
-        var afterTypes = component.Symbol.GetAttributesTypeArguments(myManualfacSymbols.AfterAttributeBase);
-        var beforeTypes = component.Symbol.GetAttributesTypeArguments(myManualfacSymbols.BeforeAttributeBase);
+        var afterTypes = component.Symbol.GetAttributesTypeArguments(manualfacSymbols.AfterAttributeBase);
+        var beforeTypes = component.Symbol.GetAttributesTypeArguments(manualfacSymbols.BeforeAttributeBase);
 
         foreach (var afterType in afterTypes)
         {

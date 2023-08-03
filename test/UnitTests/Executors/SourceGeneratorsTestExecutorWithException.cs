@@ -2,16 +2,10 @@ using Microsoft.CodeAnalysis;
 
 namespace UnitTests.Executors;
 
-internal class
-  SourceGeneratorsTestExecutorWithException<TGenerator, TException> : SourceGeneratorTestExecutorBase<TGenerator>
+internal class SourceGeneratorsTestExecutorWithException<TGenerator, TException>(string testName) : SourceGeneratorTestExecutorBase<TGenerator>(testName)
   where TGenerator : IIncrementalGenerator, new()
   where TException : Exception
 {
-  public SourceGeneratorsTestExecutorWithException(string testName) : base(testName)
-  {
-  }
-
-
   public override void ExecuteTest()
   {
     base.ExecuteTest();

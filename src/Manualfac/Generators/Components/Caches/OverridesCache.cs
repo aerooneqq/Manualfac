@@ -2,16 +2,10 @@
 
 internal class OverridesCache
 {
-  private readonly Dictionary<IComponent, IComponent> myBaseToOverrides;
+  private readonly Dictionary<IComponent, IComponent> myBaseToOverrides = new();
 
 
   public IReadOnlyDictionary<IComponent, IComponent> BaseToOverrides => myBaseToOverrides;
-
-
-  public OverridesCache()
-  {
-    myBaseToOverrides = new Dictionary<IComponent, IComponent>();
-  }
 
 
   public void AddOverride(IComponent overrideComponent, IComponent baseComponent)

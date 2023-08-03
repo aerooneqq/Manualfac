@@ -5,24 +5,16 @@ using TestCore;
 
 namespace UnitTests.Executors;
 
-internal abstract class SourceGeneratorTestExecutorBase<TGenerator>
+internal abstract class SourceGeneratorTestExecutorBase<TGenerator>(string testName)
   where TGenerator : IIncrementalGenerator, new()
 {
-  private readonly string myTestName;
-
   protected Dictionary<string, string>? GeneratedFiles;
   protected GeneratorDriverRunResult? RunResult;
 
 
-  protected SourceGeneratorTestExecutorBase(string testName)
-  {
-    myTestName = testName;
-  }
-
-
   public virtual void ExecuteTest()
   {
-    var pathToSources = TestPaths.GetPathToSources(myTestName);
+    var pathToSources = TestPaths.GetPathToSources(testName);
     var files = Directory.EnumerateFiles(pathToSources).Where(path => path.EndsWith(".cs"));
 
     GeneratorDriver driver = CSharpGeneratorDriver.Create(new TGenerator());

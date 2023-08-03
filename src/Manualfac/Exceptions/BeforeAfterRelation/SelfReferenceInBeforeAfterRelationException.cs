@@ -3,13 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Exceptions.BeforeAfterRelation;
 
-public class SelfReferenceInBeforeAfterRelationException : ManualfacGeneratorException
+public class SelfReferenceInBeforeAfterRelationException(INamedTypeSymbol componentSymbol) : ManualfacGeneratorException
 {
-  public override string Message { get; }
-
-
-  public SelfReferenceInBeforeAfterRelationException(INamedTypeSymbol componentSymbol)
-  {
-    Message = $"{componentSymbol.GetFullName()} can not reference itself in before-after relation";
-  }
+  public override string Message { get; } = $"{ExtensionsForINamedTypeSymbol.GetFullName(componentSymbol)} can not reference itself in before-after relation";
 }

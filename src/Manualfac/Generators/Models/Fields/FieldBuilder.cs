@@ -2,22 +2,12 @@ using Manualfac.Generators.Util;
 
 namespace Manualfac.Generators.Models.Fields;
 
-internal class FieldBuilder
+internal class FieldBuilder(string typeName, string fieldName)
 {
-  private readonly string myTypeName;
-  private readonly string myFieldName;
-
   private bool myIsStatic;
   private bool myReadonly;
   private string? myInitialization;
   private AccessModifier myAccessModifier = AccessModifier.Private;
-
-
-  public FieldBuilder(string typeName, string fieldName)
-  {
-    myTypeName = typeName;
-    myFieldName = fieldName;
-  }
 
 
   public FieldBuilder Static(bool isStatic)
@@ -50,6 +40,6 @@ internal class FieldBuilder
 
   public GeneratedFieldModel Build()
   {
-    return new GeneratedFieldModel(myTypeName, myFieldName, myAccessModifier, myReadonly, myIsStatic, myInitialization);
+    return new GeneratedFieldModel(typeName, fieldName, myAccessModifier, myReadonly, myIsStatic, myInitialization);
   }
 }

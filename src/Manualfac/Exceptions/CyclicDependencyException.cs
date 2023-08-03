@@ -1,5 +1,3 @@
 ﻿namespace Manualfac.Exceptions;
 
-public class CyclicDependencyException : ManualfacGeneratorException
-{
-}
+public class CyclicDependencyException : ManualfacGeneratorException;
