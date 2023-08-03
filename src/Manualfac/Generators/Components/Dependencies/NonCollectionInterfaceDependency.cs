@@ -6,10 +6,7 @@ namespace Manualfac.Generators.Components.Dependencies;
 internal class NonCollectionInterfaceDependency : IComponentDependency
 {
   private readonly ComponentsStorage myStorage;
-
-
-  private bool myIsInitialized;
-  private IReadOnlyList<IComponent> myResolveResult = null!;
+  private readonly Lazy<IReadOnlyList<IComponent>> myResolveResult;
 
 
   public INamedTypeSymbol DependencyTypeSymbol { get; }
@@ -19,19 +16,17 @@ internal class NonCollectionInterfaceDependency : IComponentDependency
   {
     DependencyTypeSymbol = interfaceSymbol;
     myStorage = storage;
+    myResolveResult = new Lazy<IReadOnlyList<IComponent>>(InitializeOrThrow);
   }
 
 
   public IReadOnlyList<IComponent> ResolveUnderlyingConcreteComponents()
   {
-    InitializeIfNeededOrThrow();
-    return myResolveResult;
+    return myResolveResult.Value;
   }
 
-  private void InitializeIfNeededOrThrow()
+  private IReadOnlyList<IComponent> InitializeOrThrow()
   {
-    if (myIsInitialized) return;
-
     if (!myStorage.InterfacesToComponents.TryGetValue(DependencyTypeSymbol, out var impls))
     {
       throw new NoImplementationForInterfaceException(DependencyTypeSymbol);
@@ -39,11 +34,10 @@ internal class NonCollectionInterfaceDependency : IComponentDependency
 
     if (impls.Count != 1)
     {
-      throw new CantResolveConcreteImplementationException(DependencyTypeSymbol,
-        impls.Select(impl => impl.FullName).ToList());
+      throw new CantResolveConcreteImplementationException(
+        DependencyTypeSymbol, impls.Select(impl => impl.FullName).ToList());
     }
 
-    myResolveResult = new[] { impls[0] };
-    myIsInitialized = true;
+    return new[] { impls[0] };
   }
 }

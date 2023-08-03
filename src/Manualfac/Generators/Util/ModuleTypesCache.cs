@@ -5,38 +5,33 @@ namespace Manualfac.Generators.Util;
 public class ModuleTypesCache
 {
   private readonly IModuleSymbol myModuleSymbol;
-  private readonly Dictionary<string, INamedTypeSymbol> myNamesToTypes;
-
-  private bool myIsInitialized;
+  private readonly Lazy<Dictionary<string, INamedTypeSymbol>> myNamesToTypes;
 
 
   public ModuleTypesCache(IModuleSymbol moduleSymbol)
   {
-    myNamesToTypes = new Dictionary<string, INamedTypeSymbol>();
+    myNamesToTypes = new Lazy<Dictionary<string, INamedTypeSymbol>>(InitializeNamesToTypes);
     myModuleSymbol = moduleSymbol;
   }
 
 
   public INamedTypeSymbol? TryGet(string name)
   {
-    InitializeIfNeeded();
-
-    return myNamesToTypes.TryGetValue(name, out var type) switch
+    return myNamesToTypes.Value.TryGetValue(name, out var type) switch
     {
       true => type,
       false => null
     };
   }
 
-  private void InitializeIfNeeded()
+  private Dictionary<string, INamedTypeSymbol> InitializeNamesToTypes()
   {
-    if (myIsInitialized) return;
-
+    var namesToTypes = new Dictionary<string, INamedTypeSymbol>();
     foreach (var type in myModuleSymbol.GetTypes())
     {
-      myNamesToTypes[type.GetFullName()] = type;
+      namesToTypes[type.GetFullName()] = type;
     }
 
-    myIsInitialized = true;
+    return namesToTypes;
   }
 }
