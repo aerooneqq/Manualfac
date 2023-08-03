@@ -12,6 +12,7 @@ internal static class ModuleExtensions
   private static IEnumerable<INamespaceSymbol> GetAllNamespacesFrom(INamespaceSymbol namespaceSymbol)
   {
     yield return namespaceSymbol;
+
     foreach (var childNamespace in namespaceSymbol.GetNamespaceMembers())
     {
       foreach (var nextNamespace in GetAllNamespacesFrom(childNamespace))

@@ -58,14 +58,14 @@ public class ManualfacGenerator : IIncrementalGenerator
       {
         continue;
       }
-      
+
       var sb = new StringBuilder();
       component.ToGeneratedFileModel(namingStyle).GenerateInto(sb, 0);
 
       context.ProductionContext.AddSource($"{component.TypeShortName}.g", sb.ToString());
     }
   }
-  
+
   private static bool ShouldGenerateContainerOrDepsParts(IAssemblySymbol assembly, ManualfacContext context)
   {
     return SymbolEqualityComparer.Default.Equals(assembly, context.Compilation.Assembly);

@@ -6,7 +6,7 @@ namespace GeneratorsTests;
 
 public class IntegrationTestWithSolutionExecutor(string solutionDirectory)
 {
-  private static readonly int ourTimeout = (int)TimeSpan.FromSeconds(10).TotalMilliseconds;
+  private static readonly int ourTimeout = (int) TimeSpan.FromSeconds(10).TotalMilliseconds;
 
 
   public void Execute()
@@ -37,6 +37,7 @@ public class IntegrationTestWithSolutionExecutor(string solutionDirectory)
         var projectName = Path.GetFileNameWithoutExtension(path);
         var dirName = Path.GetDirectoryName(path);
         Assert.That(dirName, Is.Not.Null);
+
         return (ProjectName: projectName, ObjFolderPath: dirName!);
       })
       .Select(tuple => (tuple.ProjectName, CreatePathToGenDirectory(tuple.ObjFolderPath)));
@@ -99,6 +100,7 @@ public class IntegrationTestWithSolutionExecutor(string solutionDirectory)
     {
       process.Kill();
       Assert.Fail($"Process {CreateProcessName()} timeoutted");
+
       return;
     }
 

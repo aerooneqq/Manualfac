@@ -3,7 +3,7 @@ using TestCore;
 
 namespace UnitTests.Executors;
 
-internal class SourceGeneratorsTestExecutor<TGenerator>(string testName) 
+internal class SourceGeneratorsTestExecutor<TGenerator>(string testName)
   : SourceGeneratorTestExecutorBase<TGenerator>(testName) where TGenerator : IIncrementalGenerator, new()
 {
   private readonly string myPathToGoldDirFor = TestPaths.GetPathToGoldDirFor(testName);

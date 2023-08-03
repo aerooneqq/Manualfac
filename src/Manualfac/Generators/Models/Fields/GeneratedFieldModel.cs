@@ -4,12 +4,12 @@ using Manualfac.Generators.Util;
 namespace Manualfac.Generators.Models.Fields;
 
 internal class GeneratedFieldModel(
-    string typeName,
-    string fieldName,
-    AccessModifier accessModifier = AccessModifier.Private,
-    bool @readonly = true,
-    bool isStatic = false,
-    string? defaultValue = null
+  string typeName,
+  string fieldName,
+  AccessModifier accessModifier = AccessModifier.Private,
+  bool @readonly = true,
+  bool isStatic = false,
+  string? defaultValue = null
 ) : IGeneratedModel
 {
   public string TypeName { get; } = typeName;

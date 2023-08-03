@@ -5,10 +5,10 @@ using Manualfac.Generators.Util;
 namespace Manualfac.Generators.Models;
 
 internal class GeneratedConstructorModel(
-    string containingTypeName,
-    IReadOnlyList<GeneratedFieldModel> constructorParameters,
-    IReadOnlyList<GeneratedFieldModel> fieldsToInitialize,
-    GeneratedBaseConstructorModel? baseConstructorModel = null
+  string containingTypeName,
+  IReadOnlyList<GeneratedFieldModel> constructorParameters,
+  IReadOnlyList<GeneratedFieldModel> fieldsToInitialize,
+  GeneratedBaseConstructorModel? baseConstructorModel = null
 ) : IGeneratedModel
 {
   public void GenerateInto(StringBuilder sb, int indent)

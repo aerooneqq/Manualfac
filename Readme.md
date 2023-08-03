@@ -33,7 +33,7 @@ Features:
   {
   }
   ```
-  
+
 - Specify ordering of dependencies with Before and After attributes:
   ```csharp
   [Component, Before<Class6, Class7>, After<Class8>]

@@ -12,12 +12,13 @@ internal static class ExtensionsForINamedTypeSymbol
   public static string GetAssociatedFieldNameBase(this INamedTypeSymbol symbol)
   {
     var name = symbol.Name;
+
     if (name.Length == 1) return name;
 
     var isCollectionOfComponents = symbol.IsGenericEnumerable();
     if (isCollectionOfComponents)
     {
-      symbol = (INamedTypeSymbol)symbol.TypeArguments.First();
+      symbol = (INamedTypeSymbol) symbol.TypeArguments.First();
       name = symbol.Name;
     }
 
@@ -54,12 +55,12 @@ internal static class ExtensionsForINamedTypeSymbol
 
     return false;
   }
-  
+
   public static bool CheckIfPartialClass(this INamedTypeSymbol typeSymbol)
   {
     if (typeSymbol.DeclaringSyntaxReferences.Length > 1) return true;
 
-    var classDeclaration = (ClassDeclarationSyntax)typeSymbol.DeclaringSyntaxReferences[0].GetSyntax();
+    var classDeclaration = (ClassDeclarationSyntax) typeSymbol.DeclaringSyntaxReferences[0].GetSyntax();
 
     return classDeclaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword));
   }

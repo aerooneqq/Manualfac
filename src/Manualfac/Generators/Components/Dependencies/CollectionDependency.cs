@@ -22,7 +22,7 @@ internal class CollectionDependency : IComponentDependency
     Debug.Assert(collectionInterface.TypeArguments.Length == 1);
     Debug.Assert(collectionInterface.MetadataName == Constants.GenericIEnumerable);
 
-    CollectionItemInterface = (INamedTypeSymbol)collectionInterface.TypeArguments.First();
+    CollectionItemInterface = (INamedTypeSymbol) collectionInterface.TypeArguments.First();
 
     Debug.Assert(CollectionItemInterface.TypeKind == TypeKind.Interface);
   }

@@ -6,12 +6,12 @@ using Manualfac.Generators.Util;
 namespace Manualfac.Generators.Models;
 
 internal class GeneratedClassModel(
-    string name,
-    IReadOnlyList<GeneratedConstructorModel> constructors,
-    IReadOnlyList<GeneratedFieldModel> fields,
-    IReadOnlyList<GeneratedMethodModel> methods,
-    GeneratedClassAccessModifier modifier = GeneratedClassAccessModifier.Public,
-    string? baseClass = null
+  string name,
+  IReadOnlyList<GeneratedConstructorModel> constructors,
+  IReadOnlyList<GeneratedFieldModel> fields,
+  IReadOnlyList<GeneratedMethodModel> methods,
+  GeneratedClassAccessModifier modifier = GeneratedClassAccessModifier.Public,
+  string? baseClass = null
 ) : IGeneratedModel
 {
   public void GenerateInto(StringBuilder sb, int indent)

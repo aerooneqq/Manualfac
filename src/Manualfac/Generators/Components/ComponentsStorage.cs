@@ -54,14 +54,15 @@ internal class ComponentsStorage
   private IComponent? ToComponentInfo(INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited)
   {
     if (myCache.TryGetExistingComponent(componentSymbol) is { } existingComponent) return existingComponent;
+
     if (visited.Contains(componentSymbol)) throw new CyclicDependencyException();
-    
+
     if (SymbolEqualityComparer.Default.Equals(componentSymbol.ContainingAssembly, myCompilation.Assembly) &&
         !componentSymbol.CheckIfPartialClass())
     {
       return null;
     }
-    
+
     if (!mySymbolsCache.CheckIfManualfacComponent(componentSymbol))
     {
       throw new TypeSymbolIsNotManualfacComponentException(componentSymbol);
@@ -141,6 +142,7 @@ internal class ComponentsStorage
     if (component.Symbol.TypeKind is not TypeKind.Class) return;
 
     var allInterfaces = ExtractInterfaces(component.Symbol);
+
     if (allInterfaces.Count == 0) return;
 
     foreach (var @interface in allInterfaces)
@@ -163,6 +165,7 @@ internal class ComponentsStorage
   private IComponent? TryFindOverridenComponent(INamedTypeSymbol symbol, ISet<INamedTypeSymbol> visited)
   {
     var baseSymbols = symbol.GetAttributesTypeArguments(myManualfacSymbols.OverridesAttribute);
+
     if (baseSymbols.Count == 0) return null;
 
     if (baseSymbols.Count != 1)
@@ -182,12 +185,14 @@ internal class ComponentsStorage
     }
 
     var baseComponent = ToComponentInfo(baseSymbol, visited);
+
     return baseComponent;
   }
 
   private IReadOnlyList<INamedTypeSymbol> ExtractInterfaces(INamedTypeSymbol symbol)
   {
     var asAttributes = symbol.GetAttributesTypeArguments(myManualfacSymbols.AsAttributeBase);
+
     return asAttributes.Count == 0 ? symbol.AllInterfaces : asAttributes;
   }
 
@@ -200,6 +205,7 @@ internal class ComponentsStorage
   {
     Debug.Assert(dependencyAttributeTypeArgs.Count > 1);
     var first = dependencyAttributeTypeArgs.First();
+
     return first.Name switch
     {
       nameof(AccessModifier.Internal) => AccessModifier.Internal,

@@ -20,7 +20,7 @@ internal class GeneratedContainerResolverModel : IGeneratedModel
   {
     myStorage = storage;
     var typeParam = new[] { GenericType };
-    
+
     myGeneratedClassModel = new GeneratedClassModel(
       $"{assemblySymbol.Name}Resolver",
       ImmutableList<GeneratedConstructorModel>.Empty,

@@ -43,10 +43,12 @@ internal static class DependencyAccessorUtil
     {
       case ConcreteComponentDependency or NonCollectionInterfaceDependency:
         var dep = adjustComponentFunc(dependency.ResolveUnderlyingConcreteComponents().First());
+
         return $"{dep.CreateContainerResolveExpression()}";
       case CollectionDependency collectionDependency:
         var impls = collectionDependency.ResolveUnderlyingConcreteComponents().Select(adjustComponentFunc);
         var name = collectionDependency.CollectionItemInterface.GetFullName();
+
         return $"new {name}[] {{{string.Join(",", impls.Select(impl => impl.CreateContainerResolveExpression()))}}}";
       default:
         throw new ArgumentOutOfRangeException(dependency.GetType().Name);

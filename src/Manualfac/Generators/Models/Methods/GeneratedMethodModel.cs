@@ -4,14 +4,14 @@ using Manualfac.Generators.Util;
 namespace Manualfac.Generators.Models.Methods;
 
 internal class GeneratedMethodModel(
-    string name,
-    IReadOnlyList<string> typeParameters,
-    string returnTypeName,
-    Action<StringBuilder, int> bodyGenerator,
-    IReadOnlyList<GeneratedParameterModel> parameters,
-    AccessModifier modifier = AccessModifier.Public,
-    bool isStatic = false,
-    bool isPartial = false
+  string name,
+  IReadOnlyList<string> typeParameters,
+  string returnTypeName,
+  Action<StringBuilder, int> bodyGenerator,
+  IReadOnlyList<GeneratedParameterModel> parameters,
+  AccessModifier modifier = AccessModifier.Public,
+  bool isStatic = false,
+  bool isPartial = false
 ) : IGeneratedModel
 {
   public void GenerateInto(StringBuilder sb, int indent)

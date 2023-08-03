@@ -6,6 +6,6 @@ namespace Manualfac.Exceptions;
 public class DuplicatedDependencyException(INamedTypeSymbol componentSymbol, INamedTypeSymbol duplicatedDependency)
   : ManualfacGeneratorException
 {
-  public override string Message { get; } = 
+  public override string Message { get; } =
     $"{duplicatedDependency.GetFullName()} dependency was duplicated in {componentSymbol.GetFullName()}";
 }

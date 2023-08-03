@@ -56,6 +56,7 @@ internal static class ComponentsTopologicalSorter
     visited[current] = ComponentState.Black;
 
     result.Add(current);
+
     return false;
   }
 }

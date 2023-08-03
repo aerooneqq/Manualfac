@@ -14,6 +14,7 @@ public class ManualfacSymbols
       if (module.ContainingAssembly.Name != Constants.ManualfacAttributes) return false;
 
       manualfacModule = module;
+
       return true;
     });
 

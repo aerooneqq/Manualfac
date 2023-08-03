@@ -16,10 +16,12 @@ internal class ComponentAndNonComponentSymbols(ManualfacSymbols manualfacSymbols
     if (symbol.GetAttributes().Any(IsManualfacAttribute))
     {
       myComponentsSymbols.Add(symbol);
+
       return true;
     }
 
     myNotComponentsSymbols.Add(symbol);
+
     return false;
   }
 

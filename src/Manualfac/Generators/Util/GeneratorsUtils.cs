@@ -67,6 +67,7 @@ internal static class StringBuilderCookies
   public static OpenCloseStringBuilderOperation Lock(StringBuilder sb, string objectName, int indent)
   {
     sb.AppendIndent(indent).Append("lock (").Append(objectName).Append(")").AppendNewLine();
+
     return CurlyBraces(sb, indent);
   }
 

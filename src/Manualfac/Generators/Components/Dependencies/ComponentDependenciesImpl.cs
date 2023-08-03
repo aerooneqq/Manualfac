@@ -25,10 +25,12 @@ internal class ComponentDependenciesImpl : IComponentDependencies
     get
     {
       yield return ImmediateDependencies;
+
       var current = myComponent.BaseComponent;
       while (current is { })
       {
         yield return current.Dependencies.ImmediateDependencies;
+
         current = current.BaseComponent;
       }
     }

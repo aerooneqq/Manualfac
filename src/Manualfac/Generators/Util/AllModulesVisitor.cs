@@ -17,6 +17,7 @@ public static class AllModulesVisitor
       visited.Add(module);
 
       var shouldStop = actionWithModule(module);
+
       if (shouldStop) return;
 
       foreach (var refAsm in module.ReferencedAssemblySymbols)

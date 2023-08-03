@@ -16,42 +16,49 @@ internal class MethodBuilder(string name, string returnType, Action<StringBuilde
   public MethodBuilder TypeParams(IReadOnlyList<string> typeParams)
   {
     myTypeParameters = typeParams;
+
     return this;
   }
 
   public MethodBuilder Parameters(IReadOnlyList<GeneratedParameterModel> parameters)
   {
     myParameters = parameters;
+
     return this;
   }
 
   public MethodBuilder Static(bool isStatic)
   {
     myIsStatic = isStatic;
+
     return this;
   }
 
   public MethodBuilder Partial(bool isPartial)
   {
     myIsPartial = isPartial;
+
     return this;
   }
 
   public MethodBuilder Public()
   {
     myAccessModifier = AccessModifier.Public;
+
     return this;
   }
 
   public MethodBuilder Private()
   {
     myAccessModifier = AccessModifier.Private;
+
     return this;
   }
 
   public MethodBuilder Internal()
   {
     myAccessModifier = AccessModifier.Internal;
+
     return this;
   }
 

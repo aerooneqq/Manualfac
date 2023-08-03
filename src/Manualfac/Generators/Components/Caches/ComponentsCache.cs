@@ -10,7 +10,9 @@ internal class ComponentsCache(ManualfacSymbols manualfacSymbols)
 {
   private readonly Dictionary<INamedTypeSymbol, IComponent> myCache = new(SymbolEqualityComparer.Default);
   private readonly List<IComponent> myAllComponents = new();
-  private readonly Dictionary<INamedTypeSymbol, List<IComponent>> myInterfacesToComponents = new(SymbolEqualityComparer.Default);
+
+  private readonly Dictionary<INamedTypeSymbol, List<IComponent>> myInterfacesToComponents =
+    new(SymbolEqualityComparer.Default);
 
 
   public IReadOnlyList<IComponent> AllComponents => myAllComponents;
@@ -66,7 +68,7 @@ internal class ComponentsCache(ManualfacSymbols manualfacSymbols)
         {
           var afterComponent = myCache[afterType];
           AssertBeforeAfterRelationInvariants(originalImpls, key, component, afterComponent);
-          
+
           parentToChildren.AddToList(component, afterComponent);
         }
 
@@ -74,7 +76,7 @@ internal class ComponentsCache(ManualfacSymbols manualfacSymbols)
         {
           var beforeComponent = myCache[beforeType];
           AssertBeforeAfterRelationInvariants(originalImpls, key, component, beforeComponent);
-          
+
           parentToChildren.AddToList(myCache[beforeType], component);
         }
       }
