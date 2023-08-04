@@ -1,4 +1,4 @@
-﻿using Manualfac.Generators.Util;
+﻿using Manualfac.Util;
 using Microsoft.CodeAnalysis;
 
 namespace Manualfac.Exceptions.BeforeAfterRelation;
