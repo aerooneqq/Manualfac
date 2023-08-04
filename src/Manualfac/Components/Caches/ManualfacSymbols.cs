@@ -9,7 +9,7 @@ public class ManualfacSymbols
   public static ManualfacSymbols CreateManualfacSymbolsFrom(Compilation compilation)
   {
     IModuleSymbol? manualfacModule = null;
-    AllModulesVisitor.Visit(compilation, module =>
+    AllModulesVisitor.Visit(compilation, true, module =>
     {
       if (module.ContainingAssembly.Name != Constants.ManualfacAttributes) return false;
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Manualfac.Analysis;
 using Manualfac.Components.Caches;
 using Manualfac.Components.Dependencies;
 using Manualfac.Exceptions;
@@ -9,11 +10,12 @@ namespace Manualfac.Components;
 
 internal class ComponentsStorage
 {
-  private readonly Compilation myCompilation;
+  private readonly ManualfacContext myContext;
   private readonly ComponentAndNonComponentSymbols mySymbolsCache;
   private readonly ComponentsCache myCache;
   private readonly OverridesCache myOverridesCache;
   private readonly ManualfacSymbols myManualfacSymbols;
+  private readonly CompilationAssemblyAnalyzer myCompilationAssemblyAnalyzer;
 
 
   public IReadOnlyDictionary<IComponent, IComponent> BaseToOverrides => myOverridesCache.BaseToOverrides;
@@ -23,33 +25,48 @@ internal class ComponentsStorage
     myCache.InterfacesToComponents;
 
 
-  public ComponentsStorage(ManualfacSymbols symbols, Compilation compilation)
+  public ComponentsStorage(ManualfacSymbols symbols, ManualfacContext context)
   {
     myManualfacSymbols = symbols;
-    myCompilation = compilation;
+    myContext = context;
 
     mySymbolsCache = new ComponentAndNonComponentSymbols(myManualfacSymbols);
     myCache = new ComponentsCache(myManualfacSymbols);
     myOverridesCache = new OverridesCache();
+    myCompilationAssemblyAnalyzer = new CompilationAssemblyAnalyzer(symbols, this);
   }
 
 
-  public void FillComponents()
+  public bool TryFillComponents()
   {
-    AllModulesVisitor.Visit(myCompilation, module =>
+    AllModulesVisitor.Visit(myContext.Compilation, false, module =>
     {
-      foreach (var componentType in module.GetTypes().Where(mySymbolsCache.CheckIfManualfacComponent))
-      {
-        var visited = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-        ToComponentInfo(componentType, visited);
-      }
-
+      ProcessModule(module);
       return false;
     });
+    
+    myCache.AdjustInterfaceImplementations(this.AdjustComponent);
+
+    if (myCompilationAssemblyAnalyzer.ContainsErrors(myContext)) return false;
+
+    ProcessModule(myContext.Compilation.SourceModule);
 
     myCache.AdjustInterfaceImplementations(this.AdjustComponent);
     myCache.SortByBeforeAfterRelation();
+
+    return true;
   }
+
+  private void ProcessModule(IModuleSymbol module)
+  {
+    foreach (var componentType in module.GetTypes().Where(mySymbolsCache.CheckIfManualfacComponent))
+    {
+      var visited = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+      ToComponentInfo(componentType, visited);
+    }
+  }
+
+  public bool CheckIfComponent(INamedTypeSymbol symbol) => mySymbolsCache.CheckIfManualfacComponent(symbol);
 
   private IComponent? ToComponentInfo(INamedTypeSymbol componentSymbol, ISet<INamedTypeSymbol> visited)
   {
@@ -57,7 +74,7 @@ internal class ComponentsStorage
 
     if (visited.Contains(componentSymbol)) throw new CyclicDependencyException();
 
-    if (SymbolEqualityComparer.Default.Equals(componentSymbol.ContainingAssembly, myCompilation.Assembly) &&
+    if (SymbolEqualityComparer.Default.Equals(componentSymbol.ContainingAssembly, myContext.Compilation.Assembly) &&
         !componentSymbol.CheckIfPartialClass())
     {
       return null;

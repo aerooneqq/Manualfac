@@ -4,12 +4,23 @@ namespace Manualfac.Util;
 
 public static class AllModulesVisitor
 {
-  public static void Visit(Compilation compilation, Func<IModuleSymbol, bool> actionWithModule)
+  public static void Visit(
+    Compilation compilation, bool processCompilationModule, Func<IModuleSymbol, bool> actionWithModule)
   {
     var modulesQueue = new Queue<IModuleSymbol>();
     var visited = new HashSet<IModuleSymbol>(SymbolEqualityComparer.Default);
 
-    modulesQueue.Enqueue(compilation.SourceModule);
+    if (processCompilationModule)
+    {
+      modulesQueue.Enqueue(compilation.SourceModule); 
+    }
+    else
+    {
+      ExecuteWithModuleReferences(compilation.SourceModule, refModule =>
+      {
+        modulesQueue.Enqueue(refModule);
+      });
+    }
 
     while (modulesQueue.Count != 0)
     {
@@ -19,16 +30,24 @@ public static class AllModulesVisitor
       var shouldStop = actionWithModule(module);
 
       if (shouldStop) return;
-
-      foreach (var refAsm in module.ReferencedAssemblySymbols)
+      
+      ExecuteWithModuleReferences(module, refAsmModule =>
       {
-        foreach (var refAsmModule in refAsm.Modules)
+        if (!visited.Contains(refAsmModule))
         {
-          if (!visited.Contains(refAsmModule))
-          {
-            modulesQueue.Enqueue(refAsmModule);
-          }
+          modulesQueue.Enqueue(refAsmModule);
         }
+      });
+    }
+  }
+
+  public static void ExecuteWithModuleReferences(IModuleSymbol module, Action<IModuleSymbol> refModuleAction)
+  {
+    foreach (var refAsm in module.ReferencedAssemblySymbols)
+    {
+      foreach (var refAsmModule in refAsm.Modules)
+      {
+        refModuleAction(refAsmModule);
       }
     }
   }

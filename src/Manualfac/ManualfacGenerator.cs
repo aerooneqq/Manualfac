@@ -29,13 +29,13 @@ public class ManualfacGenerator : IIncrementalGenerator
   private void DoGeneration(ManualfacContext context)
   {
     var symbols = ManualfacSymbols.CreateManualfacSymbolsFrom(context.Compilation);
-    var storage = new ComponentsStorage(symbols, context.Compilation);
+    var storage = new ComponentsStorage(symbols, context);
 
-    storage.FillComponents();
+    if (!storage.TryFillComponents()) return;
 
     GenerateDependenciesPart(storage.AllComponents, context);
     GenerateContainerBuilder(storage, context);
-
+    
     if (ShouldGenerateResolverFor(context.Compilation.Assembly, symbols))
     {
       GenerateContainerInitialization(storage, context.Compilation, context.ProductionContext);
