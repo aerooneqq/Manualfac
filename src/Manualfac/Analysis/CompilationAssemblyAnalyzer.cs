@@ -33,7 +33,7 @@ internal class CompilationAssemblyAnalyzer(ManualfacSymbols symbols, ComponentsS
         if (reference.TypeKind == TypeKind.Class && !storage.CheckIfComponent(reference))
         {
           anyError = true;
-          context.ProductionContext.ReportDiagnostic(Errors.DependsOnNonComponentSymbol(node));
+          context.ProductionContext.ReportDiagnostic(Errors.DependsOnNonComponentSymbol(node, type, reference));
         }
       }
     }
