@@ -31,18 +31,6 @@ public partial class TestConsoleAppInitializer
       }
     );
 
-    Class6Container.Initialize(
-      () => 
-      {
-        var created = new Class6(
-          ClassLibrary2.Class4Container.Resolve(),
-          ClassLibrary2.Class4Container.Resolve(),
-          ClassLibrary2.Class5Container.Resolve()
-        );
-        return created;
-      }
-    );
-
     ClassLibrary1.Class2Container.Initialize(
       () => 
       {
@@ -60,6 +48,18 @@ public partial class TestConsoleAppInitializer
           ClassLibrary1.Class2Container.Resolve(),
           Class6Container.Resolve(),
           ClassLibrary2.Class4Container.Resolve()
+        );
+        return created;
+      }
+    );
+
+    Class6Container.Initialize(
+      () => 
+      {
+        var created = new Class6(
+          ClassLibrary2.Class4Container.Resolve(),
+          ClassLibrary2.Class4Container.Resolve(),
+          ClassLibrary2.Class5Container.Resolve()
         );
         return created;
       }

@@ -16,10 +16,6 @@ public partial class TestConsoleAppResolver
     {
       return (TComponent)((object)ClassLibrary1.Class3Container.Resolve());
     }
-    if (typeof(TComponent) == typeof(Class6))
-    {
-      return (TComponent)((object)Class6Container.Resolve());
-    }
     if (typeof(TComponent) == typeof(ClassLibrary1.Class2))
     {
       return (TComponent)((object)ClassLibrary1.Class2Container.Resolve());
@@ -27,6 +23,10 @@ public partial class TestConsoleAppResolver
     if (typeof(TComponent) == typeof(ClassLibrary1.Class1))
     {
       return (TComponent)((object)ClassLibrary1.Class1Container.Resolve());
+    }
+    if (typeof(TComponent) == typeof(Class6))
+    {
+      return (TComponent)((object)Class6Container.Resolve());
     }
     throw new ArgumentOutOfRangeException();
   }
