@@ -45,8 +45,7 @@ public class IntegrationTestWithSolutionExecutor(string solutionDirectory)
   private static string CreatePathToGenDirectory(string objFolderPath)
   {
     const string Manualfac = "Manualfac";
-    const string GeneratorName = "ManualfacGenerator";
-    const string GeneratorFolderName = $"Manualfac.Generators.{GeneratorName}";
+    const string GeneratorFolderName = $"{Manualfac}.ManualfacGenerator";
 
     return Path.Combine(objFolderPath, "obj", "Debug", "net7.0", "generated", Manualfac, GeneratorFolderName);
   }
