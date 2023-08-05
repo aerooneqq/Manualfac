@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Manualfac.Components;
 using Manualfac.Components.Caches;
 using Manualfac.Util;
@@ -76,6 +77,13 @@ internal class CompilationAssemblyAnalyzer(ManualfacSymbols symbols, ComponentsS
     if (baseComponent.TypeKind != TypeKind.Class)
     {
       context.ProductionContext.ReportDiagnostic(Errors.BaseComponentIsNotClass(attributeNode, type, baseComponent));
+      return true;
+    }
+
+    if (!type.GetAllBaseTypes().Contains(baseComponent))
+    {
+      var error = Errors.ComponentShouldDeriveFromOverrideSymbol(attributeNode, type, baseComponent);
+      context.ProductionContext.ReportDiagnostic(error);
       return true;
     }
 

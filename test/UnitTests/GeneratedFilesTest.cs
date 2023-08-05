@@ -25,11 +25,13 @@ public class GeneratedFilesTest : TestWithSourceFilesBase<ManualfacGenerator>
   [Test] public void NonPartialClassesTest() => DoTest();
 
   [Test] public void DuplicatedDepsTest() => DoTestWithDiagnostic(ErrorIds.DuplicatedDependencyId);
-  [Test] public void CyclicDepsTest() => DoTestWithException<CyclicDependencyException>();
+  [Test] public void TooManyOverridesTest() => DoTestWithDiagnostic(ErrorIds.MultipleBaseComponentsId);
   [Test] public void NotComponentTest() => DoTestWithDiagnostic(ErrorIds.DependingOnNonComponentSymbolId);
   [Test] public void OverrideNotComponentTest() => DoTestWithDiagnostic(ErrorIds.CanNotOverrideNonComponentSymbolId);
+  [Test] public void OverridesMustInheritFromBase() => DoTestWithDiagnostic(ErrorIds.ComponentMustInheritFromDeclaredOverrideId);
+  
+  [Test] public void CyclicDepsTest() => DoTestWithException<CyclicDependencyException>();
   [Test] public void NoImplementationForInterfaceTest() => DoTestWithException<NoImplementationForInterfaceException>();
-  [Test] public void TooManyOverridesTest() => DoTestWithDiagnostic(ErrorIds.MultipleBaseComponentsId);
   [Test] public void CantResolveImplTest() => DoTestWithException<CantResolveConcreteImplementationException>();
 
   [Test]

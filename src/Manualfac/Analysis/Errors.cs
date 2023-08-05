@@ -65,4 +65,16 @@ public static class Errors
     var text = $"Component {component.GetFullName()} can not override non-component symbol {baseType.GetFullName()}";
     return CreateDiagnostic(ErrorIds.CanNotOverrideNonComponentSymbolId, Title, text, node);
   }
+
+  public static Diagnostic ComponentShouldDeriveFromOverrideSymbol(
+    AttributeSyntax node, INamedTypeSymbol componentType, INamedTypeSymbol baseComponentType)
+  {
+    const string Title = "Component type must inherit from declared overriden symbols";
+
+    var componentName = componentType.GetFullName();
+    var baseComponentName = baseComponentType.GetFullName();
+    var text = $"Component {componentName} must inherit from declared overriden type {baseComponentName}";
+
+    return CreateDiagnostic(ErrorIds.ComponentMustInheritFromDeclaredOverrideId, Title, text, node);
+  }
 }

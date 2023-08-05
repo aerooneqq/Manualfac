@@ -64,4 +64,18 @@ internal static class ExtensionsForINamedTypeSymbol
 
     return classDeclaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword));
   }
+
+  public static HashSet<INamedTypeSymbol> GetAllBaseTypes(this INamedTypeSymbol typeSymbol)
+  {
+    var baseTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+    var current = typeSymbol.BaseType;
+
+    while (current is { })
+    {
+      baseTypes.Add(current);
+      current = current.BaseType;
+    }
+
+    return baseTypes;
+  }
 }
