@@ -5,7 +5,7 @@ namespace Manualfac.Util;
 
 internal static class ExtensionsForIComponent
 {
-  public static IReadOnlyList<(AttributeSyntax, IReadOnlyList<INamedTypeSymbol>)> GetAttributesWithTypeArguments(
+  public static IReadOnlyList<(AttributeSyntax Node, IReadOnlyList<INamedTypeSymbol> Types)> GetAttributesWithTypeArguments(
     this ISymbol symbol, INamedTypeSymbol attributeSymbol)
   {
     return symbol.GetAttributes()
