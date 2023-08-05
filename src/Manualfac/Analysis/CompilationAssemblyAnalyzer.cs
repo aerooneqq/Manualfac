@@ -14,18 +14,19 @@ internal class CompilationAssemblyAnalyzer(ManualfacSymbols symbols, ComponentsS
     {
       foreach (var type in module.GetTypes())
       {
-        anyError |= CheckComponentReferences(type, context);
+        anyError |= CheckComponentDependencies(type, context);
       }
     }
 
     return anyError;
   }
 
-  private bool CheckComponentReferences(INamedTypeSymbol type, ManualfacContext context)
+  private bool CheckComponentDependencies(INamedTypeSymbol type, ManualfacContext context)
   {
     var attributes = type.GetAttributesWithTypeArguments(symbols.DependsOnAttributeBase);
     var anyError = false;
-    
+
+    var seenDependencies = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
     foreach (var (node, references) in attributes)
     {
       foreach (var reference in references.Skip(1))
@@ -35,6 +36,14 @@ internal class CompilationAssemblyAnalyzer(ManualfacSymbols symbols, ComponentsS
           anyError = true;
           context.ProductionContext.ReportDiagnostic(Errors.DependsOnNonComponentSymbol(node, type, reference));
         }
+
+        if (seenDependencies.Contains(reference))
+        {
+          anyError = true;
+          context.ProductionContext.ReportDiagnostic(Errors.DuplicatedDependency(node, type, reference));
+        }
+
+        seenDependencies.Add(reference);
       }
     }
 
