@@ -10,5 +10,6 @@ public class DefaultNamingStyle : NamingStyle
   }
 
 
-  public override string ApplyNamingStyleTo(string originalFieldName) => originalFieldName;
+  public override string ApplyNamingStyleTo(string originalFieldName) => 
+    char.ToLower(originalFieldName[0]) + originalFieldName.Substring(1);
 }
