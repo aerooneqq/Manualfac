@@ -78,4 +78,21 @@ internal static class ExtensionsForINamedTypeSymbol
 
     return baseTypes;
   }
+
+  public static string GetFullNamespaceName(this INamedTypeSymbol symbol)
+  {
+    var currentNamespace = symbol.ContainingNamespace;
+    var sb = new StringBuilder();
+    AppendNamespacePart(currentNamespace, sb);
+
+    return sb.ToString().Substring(1, sb.Length - 2);
+  }
+
+  private static void AppendNamespacePart(INamespaceSymbol? namespaceSymbol, StringBuilder sb)
+  {
+    if (namespaceSymbol is null) return;
+    
+    AppendNamespacePart(namespaceSymbol.ContainingNamespace, sb);
+    sb.Append(namespaceSymbol.Name).Append('.');
+  }
 }

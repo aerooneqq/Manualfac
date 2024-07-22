@@ -12,7 +12,7 @@ internal class Component : IComponent
 
   public string TypeShortName => Symbol.Name;
   public string FullName => Symbol.GetFullName();
-  public string Namespace => Symbol.ContainingNamespace.Name;
+  public string Namespace => Symbol.GetFullNamespaceName();
 
 
   public Component(
