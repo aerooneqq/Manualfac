@@ -8,7 +8,7 @@ namespace Manualfac.Util;
 
 internal static class ExtensionsForINamedTypeSymbol
 {
-  public static string GetFullName(this INamedTypeSymbol symbol) => symbol.ToString();
+  public static string GetFullName(this INamedTypeSymbol symbol) => symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
   public static string GetAssociatedFieldNameBase(this INamedTypeSymbol symbol)
   {

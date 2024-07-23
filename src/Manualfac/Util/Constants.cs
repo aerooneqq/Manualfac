@@ -2,6 +2,7 @@ namespace Manualfac.Util;
 
 internal static class Constants
 {
+  public const string Global = "global::";
   public const string Manualfac = "Manualfac";
 
   public const string ManualfacAttribute = "ManualfacAttribute";
@@ -14,15 +15,15 @@ internal static class Constants
   public const string BeforeAttributeBase = "BeforeAttributeBase";
   public const string ManualInitializationAttribute = "ManualInitializationAttribute";
 
-  public const string ManualfacAttributeFullName = $"{ManualfacAttributes}.{ManualfacAttribute}";
-  public const string GenerateResolverAttributeFullName = $"{ManualfacAttributes}.{GenerateResolverAttribute}";
-  public const string ComponentAttributeFullName = $"{ManualfacAttributes}.{ComponentAttribute}";
-  public const string OverridesAttributeFullName = $"{ManualfacAttributes}.{OverridesAttribute}<TComponent>";
-  public const string AsAttributeBaseFullName = $"{ManualfacAttributes}.{AsAttributeBase}";
-  public const string DependsOnAttributeBaseFullName = $"{ManualfacAttributes}.{DependsOnAttributeBase}";
-  public const string AfterAttributeBaseFullName = $"{ManualfacAttributes}.{AfterAttributeBase}";
-  public const string BeforeAttributeBaseFullName = $"{ManualfacAttributes}.{BeforeAttributeBase}";
-  public const string ManualInitializationAttributeFullName = $"{ManualfacAttributes}.{ManualInitializationAttribute}";
+  public const string ManualfacAttributeFullName = $"{Global}{ManualfacAttributes}.{ManualfacAttribute}";
+  public const string GenerateResolverAttributeFullName = $"{Global}{ManualfacAttributes}.{GenerateResolverAttribute}";
+  public const string ComponentAttributeFullName = $"{Global}{ManualfacAttributes}.{ComponentAttribute}";
+  public const string OverridesAttributeFullName = $"{Global}{ManualfacAttributes}.{OverridesAttribute}<TComponent>";
+  public const string AsAttributeBaseFullName = $"{Global}{ManualfacAttributes}.{AsAttributeBase}";
+  public const string DependsOnAttributeBaseFullName = $"{Global}{ManualfacAttributes}.{DependsOnAttributeBase}";
+  public const string AfterAttributeBaseFullName = $"{Global}{ManualfacAttributes}.{AfterAttributeBase}";
+  public const string BeforeAttributeBaseFullName = $"{Global}{ManualfacAttributes}.{BeforeAttributeBase}";
+  public const string ManualInitializationAttributeFullName = $"{Global}{ManualfacAttributes}.{ManualInitializationAttribute}";
 
   public const string ManualfacAttributes = "ManualfacAttributes";
 
