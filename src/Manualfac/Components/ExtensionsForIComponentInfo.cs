@@ -20,11 +20,11 @@ internal static class ExtensionsForIComponentInfo
     $"{component.CreateContainerFullName()}.{Constants.ResolveMethod}()";
 
   public static GeneratedUsingsModel ToDependenciesUsingsModel(this IComponent component) =>
-    new(component.Dependencies.AllDependenciesSet
-      .SelectMany(dep => dep.ResolveUnderlyingConcreteComponents().Select(c => c.Namespace))
+    new(component.RawDependencies
+      .Select(dep => dep.GetFullNamespaceName())
       .Where(ns => ns is { } && !string.IsNullOrWhiteSpace(ns))
       .Distinct()
-      .ToList()!);
+      .ToList());
 
   public static GeneratedComponentFileModel ToGeneratedFileModel(this IComponent component, NamingStyle style) =>
     new(component, style);

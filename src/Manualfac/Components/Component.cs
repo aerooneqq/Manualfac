@@ -9,6 +9,7 @@ internal class Component : IComponent
   public INamedTypeSymbol Symbol { get; }
   public IComponentDependencies Dependencies { get; }
   public IComponent? BaseComponent { get; }
+  public IReadOnlyList<INamedTypeSymbol> RawDependencies { get; }
 
   public string TypeShortName => Symbol.Name;
   public string FullName => Symbol.GetFullName();
@@ -26,11 +27,17 @@ internal class Component : IComponent
     Symbol = componentSymbol;
     Dependencies = new ComponentDependenciesImpl(this, dependenciesByLevels);
     ManualInitialization = manualInitialization;
+    RawDependencies = dependenciesByLevels.Select(d => d.Dependency.DependencyTypeSymbol).ToList();
   }
 
 
   public IReadOnlyList<IComponent> ResolveConcreteDependencies()
   {
+    if (ManualInitialization)
+    {
+      return [];
+    }
+
     var concreteDependencies = new List<IComponent>();
     foreach (var (component, _) in Dependencies.AllOrderedDependencies)
     {

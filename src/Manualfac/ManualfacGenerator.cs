@@ -53,6 +53,8 @@ public class ManualfacGenerator : IIncrementalGenerator
     var namingStyle = ParseNamingStyle(context);
     foreach (var component in components)
     {
+      if (component.ManualInitialization) continue;
+
       var componentAssembly = component.Symbol.ContainingAssembly;
       if (!ShouldGenerateContainerOrDepsParts(componentAssembly, context))
       {

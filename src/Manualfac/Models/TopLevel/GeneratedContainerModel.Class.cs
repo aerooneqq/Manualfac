@@ -45,7 +45,6 @@ internal partial class GeneratedContainerModel
 
   private static IReadOnlyList<GeneratedMethodModel> CreateMethods(IComponent component)
   {
-    var initializationModel = new GeneratedComponentObjectCreationModel(component, static c => c);
     var initializeMethodParams = new[]
     {
       new GeneratedParameterModel($"Func<{component.FullName}>", InitializeFuncParamName)
@@ -59,6 +58,7 @@ internal partial class GeneratedContainerModel
 
     if (!component.ManualInitialization)
     {
+      var initializationModel = new GeneratedComponentObjectCreationModel(component, static c => c);
       methods.Add(MethodFactory.PrivateStatic(DefaultInitializeMethodName, component.FullName, initializationModel.GenerateInto));
     }
 
