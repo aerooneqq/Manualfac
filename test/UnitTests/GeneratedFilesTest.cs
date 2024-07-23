@@ -23,6 +23,7 @@ public class GeneratedFilesTest : TestWithSourceFilesBase<ManualfacGenerator>
   [Test] public void BeforeAfterTest4() => DoTest();
   [Test] public void CustomComponentAttributeTest() => DoTest();
   [Test] public void NonPartialClassesTest() => DoTest();
+  [Test] public void ManualInitialization() => DoTest();
 
   [Test] public void DuplicatedDepsTest() => DoTestWithDiagnostic(ErrorIds.DuplicatedDependencyId);
   [Test] public void TooManyOverridesTest() => DoTestWithDiagnostic(ErrorIds.MultipleBaseComponentsId);

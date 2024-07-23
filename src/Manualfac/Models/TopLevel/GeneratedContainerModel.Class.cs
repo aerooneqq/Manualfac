@@ -31,13 +31,17 @@ internal partial class GeneratedContainerModel
       component.CreateContainerName(), constructors, CreateFields(component), CreateMethods(component));
   }
 
-  private static IReadOnlyList<GeneratedFieldModel> CreateFields(IComponent component) => new[]
-  {
+  private static IReadOnlyList<GeneratedFieldModel> CreateFields(IComponent component) =>
+  [
     FieldFactory.PrivateStatic(component.FullName, InstanceFieldName),
     FieldFactory.PrivateStaticInitialized("object", SyncFieldName, "new object()"),
-    FieldFactory.PrivateStaticInitialized($"Func<{component.FullName}>", InitializationFuncFieldName,
-      DefaultInitializeMethodName)
-  };
+    component.ManualInitialization switch
+    {
+      true => FieldFactory.PrivateStatic($"Func<{component.FullName}>", InitializationFuncFieldName),
+      false => FieldFactory.PrivateStaticInitialized($"Func<{component.FullName}>", InitializationFuncFieldName,
+        DefaultInitializeMethodName)
+    }
+  ];
 
   private static IReadOnlyList<GeneratedMethodModel> CreateMethods(IComponent component)
   {
@@ -47,13 +51,18 @@ internal partial class GeneratedContainerModel
       new GeneratedParameterModel($"Func<{component.FullName}>", InitializeFuncParamName)
     };
 
-    return new[]
-    {
+    List<GeneratedMethodModel> methods =
+    [
       MethodFactory.PublicStatic(Constants.ResolveMethod, component.FullName, GenerateFactoryMethod),
-      MethodFactory.PublicStaticParameters(Constants.InitializeMethod, Void, GenerateInitializeMethod,
-        initializeMethodParams),
-      MethodFactory.PrivateStatic(DefaultInitializeMethodName, component.FullName, initializationModel.GenerateInto)
-    };
+      MethodFactory.PublicStaticParameters(Constants.InitializeMethod, Void, GenerateInitializeMethod, initializeMethodParams),
+    ];
+
+    if (!component.ManualInitialization)
+    {
+      methods.Add(MethodFactory.PrivateStatic(DefaultInitializeMethodName, component.FullName, initializationModel.GenerateInto));
+    }
+
+    return methods;
   }
 
   private static void GenerateFactoryMethod(StringBuilder sb, int indent)

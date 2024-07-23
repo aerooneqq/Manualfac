@@ -89,7 +89,12 @@ internal class ComponentsStorage
 
     var componentsDepsByLevels = ExtractComponentsDependencies(componentSymbol, visited);
     var baseComponent = TryFindBaseComponent(componentSymbol, visited);
-    var createdComponent = new Component(componentSymbol, componentsDepsByLevels, baseComponent);
+
+    var manualInitialization = componentSymbol
+      .GetAttributes()
+      .Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, myManualfacSymbols.ManualInitialization));
+
+    var createdComponent = new Component(componentSymbol, componentsDepsByLevels, baseComponent, manualInitialization);
 
     if (TryFindOverridenComponent(componentSymbol, visited) is { } overridenComponent)
     {

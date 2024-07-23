@@ -12,6 +12,7 @@ internal interface IComponent
   string TypeShortName { get; }
   string FullName { get; }
   string? Namespace { get; }
+  bool ManualInitialization { get; }
 
   IReadOnlyList<IComponent> ResolveConcreteDependencies();
 }

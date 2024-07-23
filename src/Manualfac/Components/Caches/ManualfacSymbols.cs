@@ -38,6 +38,7 @@ public class ManualfacSymbols
   public INamedTypeSymbol AsAttributeBase => FindTypeOrThrow(Constants.AsAttributeBaseFullName);
   public INamedTypeSymbol AfterAttributeBase => FindTypeOrThrow(Constants.AfterAttributeBaseFullName);
   public INamedTypeSymbol BeforeAttributeBase => FindTypeOrThrow(Constants.BeforeAttributeBaseFullName);
+  public INamedTypeSymbol ManualInitialization => FindTypeOrThrow(Constants.ManualInitializationAttributeFullName);
 
 
   private ManualfacSymbols(IModuleSymbol manualfacModule)

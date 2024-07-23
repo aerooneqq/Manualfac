@@ -13,16 +13,19 @@ internal class Component : IComponent
   public string TypeShortName => Symbol.Name;
   public string FullName => Symbol.GetFullName();
   public string Namespace => Symbol.GetFullNamespaceName();
+  public bool ManualInitialization { get; }
 
 
   public Component(
     INamedTypeSymbol componentSymbol,
     IReadOnlyList<ComponentDependencyDescriptor> dependenciesByLevels,
-    IComponent? baseComponent)
+    IComponent? baseComponent,
+    bool manualInitialization)
   {
     BaseComponent = baseComponent;
     Symbol = componentSymbol;
     Dependencies = new ComponentDependenciesImpl(this, dependenciesByLevels);
+    ManualInitialization = manualInitialization;
   }
 
 

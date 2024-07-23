@@ -6,7 +6,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MISC", "MISC", "{1C6A3FC4-9
 		Readme.md = Readme.md
 		.editorconfig = .editorconfig
 		Directory.Build.props = Directory.Build.props
-		src\Manualfac\Manualfac.nuspec = src\Manualfac\Manualfac.nuspec
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{372AEED5-DD23-4399-8E95-9C5C7201938D}"

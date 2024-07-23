@@ -1,4 +1,5 @@
-﻿using Humanizer;
+﻿using System.Text;
+using Humanizer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
